@@ -1,0 +1,12 @@
+{
+    "summaries": {
+        "PROGRAMMING": {
+            "total": 53,
+            "totalScore": 1350
+        },
+        "CODE_COMPLETION": {
+            "total": 12,
+            "totalScore": 230
+        }
+    }
+}
