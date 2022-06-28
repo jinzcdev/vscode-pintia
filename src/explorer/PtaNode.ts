@@ -1,5 +1,5 @@
 
-import { IPtaNode, PtaNodeType } from "../shared";
+import { IPtaNode, IPtaNodeValue, PtaNodeType } from "../shared";
 
 export class PtaNode {
 
@@ -21,8 +21,12 @@ export class PtaNode {
         return this.data.type;
     }
 
-    public get value(): string {
+    public get value(): IPtaNodeValue {
         return this.data.value;
+    }
+
+    public get isFavorite(): boolean {
+        return this.data.isFavorite;
     }
 
 }

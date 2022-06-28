@@ -1,0 +1,143 @@
+{
+    "queued": -1,
+    "submission": {
+        "id": "1516021537063739392",
+        "user": {
+            "studentUser": {
+                "studentNumber": "",
+                "name": "",
+                "id": "0"
+            }
+        },
+        "problemType": "PROGRAMMING",
+        "problemSetProblem": {
+            "id": "709",
+            "label": "7-1",
+            "type": "PROGRAMMING",
+            "problemPoolIndex": 1,
+            "indexInProblemPool": 1
+        },
+        "submitAt": "2022-04-18T11:51:15Z",
+        "status": "ACCEPTED",
+        "score": 20,
+        "compiler": "GXX",
+        "time": 0.012,
+        "memory": 1273856,
+        "submissionDetails": [
+            {
+                "problemSetProblemId": "709",
+                "programmingSubmissionDetail": {
+                    "compiler": "GXX",
+                    "program": "#include <bits/stdc++.h>\nusing namespace std;\nint main() {\n    int n, ans;\n    cin >> n;\n    vector<int> v(n), dp(n);\n    for (int i = 0; i < n; i++) scanf(\"%d\", &v[i]);\n    ans = dp[0] = v[0];\n    for (int i = 1; i < n; i++) {\n        dp[i] = max(dp[i - 1] + v[i], v[i]);\n        ans = max(ans, dp[i]);\n    }\n    cout << ans;\n    return 0;\n}"
+                },
+                "problemId": "0"
+            }
+        ],
+        "judgeResponseContents": [
+            {
+                "status": "ACCEPTED",
+                "score": 20,
+                "programmingJudgeResponseContent": {
+                    "compilationResult": {
+                        "log": "a.cpp: In function ‘int main()’:\na.cpp:7:38: warning: ignoring return value of ‘int scanf(const char*, ...)’, declared with attribute warn_unused_result [-Wunused-result]\n     for (int i = 0; i < n; i++) scanf(\"%d\", &v[i]);\n                                 ~~~~~^~~~~~~~~~~~~",
+                        "success": true,
+                        "error": ""
+                    },
+                    "checkerCompilationResult": {
+                        "log": "",
+                        "success": false,
+                        "error": ""
+                    },
+                    "testcaseJudgeResults": {
+                        "0": {
+                            "result": "ACCEPTED",
+                            "exceed": "UNKNOWN_TESTCASE_EXCEED",
+                            "time": 0.004,
+                            "memory": 466944,
+                            "exitcode": 0,
+                            "termsig": 0,
+                            "error": "",
+                            "stdout": "",
+                            "stderr": "",
+                            "checkerOutput": "",
+                            "testcaseScore": 12,
+                            "stdoutTruncated": false,
+                            "stderrTruncated": false
+                        },
+                        "1": {
+                            "result": "ACCEPTED",
+                            "exceed": "UNKNOWN_TESTCASE_EXCEED",
+                            "time": 0.003,
+                            "memory": 339968,
+                            "exitcode": 0,
+                            "termsig": 0,
+                            "error": "",
+                            "stdout": "",
+                            "stderr": "",
+                            "checkerOutput": "",
+                            "testcaseScore": 2,
+                            "stdoutTruncated": false,
+                            "stderrTruncated": false
+                        },
+                        "2": {
+                            "result": "ACCEPTED",
+                            "exceed": "UNKNOWN_TESTCASE_EXCEED",
+                            "time": 0.004,
+                            "memory": 335872,
+                            "exitcode": 0,
+                            "termsig": 0,
+                            "error": "",
+                            "stdout": "",
+                            "stderr": "",
+                            "checkerOutput": "",
+                            "testcaseScore": 2,
+                            "stdoutTruncated": false,
+                            "stderrTruncated": false
+                        },
+                        "3": {
+                            "result": "ACCEPTED",
+                            "exceed": "UNKNOWN_TESTCASE_EXCEED",
+                            "time": 0.006,
+                            "memory": 618496,
+                            "exitcode": 0,
+                            "termsig": 0,
+                            "error": "",
+                            "stdout": "",
+                            "stderr": "",
+                            "checkerOutput": "",
+                            "testcaseScore": 2,
+                            "stdoutTruncated": false,
+                            "stderrTruncated": false
+                        },
+                        "4": {
+                            "result": "ACCEPTED",
+                            "exceed": "UNKNOWN_TESTCASE_EXCEED",
+                            "time": 0.012,
+                            "memory": 1273856,
+                            "exitcode": 0,
+                            "termsig": 0,
+                            "error": "",
+                            "stdout": "",
+                            "stderr": "",
+                            "checkerOutput": "",
+                            "testcaseScore": 2,
+                            "stdoutTruncated": false,
+                            "stderrTruncated": false
+                        }
+                    }
+                },
+                "problemSetProblemId": "709"
+            }
+        ],
+        "hints": {
+            "0": "sample 有正负，负数开头结尾，最大和有更新",
+            "1": "100个随机数",
+            "2": "1000个随机数",
+            "3": "10000个随机数",
+            "4": "100000个随机数"
+        },
+        "problemSetId": "15",
+        "previewSubmission": false,
+        "cause": ""
+    }
+}

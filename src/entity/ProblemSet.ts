@@ -1,5 +1,6 @@
+import { IProblemSummary } from "./ProblemSummary";
 
-export interface ProblemSet {
+export interface IProblemSet {
 
     id: string;
     name: string;
@@ -8,5 +9,5 @@ export interface ProblemSet {
     problemSetConfig: {
         compilers: string[]
     };
-
+    summaries: IProblemSummary;
 }

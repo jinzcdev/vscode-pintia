@@ -1,16 +1,16 @@
 
-export class ProblemSummary {
+export interface IProblemSummary {
 
-    id: string;
-    name: string;
-    status: string;
-    compilers: string[];
-
-    constructor(id: string, name: string, status: string, compilers: string[]) {
-        this.id = id;
-        this.name = name;
-        this.status = status;
-        this.compilers = compilers;
+    PROGRAMMING: {
+        total: number;
+        totalScore: number;
     }
+
+    CODE_COMPLETION: {
+        total: number;
+        totalScore: number;
+    }
+
+    numType: number;
 
 }

@@ -1,6 +1,6 @@
 import { Disposable } from "vscode";
 import { PtaNode } from "./PtaNode";
-import { ptaApi } from "../api";
+import { ptaApi } from "../utils/api";
 import { ProblemType, PtaNodeType } from "../shared";
 import { defaultPtaNode } from "../shared";
 
@@ -9,35 +9,72 @@ class ExplorerNodeManager implements Disposable {
     public async getRootNodes(): Promise<PtaNode[]> {
         const ptaNodeList: PtaNode[] = [];
         const problemSetList = await ptaApi.getAllProblemSets();
-        problemSetList.forEach(pbs => {
+        problemSetList.forEach(item => {
             ptaNodeList.push(
                 new PtaNode(Object.assign({}, defaultPtaNode, {
-                    psID: pbs.id,
-                    label: pbs.name,
+                    psID: item.id,
+                    label: item.name,
                     type: PtaNodeType.ProblemSet,
-                    value: pbs.multiType ? "multiType" : ""
+                    value: {
+                        summaries: item.summaries,
+                        limit: 50 // not used
+                    }
                 }))
             );
         });
         return ptaNodeList;
     }
 
-    public async getProblemNodes(psID: number | string, problemType: ProblemType): Promise<PtaNode[]> {
+    public async getProblemNodes(psID: string, problemType: ProblemType, page?: number, limit?: number): Promise<PtaNode[]> {
+        let problemList, startIndex = 1;
+        if (page !== undefined && limit !== undefined) {
+            problemList = await ptaApi.getProblemInfoListByPage(psID, problemType, page, limit);
+            startIndex = page * limit + 1;
+        } else {
+            // page number is -1, get all problems
+            problemList = await ptaApi.getAllProblemInfoList(psID, problemType);
+        }
 
         const ptaNodeList: PtaNode[] = [];
-        const problemList = await ptaApi.getProblemList(psID, problemType);
         for (let i = 0; i < problemList.length; i++) {
             const pb = problemList[i];
             ptaNodeList.push(
                 new PtaNode(Object.assign({}, defaultPtaNode, {
                     pID: pb.id,
                     psID: psID,
-                    label: `[${i + 1}] ${pb.label} ${pb.title}`,
+                    label: `[${i + startIndex}] ${pb.label} ${pb.title}`,
                     type: PtaNodeType.Problem,
                 }))
             );
         }
         return ptaNodeList;
+    }
+
+
+    public async getProblemSetPageNodes(psID: string, problemType: ProblemType, total: number, limit?: number): Promise<PtaNode[]> {
+        if (limit === undefined) {
+            limit = 100;
+        }
+
+        // const summaries = ptaNode.value;
+        let nodeList: PtaNode[] = [];
+        // const total = summaries[ProblemType.PROGRAMMING]["total"];
+        const pageNum: number = Math.ceil(total / limit);
+
+        for (let i = 0; i < pageNum; i++) {
+            nodeList.push(new PtaNode(Object.assign({}, defaultPtaNode, {
+                psID: psID,
+                type: PtaNodeType.ProblemPage,
+                label: `${i * limit + 1}-${i == pageNum - 1 ? total : (i + 1) * limit}`,
+                value: {
+                    total: total,
+                    limit: limit,
+                    page: i,
+                    problemType: problemType
+                }
+            })));
+        }
+        return nodeList;
     }
 
 

@@ -1,0 +1,45 @@
+{
+    "problemSetProblem": {
+        "id": "724",
+        "label": "6-1",
+        "score": 20,
+        "problemConfig": {
+            "codeCompletionProblemConfig": {
+                "timeLimit": 400,
+                "memoryLimit": 65536,
+                "codeSizeLimit": 16,
+                "cases": {},
+                "exampleTestDatas": [],
+                "testdataDescriptionCode": "",
+                "tools": []
+            },
+            "solutionVisible": false
+        },
+        "deadline": "1970-01-01T00:00:00Z",
+        "title": "单链表逆转",
+        "content": "本题要求实现一个函数，将给定的单链表逆转。\n\n### 函数接口定义：\n```c++\nList Reverse( List L );\n```\n\n其中`List`结构定义如下：\n```c++\ntypedef struct Node *PtrToNode;\nstruct Node {\n    ElementType Data; /* 存储结点数据 */\n    PtrToNode   Next; /* 指向下一个结点的指针 */\n};\ntypedef PtrToNode List; /* 定义单链表类型 */\n```\n`L`是给定单链表，函数`Reverse`要返回被逆转后的链表。\n\n### 裁判测试程序样例：\n```c++\n#include <stdio.h>\n#include <stdlib.h>\n\ntypedef int ElementType;\ntypedef struct Node *PtrToNode;\nstruct Node {\n    ElementType Data;\n    PtrToNode   Next;\n};\ntypedef PtrToNode List;\n\nList Read(); /* 细节在此不表 */\nvoid Print( List L ); /* 细节在此不表 */\n\nList Reverse( List L );\n\nint main()\n{\n    List L1, L2;\n    L1 = Read();\n    L2 = Reverse(L1);\n    Print(L1);\n    Print(L2);\n    return 0;\n}\n\n/* 你的代码将被嵌在这里 */\n```\n\n### 输入样例：\n```in\n5\n1 3 4 5 2\n```\n\n### 输出样例：\n```out\n1\n2 5 4 3 1\n```",
+        "type": "CODE_COMPLETION",
+        "author": "陈越",
+        "authorOrganization": {
+            "id": "1",
+            "name": "浙江大学",
+            "comment": "",
+            "code": "",
+            "country": "NO_COUNTRY",
+            "membersCount": 0,
+            "type": "UNKNOWN",
+            "balance": 0,
+            "subdomain": "",
+            "logo": ""
+        },
+        "compiler": "GCC",
+        "problemStatus": "REVIEWED",
+        "lastSubmissionId": "0",
+        "solution": "",
+        "problemSetId": "15",
+        "problemId": "343",
+        "description": "本题要求实现一个函数，将给定的单链表逆转。\n\n### 函数接口定义：\n```c++\nList Reverse( List L );\n```\n\n其中`List`结构定义如下：\n```c++\ntypedef struct Node *PtrToNode;\nstruct Node {\n    ElementType Data; /* 存储结点数据 */\n    PtrToNode   Next; /* 指向下一个结点的指针 */\n};\ntypedef PtrToNode List; /* 定义单链表类型 */\n```\n`L`是给定单链表，函数`Reverse`要返回被逆转后的链表。\n\n### 裁判测试程序样例：\n```c++\n#include <stdio.h>\n#include <stdlib.h>\n\ntypedef int ElementType;\ntypedef struct Node *PtrToNode;\nstruct Node {\n    ElementType Data;\n    PtrToNode   Next;\n};\ntypedef PtrToNode List;\n\nList Read(); /* 细节在此不表 */\nvoid Print( List L ); /* 细节在此不表 */\n\nList Reverse( List L );\n\nint main()\n{\n    List L1, L2;\n    L1 = Read();\n    L2 = Reverse(L1);\n    Print(L1);\n    Print(L2);\n    return 0;\n}\n\n/* 你的代码将被嵌在这里 */\n```\n\n### 输入样例：\n```in\n5\n1 3 4 5 2\n```\n\n### 输出样例：\n```out\n1\n2 5 4 3 1\n```",
+        "problemPoolIndex": 1,
+        "indexInProblemPool": 1
+    }
+}

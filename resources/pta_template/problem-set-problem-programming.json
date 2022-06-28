@@ -1,0 +1,58 @@
+{
+    "problemSetProblem": {
+        "id": "994805528788582400",
+        "label": "1001",
+        "score": 20,
+        "problemConfig": {
+            "programmingProblemConfig": {
+                "timeLimit": 400,
+                "memoryLimit": 65536,
+                "codeSizeLimit": 16,
+                "cases": {},
+                "exampleTestDatas": [
+                    {
+                        "name": "",
+                        "input": "-1000000 9\n",
+                        "output": "-999,991\n"
+                    },
+                    {
+                        "name": "",
+                        "input": "-1000000 9\n",
+                        "output": "-999,991\n"
+                    }
+                ],
+                "testdataDescriptionCode": "",
+                "customizeLimits": [],
+                "stackSizeLimit": 0,
+                "tools": []
+            },
+            "solutionVisible": false
+        },
+        "deadline": "1970-01-01T00:00:00Z",
+        "title": "A+B Format",
+        "content": "Calculate $$a + b$$ and output the sum in standard format -- that is, the digits must be separated into groups of three by commas (unless there are less than four digits).\n\n### Input Specification:\n\nEach input file contains one test case. Each case contains a pair of integers $$a$$ and $$b$$ where $$-10^6 \\le a, b \\le 10^6$$. The numbers are separated by a space.\n\n### Output Specification:\n\nFor each test case, you should output the sum of $$a$$ and $$b$$ in one line. The sum must be written in the standard format.\n\n### Sample Input:\n```in\n-1000000 9\n```\n\n### Sample Output:\n```out\n-999,991\n```",
+        "type": "PROGRAMMING",
+        "author": "CHEN, Yue",
+        "authorOrganization": {
+            "id": "1",
+            "name": "浙江大学",
+            "comment": "",
+            "code": "",
+            "country": "NO_COUNTRY",
+            "membersCount": 0,
+            "type": "UNKNOWN",
+            "balance": 0,
+            "subdomain": "",
+            "logo": ""
+        },
+        "compiler": "NO_COMPILER",
+        "problemStatus": "PRIVATE",
+        "lastSubmissionId": "0",
+        "solution": "",
+        "problemSetId": "994805342720868352",
+        "problemId": "10007",
+        "description": "Calculate $$a + b$$ and output the sum in standard format -- that is, the digits must be separated into groups of three by commas (unless there are less than four digits).\n\n### Input Specification:\n\nEach input file contains one test case. Each case contains a pair of integers $$a$$ and $$b$$ where $$-10^6 \\le a, b \\le 10^6$$. The numbers are separated by a space.\n\n### Output Specification:\n\nFor each test case, you should output the sum of $$a$$ and $$b$$ in one line. The sum must be written in the standard format.\n\n### Sample Input:\n```in\n-1000000 9\n```\n\n### Sample Output:\n```out\n-999,991\n```",
+        "problemPoolIndex": 0,
+        "indexInProblemPool": 1
+    }
+}

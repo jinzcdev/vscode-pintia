@@ -1,3 +1,9 @@
+import { IProblemSummary } from "./entity/ProblemSummary";
+
+import * as os from "os";
+import * as path from "path";
+
+export const configPath = path.join(os.homedir(), ".pintia")
 
 export enum UserStatus {
     SignedIn = 1,
@@ -17,8 +23,9 @@ export enum ProblemType {
 
 export enum PtaNodeType {
     ProblemSet = 1,
-    ProblemType = 2,
-    Problem = 3
+    ProblemSubSet = 2,
+    ProblemPage = 3,
+    Problem = 4
 }
 
 export interface IPtaNode {
@@ -26,7 +33,19 @@ export interface IPtaNode {
     psID: string;
     label: string;
     type: PtaNodeType;
-    value: string;
+    value: IPtaNodeValue;
+    isFavorite: boolean;
+    state: ProblemState;
+    tag: string[];
+}
+
+export interface IPtaNodeValue {
+    summaries: IProblemSummary;
+    total: number;
+    page: number;
+    limit: number;
+    problemTotal: number;
+    problemType: ProblemType;
 }
 
 export const defaultPtaNode: IPtaNode = {
@@ -34,5 +53,26 @@ export const defaultPtaNode: IPtaNode = {
     psID: "",
     label: "",
     type: PtaNodeType.ProblemSet,
-    value: ""
+    value: {
+        summaries: {
+            PROGRAMMING: {
+                total: 0,
+                totalScore: 0
+            },
+            CODE_COMPLETION: {
+                total: 0,
+                totalScore: 0
+            },
+            numType: 1
+        },
+        total: 0,
+        page: 0,
+        limit: 0,
+        problemTotal: 0,
+        problemType: ProblemType.PROGRAMMING,
+    },
+    isFavorite: false,
+    state: ProblemState.Unknown,
+    tag: [] as string[]
 };
+
