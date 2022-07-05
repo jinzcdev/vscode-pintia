@@ -1,6 +1,7 @@
+import { PtaLoginMethod } from "../shared";
 import { IPtaUser } from "./PtaUser";
 
-enum AuthStatus {
+export enum AuthStatus {
     WAITING = "WAITING",
     SUCCESSFUL = "SUCCESSFUL",
     FAILURE = "FAILURE"
@@ -26,4 +27,12 @@ export interface IWechatUserInfo {
     mfa: [];
     // add `cookie` property.
     cookie: string;
+}
+
+export interface ILoginSession {
+    id: string,
+    user: string,
+    email: string,
+    loginMethod: PtaLoginMethod,
+    cookie: string
 }

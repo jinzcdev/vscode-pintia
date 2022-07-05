@@ -10,13 +10,14 @@ import { IProblemSubmission } from "../entity/ProblemSubmission";
 import { IProblemSubmissionResult } from "../entity/ProblemSubmissionResult";
 
 import { configPath } from "../shared";
-import { IWechatAuth, IWechatAuthState, IWechatUserState } from "../entity/userLoginSession";
+import { IWechatAuth, IWechatAuthState, IWechatUserInfo, IWechatUserState } from "../entity/userLoginSession";
 import { Response } from "node-fetch";
 import fetch from "node-fetch"
     ;
 import * as fs from "fs-extra";
 import * as os from "os";
 import * as path from "path";
+import { IPtaUser } from "../entity/PtaUser";
 
 class PtaAPI {
 
@@ -194,39 +195,56 @@ class PtaAPI {
     }
 
     // https://passport.pintia.cn/api/oauth/wechat/official-account/auth-url
-    private async getWechatAuth(): Promise<IWechatAuth> {
+    public async getWechatAuth(): Promise<IWechatAuth> {
         return await httpGet(this.wechatAuthUrl);
     }
 
     // https://passport.pintia.cn/api/oauth/wechat/official-account/state/{state}
-    private async getWechatAuthState(state: string): Promise<IWechatAuthState> {
+    public async getWechatAuthState(state: string): Promise<IWechatAuthState> {
         return await httpGet(this.wechatAuthState + state);
     }
 
     // https://passport.pintia.cn/api/oauth/wechat/state/{state}/user
-    private async getWechatAuthUser(state: string): Promise<IWechatUserState> {
+    public async getWechatAuthUser(state: string): Promise<IWechatUserState> {
         return await httpGet(this.wechatAuthUser + `${state}/user`).then(json => json['user'])
     }
 
-    // https://passport.pintia.cn/api/users/sessions/state/{state}/login_users/{userId}
-    public async getPTASessionCookie(state: string, userId: string): Promise<string> {
-        const cookie: string | null = await fetch(`https://passport.pintia.cn/api/oauth/wechat/state/${state}/user/${userId}`, {
-            method: "GET",
+    // https://passport.pintia.cn/api/users/sessions/state/${state}/login_users/${userId}
+    public async getWechatUserInfo(state: string, userId: string): Promise<IWechatUserInfo> {
+        const response = await fetch(`https://passport.pintia.cn/api/users/sessions/state/${state}/login_users/${userId}`, {
+            method: "POST",
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             }
-        })
-            .then(response => response.headers)
-            .then(headers => headers.get("Cookie"));
-        if (cookie === null) {
-            throw "`Log in` fails";
+        });
+        let userInfo: IWechatUserInfo = await response.json();
+        let cookie = response.headers.get("Set-Cookie")!;
+        for (const s of cookie.split(";")) {
+            if (s.includes("PTASession")) {
+                userInfo.cookie = s + ";";
+                break;
+            }
         }
-        return cookie;
-        // const data: IPTASession = await response.json()
-        // data.cookie = response.headers.get("Cookie")!;
-        // return data;
-        // return response.headers.get("Cookie")!;
+        return userInfo;
+    }
+
+    public async getCurrentUser(cookie: string): Promise<IPtaUser | undefined> {
+        return await httpGet("https://pintia.cn/api/u/current", cookie)
+            .then(json => json['user']);
+    }
+
+    public async signOut(cookie: string): Promise<void> {
+        await fetch("https://pintia.cn/api/u/info", {
+            method: "DELETE",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Cookie': cookie
+            }
+        })
+            // .then(response => {})
+            .catch(reason => console.log(reason));
     }
 }
 

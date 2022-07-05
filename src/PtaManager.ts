@@ -1,7 +1,12 @@
 import { EventEmitter } from "events";
 import * as vscode from "vscode";
-import { UserStatus } from "./shared";
+import { configPath, IQuickPickItem, PtaLoginMethod, UserStatus } from "./shared";
 import { ptaExecutor } from "./PtaExecutor";
+import { ILoginSession } from "./entity/userLoginSession";
+import { ptaApi } from "./utils/api";
+import * as fs from "fs-extra";
+import * as path from "path";
+import { IPtaUser } from "./entity/PtaUser";
 
 
 class PtaManager extends EventEmitter {
@@ -16,47 +21,75 @@ class PtaManager extends EventEmitter {
     }
 
     public async signIn(): Promise<void> {
-        const picks: Array<vscode.QuickPickItem> = [];
+        const picks: IQuickPickItem<PtaLoginMethod>[] = [];
         picks.push(
             {
                 label: "QR Code",
-                detail: "Use wechat QRCode to login"
+                detail: "Use wechat QRCode to login",
+                value: PtaLoginMethod.WeChat
             },
             {
                 label: "PTA Account",
-                detail: "Use Pintia account to login"
+                detail: "Use Pintia account to login",
+                value: PtaLoginMethod.PTA
             }
         );
 
-        const choice: vscode.QuickPickItem | undefined = await vscode.window.showQuickPick(picks);
+        const choice: IQuickPickItem<PtaLoginMethod> | undefined = await vscode.window.showQuickPick(picks);
         if (!choice) {
             return;
         }
-        const userName: string | undefined = await new Promise((resolve: (res: string | undefined) => void, reject: (e: Error) => void) => {
-            return resolve("jinzcdev");
-        });
+        try {
+            await ptaExecutor.signIn(choice.value, async (msg: string, data?: ILoginSession) => {
+                switch (msg) {
+                    case "SUCCESS":
+                        await fs.writeJson(path.join(configPath, 'user.json'), data);
+                        vscode.window.showInformationMessage(`Successfully, ${choice.value}.`);
+                        this.currentUser = data?.user;
+                        this.userStatus = UserStatus.SignedIn;
 
-        if (userName) {
-            vscode.window.showInformationMessage(`Successfully, ${choice.label}.`);
-            this.currentUser = userName;
-            this.userStatus = UserStatus.SignedIn;
-            // if status changed, problems refresh
-            this.emit("statusChanged");
+                        this.emit("statusChanged");
+                        break;
+                    case "TIMEOUT":
+                        vscode.window.showErrorMessage("Login timed out!");
+
+                    default:
+                }
+            });
         }
-
-        return Promise.resolve();
+        catch (error) {
+            console.log(error);
+        }
     }
 
-    public async singOut(): Promise<void> {
-        console.log("Sign Out ... ");
-        return Promise.resolve();
+    public async signOut(): Promise<void> {
+        try {
+            await ptaExecutor.signOut();
+            vscode.window.showInformationMessage("Successfully signed out.");
+            this.currentUser = undefined;
+            this.userStatus = UserStatus.SignedOut;
+            this.emit("statusChanged");
+        } catch (error) {
+            // swallow the error when sign out.
+            console.log(error);
+        }
     }
 
     public async getLoginStatus(): Promise<void> {
+        const filePath = path.join(configPath, "user.json");
         try {
-            const result: string = await ptaExecutor.getUserInfo();
-            this.currentUser = result;
-            this.userStatus = UserStatus.SignedIn;
+            if (await fs.pathExists(filePath)) {
+                const loginSession: ILoginSession = await fs.readJSON(filePath);
+                const user: IPtaUser | undefined = await ptaApi.getCurrentUser(loginSession.cookie);
+                console.log(user);
+                if (user) {
+                    this.currentUser = user.nickname;
+                    this.userStatus = UserStatus.SignedIn;
+                } else {
+                    this.currentUser = undefined;
+                    this.userStatus = UserStatus.SignedOut;
+                }
+            }
         } catch (error) {
             this.currentUser = undefined;
             this.userStatus = UserStatus.SignedOut;
@@ -67,6 +100,10 @@ class PtaManager extends EventEmitter {
 
     public getUser(): string | undefined {
         return this.currentUser;
+    }
+
+    public getStatus(): UserStatus {
+        return this.userStatus;
     }
 }
 

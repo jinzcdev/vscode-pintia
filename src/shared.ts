@@ -2,12 +2,23 @@ import { IProblemSummary } from "./entity/ProblemSummary";
 
 import * as os from "os";
 import * as path from "path";
+import * as vscode from "vscode";
+import { IProblemInfo } from "./entity/ProblemInfo";
 
 export const configPath = path.join(os.homedir(), ".pintia")
 
 export enum UserStatus {
     SignedIn = 1,
     SignedOut = 2
+}
+
+export enum PtaLoginMethod {
+    PTA = "PTA",
+    WeChat = "WeChat"
+}
+
+export interface IQuickPickItem<T> extends vscode.QuickPickItem {
+    value: T;
 }
 
 export enum ProblemState {
@@ -46,6 +57,7 @@ export interface IPtaNodeValue {
     limit: number;
     problemTotal: number;
     problemType: ProblemType;
+    problemInfo?: IProblemInfo;
 }
 
 export const defaultPtaNode: IPtaNode = {
@@ -70,6 +82,7 @@ export const defaultPtaNode: IPtaNode = {
         limit: 0,
         problemTotal: 0,
         problemType: ProblemType.PROGRAMMING,
+        problemInfo: undefined
     },
     isFavorite: false,
     state: ProblemState.Unknown,
