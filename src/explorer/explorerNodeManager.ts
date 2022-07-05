@@ -3,6 +3,7 @@ import { PtaNode } from "./PtaNode";
 import { ptaApi } from "../utils/api";
 import { ProblemType, PtaNodeType } from "../shared";
 import { defaultPtaNode } from "../shared";
+import { IProblemInfo } from "../entity/ProblemInfo";
 
 class ExplorerNodeManager implements Disposable {
 
@@ -26,24 +27,26 @@ class ExplorerNodeManager implements Disposable {
     }
 
     public async getProblemNodes(psID: string, problemType: ProblemType, page?: number, limit?: number): Promise<PtaNode[]> {
-        let problemList, startIndex = 1;
+        let problemList: IProblemInfo[], startIndex = 1;
         if (page !== undefined && limit !== undefined) {
             problemList = await ptaApi.getProblemInfoListByPage(psID, problemType, page, limit);
             startIndex = page * limit + 1;
         } else {
-            // page number is -1, get all problems
             problemList = await ptaApi.getAllProblemInfoList(psID, problemType);
         }
 
         const ptaNodeList: PtaNode[] = [];
         for (let i = 0; i < problemList.length; i++) {
-            const pb = problemList[i];
+            const pb: IProblemInfo = problemList[i];
             ptaNodeList.push(
                 new PtaNode(Object.assign({}, defaultPtaNode, {
                     pID: pb.id,
                     psID: psID,
                     label: `[${i + startIndex}] ${pb.label} ${pb.title}`,
                     type: PtaNodeType.Problem,
+                    value: {
+                        problemInfo: pb
+                    }
                 }))
             );
         }

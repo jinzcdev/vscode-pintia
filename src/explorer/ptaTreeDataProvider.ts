@@ -1,7 +1,7 @@
 
 import * as vscode from "vscode";
 import { PtaNode } from "./PtaNode";
-import { defaultPtaNode, IPtaNode, IPtaNodeValue, ProblemType, PtaNodeType } from "../shared";
+import { defaultPtaNode, IPtaNodeValue, ProblemType, PtaNodeType } from "../shared";
 import { ptaManager } from "../PtaManager";
 import { explorerNodeManager } from "./explorerNodeManager";
 
@@ -21,23 +21,22 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode> {
     }
 
     getTreeItem(element: PtaNode): vscode.TreeItem | Thenable<vscode.TreeItem> {
-        // if (element.pID === "notSignIn") {
-        //     return {
-        //         label: element.label,
-        //         collapsibleState: vscode.TreeItemCollapsibleState.None,
-        //         command: {
-        //             title: "Sign in to Pintia",
-        //             command: "pintia.signin"
-        //         }
-        //     };
-        // }
+        if (element.pID === "notSignIn") {
+            return {
+                label: element.label,
+                collapsibleState: vscode.TreeItemCollapsibleState.None,
+                command: {
+                    title: "Sign in to Pintia",
+                    command: "pintia.signIn"
+                }
+            };
+        }
         return {
             label: element.label,
             collapsibleState: element.type === PtaNodeType.Problem ?
                 vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Collapsed,
-            // tooltip: "hshshhshs",
             command: element.type === PtaNodeType.Problem ? {
-                title: "Sign in to Pintia",
+                title: "Preview Problem",
                 command: "pintia.previewProblem",
                 arguments: [element]
             } : undefined
@@ -45,17 +44,14 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode> {
     }
     getChildren(element?: PtaNode): vscode.ProviderResult<PtaNode[]> {
         const limit = 200;
-        // if (!ptaManager.getUser()) {
-        //     return [
-        //         new PtaNode(Object.assign({}, defaultPtaNode, {
-        //             pID: "notSignIn",
-        //             psID: "notSignIn",
-        //             label: "Sign in to Pintia",
-        //             type: PtaNodeType.Problem,
-        //             value: ""
-        //         }))
-        //     ];
-        // }
+        if (!ptaManager.getUser()) {
+            return [
+                new PtaNode(Object.assign({}, defaultPtaNode, {
+                    pID: "notSignIn",
+                    label: "Sign in to Pintia"
+                }))
+            ];
+        }
         if (!element) {
             // root directoty
             return explorerNodeManager.getRootNodes();
