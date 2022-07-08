@@ -44,7 +44,7 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode> {
     }
     getChildren(element?: PtaNode): vscode.ProviderResult<PtaNode[]> {
         const limit = 200;
-        if (!ptaManager.getUser()) {
+        if (!ptaManager.getUserSession()) {
             return [
                 new PtaNode(Object.assign({}, defaultPtaNode, {
                     pID: "notSignIn",

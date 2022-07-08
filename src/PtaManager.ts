@@ -2,7 +2,7 @@ import { EventEmitter } from "events";
 import * as vscode from "vscode";
 import { configPath, IQuickPickItem, PtaLoginMethod, UserStatus } from "./shared";
 import { ptaExecutor } from "./PtaExecutor";
-import { ILoginSession } from "./entity/userLoginSession";
+import { IUserSession } from "./entity/userLoginSession";
 import { ptaApi } from "./utils/api";
 import * as fs from "fs-extra";
 import * as path from "path";
@@ -11,12 +11,12 @@ import { IPtaUser } from "./entity/PtaUser";
 
 class PtaManager extends EventEmitter {
 
-    private currentUser: string | undefined;
+    private userSession: IUserSession | undefined;
     private userStatus: UserStatus;
 
     constructor() {
         super();
-        this.currentUser = undefined;
+        this.userSession = undefined;
         this.userStatus = UserStatus.SignedOut;
     }
 
@@ -40,12 +40,12 @@ class PtaManager extends EventEmitter {
             return;
         }
         try {
-            await ptaExecutor.signIn(choice.value, async (msg: string, data?: ILoginSession) => {
+            await ptaExecutor.signIn(choice.value, async (msg: string, data?: IUserSession) => {
                 switch (msg) {
                     case "SUCCESS":
                         await fs.writeJson(path.join(configPath, 'user.json'), data);
                         vscode.window.showInformationMessage(`Successfully, ${choice.value}.`);
-                        this.currentUser = data?.user;
+                        this.userSession = data;
                         this.userStatus = UserStatus.SignedIn;
 
                         this.emit("statusChanged");
@@ -66,7 +66,7 @@ class PtaManager extends EventEmitter {
         try {
             await ptaExecutor.signOut();
             vscode.window.showInformationMessage("Successfully signed out.");
-            this.currentUser = undefined;
+            this.userSession = undefined;
             this.userStatus = UserStatus.SignedOut;
             this.emit("statusChanged");
         } catch (error) {
@@ -75,31 +75,31 @@ class PtaManager extends EventEmitter {
         }
     }
 
-    public async getLoginStatus(): Promise<void> {
+    public async fetchLoginStatus(): Promise<void> {
         const filePath = path.join(configPath, "user.json");
         try {
             if (await fs.pathExists(filePath)) {
-                const loginSession: ILoginSession = await fs.readJSON(filePath);
+                const loginSession: IUserSession = await fs.readJSON(filePath);
                 const user: IPtaUser | undefined = await ptaApi.getCurrentUser(loginSession.cookie);
-                console.log(user);
                 if (user) {
-                    this.currentUser = user.nickname;
+                    this.userSession = loginSession;
                     this.userStatus = UserStatus.SignedIn;
                 } else {
-                    this.currentUser = undefined;
+                    this.userSession = undefined;
                     this.userStatus = UserStatus.SignedOut;
+                    vscode.window.showErrorMessage("Login session has expired! Please login again.");
                 }
             }
         } catch (error) {
-            this.currentUser = undefined;
+            this.userSession = undefined;
             this.userStatus = UserStatus.SignedOut;
         } finally {
             this.emit("statusChanged");
         }
     }
 
-    public getUser(): string | undefined {
-        return this.currentUser;
+    public getUserSession(): IUserSession | undefined {
+        return this.userSession;
     }
 
     public getStatus(): UserStatus {

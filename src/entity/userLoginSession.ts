@@ -29,7 +29,7 @@ export interface IWechatUserInfo {
     cookie: string;
 }
 
-export interface ILoginSession {
+export interface IUserSession {
     id: string,
     user: string,
     email: string,
