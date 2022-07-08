@@ -16,7 +16,7 @@ export abstract class PtaWebview implements Disposable {
         //     ? vscode.window.activeTextEditor.viewColumn
         //     : undefined;
         if (this.currentPanel) {
-            this.currentPanel.title = this.data.title;
+            this.currentPanel.title = "PTA: " + this.data.title;
             this.currentPanel.webview.html = this.getWebviewContent();
             this.currentPanel.reveal(vscode.ViewColumn.One);
         } else {
@@ -24,7 +24,9 @@ export abstract class PtaWebview implements Disposable {
                 'PTA',
                 this.data.title,
                 vscode.ViewColumn.One,
-                {}
+                {
+                    enableScripts: true
+                }
             );
             this.currentPanel.webview.html = this.getWebviewContent();
             this.currentPanel.onDidDispose(this.onDidDisposeWebview, this, this.listeners);
@@ -63,5 +65,5 @@ export abstract class PtaWebview implements Disposable {
         this.listeners = [];
     }
 
-    protected async onDidReceiveMessage(_message: any): Promise<void> { }
+    protected async onDidReceiveMessage(_msg: any): Promise<void> { }
 }

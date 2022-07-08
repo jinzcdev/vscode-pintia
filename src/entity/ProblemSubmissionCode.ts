@@ -7,8 +7,11 @@ export interface IProblemCode {
 export interface IProblemSubmissionDetail {
     problemId: string,
     problemSetProblemId: string,
-    programmingSubmissionDetail: {
-        compiler: string;
-        program: string;
-    }
+    codeCompletionSubmissionDetail: SubmissionDetail;
+    programmingSubmissionDetail: SubmissionDetail;
+}
+
+interface SubmissionDetail {
+    compiler: string;
+    program: string;
 }

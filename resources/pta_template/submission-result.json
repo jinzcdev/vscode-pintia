@@ -26,6 +26,7 @@
         "submissionDetails": [
             {
                 "problemSetProblemId": "709",
+                // codeCompletionSubmissionDetail
                 "programmingSubmissionDetail": {
                     "compiler": "GXX",
                     "program": "#include <bits/stdc++.h>\nusing namespace std;\nint main() {\n    int n, ans;\n    cin >> n;\n    vector<int> v(n), dp(n);\n    for (int i = 0; i < n; i++) scanf(\"%d\", &v[i]);\n    ans = dp[0] = v[0];\n    for (int i = 1; i < n; i++) {\n        dp[i] = max(dp[i - 1] + v[i], v[i]);\n        ans = max(ans, dp[i]);\n    }\n    cout << ans;\n    return 0;\n}"
@@ -137,6 +138,120 @@
             "4": "100000个随机数"
         },
         "problemSetId": "15",
+        "previewSubmission": false,
+        "cause": ""
+    }
+}
+
+
+
+
+{
+    "queued": -1,
+    "submission": {
+        "id": "1544323163243638784",
+        "user": {
+            "studentUser": {
+                "studentNumber": "",
+                "name": "",
+                "id": "0"
+            }
+        },
+        "problemType": "CODE_COMPLETION",
+        "problemSetProblem": {
+            "id": "733",
+            "label": "6-1",
+            "type": "CODE_COMPLETION",
+            "problemPoolIndex": 1,
+            "indexInProblemPool": 1
+        },
+        "submitAt": "2022-07-05T14:11:48Z",
+        "status": "WRONG_ANSWER",
+        "score": 0.0,
+        "compiler": "GCC",
+        "time": 0.04,
+        "memory": 3588096,
+        "submissionDetails": [
+            {
+                "problemSetProblemId": "733",
+                "codeCompletionSubmissionDetail": {
+                    "program": "void PrintN(int N) {\n    int i \u003d 2;\n    while (i \u003c\u003d N) {\n        printf(\"%d\\n\", i++);\n    }\n}"
+                },
+                "problemId": "0"
+            }
+        ],
+        "judgeResponseContents": [
+            {
+                "status": "WRONG_ANSWER",
+                "score": 0.0,
+                "codeCompletionJudgeResponseContent": {
+                    "compilationResult": {
+                        "log": "a.c: In function ‘main’:\na.c:8:2: warning: ignoring return value of ‘scanf’, declared with attribute warn_unused_result [-Wunused-result]\n  scanf(\"%d\", \u0026N);\n  ^~~~~~~~~~~~~~~",
+                        "success": true,
+                        "error": ""
+                    },
+                    "checkerCompilationResult": {
+                        "log": "",
+                        "success": false,
+                        "error": ""
+                    },
+                    "testcaseJudgeResults": {
+                        "0": {
+                            "result": "WRONG_ANSWER",
+                            "exceed": "UNKNOWN_TESTCASE_EXCEED",
+                            "time": 0.002,
+                            "memory": 204800,
+                            "exitcode": 0,
+                            "termsig": 0,
+                            "error": "",
+                            "stdout": "",
+                            "stderr": "",
+                            "checkerOutput": "",
+                            "testcaseScore": 0,
+                            "stdoutTruncated": false,
+                            "stderrTruncated": false
+                        },
+                        "1": {
+                            "result": "WRONG_ANSWER",
+                            "exceed": "UNKNOWN_TESTCASE_EXCEED",
+                            "time": 0.002,
+                            "memory": 192512,
+                            "exitcode": 0,
+                            "termsig": 0,
+                            "error": "",
+                            "stdout": "",
+                            "stderr": "",
+                            "checkerOutput": "",
+                            "testcaseScore": 0,
+                            "stdoutTruncated": false,
+                            "stderrTruncated": false
+                        },
+                        "2": {
+                            "result": "WRONG_ANSWER",
+                            "exceed": "UNKNOWN_TESTCASE_EXCEED",
+                            "time": 0.04,
+                            "memory": 3588096,
+                            "exitcode": 0,
+                            "termsig": 0,
+                            "error": "",
+                            "stdout": "",
+                            "stderr": "",
+                            "checkerOutput": "",
+                            "testcaseScore": 0,
+                            "stdoutTruncated": false,
+                            "stderrTruncated": false
+                        }
+                    }
+                },
+                "problemSetProblemId": "733"
+            }
+        ],
+        "hints": {
+            "0": "sample 一般测试",
+            "1": "最小N",
+            "2": "大N，卡递归"
+        },
+        "problemSetId": "14",
         "previewSubmission": false,
         "cause": ""
     }

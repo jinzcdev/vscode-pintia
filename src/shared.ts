@@ -96,18 +96,18 @@ export const solutionStatusMapping: Map<string, string> = new Map([
     ["JUDGING", "<td style='color: orange;'>正在评测</td>"],
     ["COMPILE_ERROR", "<td style='color: #237aff;'>编译错误</td>"],
     ["ACCEPTED", "<td style='color: #ff5555;'>答案正确</td>"],
-    ["PARTIAL_ACCEPTED", "<td style='color: green;'>部分正确</td>"],
-    ["PRESENTATION_ERROR", "<td style='color: green;'>格式错误</td>"],
-    ["WRONG_ANSWER", "<td style='color: green;'>答案错误</td>"],
-    ["MULTIPLE_ERROR", "<td style='color: green;'>多种错误</td>"],
-    ["TIME_LIMIT_EXCEEDED", "<td style='color: green;'>运行超时</td>"],
-    ["MEMORY_LIMIT_EXCEEDED", "<td style='color: green;'>内存超限</td>"],
-    ["NON_ZERO_EXIT_CODE", "<td style='color: green;'>非零返回</td>"],
-    ["SEGMENTATION_FAULT", "<td style='color: green;'>段错误</td>"],
-    ["FLOAT_POINT_EXCEPTION", "<td style='color: green;'>浮点错误</td>"],
-    ["OUTPUT_LIMIT_EXCEEDED", "<td style='color: green;'>输出超限</td>"],
+    ["PARTIAL_ACCEPTED", "<td style='color: #00b000;'>部分正确</td>"],
+    ["PRESENTATION_ERROR", "<td style='color: #00b000;'>格式错误</td>"],
+    ["WRONG_ANSWER", "<td style='color: #00b000;'>答案错误</td>"],
+    ["MULTIPLE_ERROR", "<td style='color: #00b000;'>多种错误</td>"],
+    ["TIME_LIMIT_EXCEEDED", "<td style='color: #00b000;'>运行超时</td>"],
+    ["MEMORY_LIMIT_EXCEEDED", "<td style='color: #00b000;'>内存超限</td>"],
+    ["NON_ZERO_EXIT_CODE", "<td style='color: #00b000;'>非零返回</td>"],
+    ["SEGMENTATION_FAULT", "<td style='color: #00b000;'>段错误</td>"],
+    ["FLOAT_POINT_EXCEPTION", "<td style='color: #00b000;'>浮点错误</td>"],
+    ["OUTPUT_LIMIT_EXCEEDED", "<td style='color: #00b000;'>输出超限</td>"],
     ["INTERNAL_ERROR", "<td>内部错误</td>"],
-    ["RUNTIME_ERROR", "<td style='color: green;'>运行时错误</td>"],
+    ["RUNTIME_ERROR", "<td style='color: #00b000;'>运行时错误</td>"],
 ]);
 
 
@@ -501,3 +501,8 @@ export const ptaCompiler = {
     }
 }
 
+function fun(data: any) {
+    console.log(data["SQL"]);
+}
+
+fun(ptaCompiler)

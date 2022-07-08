@@ -30,42 +30,49 @@ export interface IProblemSubmissionResult {
         judgeResponseContents: [{
             status: string;
             score: number;
-            programmingJudgeResponseContent: {
-                compilationResult: {
-                    log: string;
-                    success: boolean;
-                    error: string;
-                },
-                checkerCompilationResult: {
-                    log: string;
-                    success: boolean;
-                    error: string;
-                },
-                testcaseJudgeResults: {
-                    /*
-                    "0": {
-                        "result": "ACCEPTED",
-                        "exceed": "UNKNOWN_TESTCASE_EXCEED",
-                        "time": 0.004,
-                        "memory": 466944,
-                        "exitcode": 0,
-                        "termsig": 0,
-                        "error": "",
-                        "stdout": "",
-                        "stderr": "",
-                        "checkerOutput": "",
-                        "testcaseScore": 12,
-                        "stdoutTruncated": false,
-                        "stderrTruncated": false
-                    };
-                    */
-                }
-            };
+            // "codeCompletionJudgeResponseContent" or "programmingJudgeResponseContent"
+            codeCompletionJudgeResponseContent: JudgeResponseContent;
+            programmingJudgeResponseContent: JudgeResponseContent;
             problemSetProblemId: string;
         }];
-        hints: {};
+        hints: any;
+        // {
+        //     0: "sample 满3位没有0",
+        // };
         problemSetId: string;
         previewSubmission: boolean;
         cause: string;
     };
+}
+
+interface JudgeResponseContent {
+    compilationResult: {
+        log: string;
+        success: boolean;
+        error: string;
+    },
+    checkerCompilationResult: {
+        log: string;
+        success: boolean;
+        error: string;
+    },
+    testcaseJudgeResults: any;
+    /*
+    {
+    "0": {
+        "result": "ACCEPTED",
+        "exceed": "UNKNOWN_TESTCASE_EXCEED",
+        "time": 0.004,
+        "memory": 466944,
+        "exitcode": 0,
+        "termsig": 0,
+        "error": "",
+        "stdout": "",
+        "stderr": "",
+        "checkerOutput": "",
+        "testcaseScore": 12,
+        "stdoutTruncated": false,
+        "stderrTruncated": false
+    };
+    */
 }
