@@ -6,6 +6,7 @@ export async function httpGet(url: string, cookie: string = ''): Promise<any> {
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
+            'Accept-Language': 'zh-CN',
             'Cookie': cookie
         }
     })
@@ -13,12 +14,13 @@ export async function httpGet(url: string, cookie: string = ''): Promise<any> {
         .catch(reason => console.log(reason));
 }
 
-export async function httpPost(url: string, cookie: string = '', body: any): Promise<any> {
+export async function httpPost(url: string, cookie: string = '', body?: any): Promise<any> {
     return await fetch(url, {
         method: "POST",
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
+            'Accept-Language': 'zh-CN',
             'Cookie': cookie
         },
         body: JSON.stringify(body)

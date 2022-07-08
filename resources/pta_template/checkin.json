@@ -1,0 +1,34 @@
+// https://pintia.cn/api/users/checkin
+// success
+{
+    "rewards": {
+        "DAILY_CHECK_IN": {
+            "rewards": [
+                {
+                    "purchaseObjectType": "UNKNOWN",
+                    "amount": 5
+                }
+            ]
+        }
+    }
+}
+// error
+{
+    "error": {
+        "code": "BILL_ACCOUNT_SERVICE_ALREADY_DAILY_CHECK_IN",
+        "message": "今天已经签到过"
+    }
+}
+
+// https://pintia.cn/api/users/rewards/DAILY_CHECK_IN
+{
+    "exists": true,
+    "rewardContent": {
+        "rewards": [
+            {
+                "purchaseObjectType": "UNKNOWN",
+                "amount": 5
+            }
+        ]
+    }
+}

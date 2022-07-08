@@ -11,13 +11,11 @@ import { IProblemSubmissionResult } from "../entity/ProblemSubmissionResult";
 
 import { configPath } from "../shared";
 import { IWechatAuth, IWechatAuthState, IWechatUserInfo, IWechatUserState } from "../entity/userLoginSession";
-import { Response } from "node-fetch";
-import fetch from "node-fetch"
-    ;
+import fetch from "node-fetch";
 import * as fs from "fs-extra";
-import * as os from "os";
 import * as path from "path";
 import { IPtaUser } from "../entity/PtaUser";
+import { ICheckIn } from "../entity/ICheckIn";
 
 class PtaAPI {
 
@@ -245,6 +243,10 @@ class PtaAPI {
         })
             // .then(response => {})
             .catch(reason => console.log(reason));
+    }
+
+    public async checkin(cookie: string): Promise<ICheckIn> {
+        return await httpPost("https://pintia.cn/api/users/checkin", cookie);
     }
 }
 
