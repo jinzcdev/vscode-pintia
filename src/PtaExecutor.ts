@@ -4,41 +4,46 @@ import { IProblemSubmission } from "./entity/ProblemSubmission";
 import { IProblemSubmissionResult } from "./entity/ProblemSubmissionResult";
 import { ptaApi } from "./utils/api";
 import * as fs from "fs-extra";
-import { configPath, PtaLoginMethod } from "./shared";
+import { CallBack, configPath, ProblemType, PtaLoginMethod } from "./shared";
 import * as path from "path";
 import { IUserSession, IWechatAuth, AuthStatus, IWechatUserState, IWechatUserInfo } from "./entity/userLoginSession";
 import { ptaLoginProvider } from "./webview/ptaLoginProvider";
 import { EventEmitter } from "events";
+import { ptaManager } from "./PtaManager";
 
 
 class PtaExecutor extends EventEmitter implements Disposable {
 
-    public async submitSolution(psID: string, pID: string, filePath: string): Promise<boolean> {
-        if (!await fs.pathExists(filePath)) {
-            throw "submitted file doesn't exist."
-        }
-        const fileContent = await fs.readFile(filePath, "utf-8");
+    public async submitSolution(psID: string, pID: string, problemType: ProblemType, solution: { compiler: string, code: string }, callback: CallBack<IProblemSubmissionResult>): Promise<void> {
 
-        const cookie = "PTASession=a3249ecf-9400-4b34-a57c-9adc840cb98d;";
-        const compiler = "GXX";
+        const userSession: IUserSession | undefined = ptaManager.getUserSession();
+        if (!userSession) {
+            console.log("Login Session doesn't exist!");
+            return;
+        }
+        const cookie = userSession.cookie;
+        const compiler = solution.compiler;
         const submission: IProblemSubmission = await ptaApi.getProblemSetExam(psID, cookie)
             .then(exam => exam.id)
             .then(id => ptaApi.submitSolution(id, cookie, {
                 details: [
-                    {
-                        problemId: pID,
-                        problemSetProblemId: psID,
+                    problemType === ProblemType.PROGRAMMING ? {
+                        problemId: "0",
+                        problemSetProblemId: pID,
                         programmingSubmissionDetail: {
                             compiler: compiler,
-                            program: fileContent
-                        },
+                            program: solution.code
+                        }
+                    } : {
+                        problemId: "0",
+                        problemSetProblemId: pID,
                         codeCompletionSubmissionDetail: {
                             compiler: compiler,
-                            program: fileContent
+                            program: solution.code
                         }
                     }
                 ],
-                problemType: "PROGRAMMING"
+                problemType: problemType
             }))
 
         let data: IProblemSubmissionResult;
@@ -46,14 +51,13 @@ class PtaExecutor extends EventEmitter implements Disposable {
             data = await ptaApi.getProblemSubmissionResult(submission.submissionId, cookie);
             console.log(`Waiting for ${data.queued} users`);
             if (data.queued === -1) {
-                clearInterval(interval)
-                console.log(data)
+                clearInterval(interval);
+                callback("SUCCESS", data);
             }
         }, 1000);
-        return Promise.resolve(true);
     }
 
-    public async signIn(value: PtaLoginMethod, callback: (msg: string, data?: IUserSession) => void): Promise<void> {
+    public async signIn(value: PtaLoginMethod, callback: CallBack<IUserSession>): Promise<void> {
         if (value === PtaLoginMethod.WeChat) {
             await this.wechatSignIn(callback);
         } else {
@@ -69,14 +73,14 @@ class PtaExecutor extends EventEmitter implements Disposable {
         }
     }
 
-    public async wechatSignIn(callback: (msg: string, data?: IUserSession) => void): Promise<void> {
+    public async wechatSignIn(callback: CallBack<IUserSession>): Promise<void> {
         const auth: IWechatAuth = await ptaApi.getWechatAuth();
         await ptaLoginProvider.showQRCode(auth.url);
         let cnt = 0;
         let interval = setInterval(async () => {
             const authState = await ptaApi.getWechatAuthState(auth.state);
             if (authState.status === AuthStatus.SUCCESSFUL) {
-                
+
                 const userState: IWechatUserState = await ptaApi.getWechatAuthUser(auth.state);
                 const userInfo: IWechatUserInfo = await ptaApi.getWechatUserInfo(auth.state, userState.id);
 

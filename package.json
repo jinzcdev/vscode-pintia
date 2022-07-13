@@ -135,6 +135,11 @@
                 "title": "Sort Problems",
                 "category": "PTA",
                 "icon": "$(sort-precedence)"
+            },
+            {
+                "command": "pintia.checkIn",
+                "title": "Check In PTA",
+                "category": "PTA"
             }
         ]
     },

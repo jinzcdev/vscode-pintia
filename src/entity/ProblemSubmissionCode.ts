@@ -5,10 +5,10 @@ export interface IProblemCode {
 }
 
 export interface IProblemSubmissionDetail {
-    problemId: string,
-    problemSetProblemId: string,
-    codeCompletionSubmissionDetail: SubmissionDetail;
-    programmingSubmissionDetail: SubmissionDetail;
+    problemId: string;
+    problemSetProblemId: string;
+    codeCompletionSubmissionDetail?: SubmissionDetail;
+    programmingSubmissionDetail?: SubmissionDetail;
 }
 
 interface SubmissionDetail {

@@ -1,15 +1,16 @@
 import { PtaWebview } from "./PtaWebview";
 import { IProblemSubmissionResult } from "../entity/ProblemSubmissionResult";
 import { ProblemType, solutionStatusMapping, ptaCompiler } from "../shared";
+import { IProblemSubmissionDetail } from "../entity/ProblemSubmissionCode";
 
 class PtaSubmissionProvider extends PtaWebview {
 
     public async showSubmission(result: IProblemSubmissionResult) {
-        const submissionDetail = result.submission.submissionDetails[0];
+        const submissionDetail: IProblemSubmissionDetail = result.submission.submissionDetails[0];
         const judgeResponseContent = result.submission.judgeResponseContents[0];
         const codeJudgeResponseContent = ProblemType.PROGRAMMING ? judgeResponseContent.programmingJudgeResponseContent
             : judgeResponseContent.codeCompletionJudgeResponseContent;
-        const testcaseJudgeResults = codeJudgeResponseContent.testcaseJudgeResults;
+        const testcaseJudgeResults = codeJudgeResponseContent!.testcaseJudgeResults;
 
         this.data = {
             title: "PTA: Submission",
@@ -24,10 +25,10 @@ class PtaSubmissionProvider extends PtaWebview {
                 compiler: result.submission.compiler,
                 time: result.submission.time,
                 memory: result.submission.memory,
-                compilationOutput: codeJudgeResponseContent.compilationResult.log,
+                compilationOutput: codeJudgeResponseContent!.compilationResult.log,
                 program: result.submission.problemType === ProblemType.PROGRAMMING ?
-                    submissionDetail.programmingSubmissionDetail.program :
-                    submissionDetail.codeCompletionSubmissionDetail.program
+                    submissionDetail.programmingSubmissionDetail!.program :
+                    submissionDetail.codeCompletionSubmissionDetail!.program
             })
         };
 
@@ -169,7 +170,7 @@ class PtaSubmissionProvider extends PtaWebview {
         </div>
         `
     }
-    
+
     private formatDate(date: Date): string {
         const year = date.getFullYear(),
             month = date.getMonth(),

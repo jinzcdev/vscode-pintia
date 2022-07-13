@@ -31,8 +31,8 @@ export interface IProblemSubmissionResult {
             status: string;
             score: number;
             // "codeCompletionJudgeResponseContent" or "programmingJudgeResponseContent"
-            codeCompletionJudgeResponseContent: JudgeResponseContent;
-            programmingJudgeResponseContent: JudgeResponseContent;
+            codeCompletionJudgeResponseContent?: JudgeResponseContent;
+            programmingJudgeResponseContent?: JudgeResponseContent;
             problemSetProblemId: string;
         }];
         hints: any;

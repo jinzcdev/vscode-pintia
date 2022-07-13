@@ -4,8 +4,8 @@ export async function httpGet(url: string, cookie: string = ''): Promise<any> {
     return await fetch(url, {
         method: "GET",
         headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
+            'Accept': 'application/json;charset=UTF-8',
+            'Content-Type': 'application/json;charset=UTF-8',
             'Accept-Language': 'zh-CN',
             'Cookie': cookie
         }
@@ -18,8 +18,8 @@ export async function httpPost(url: string, cookie: string = '', body?: any): Pr
     return await fetch(url, {
         method: "POST",
         headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
+            'Accept': 'application/json;charset=UTF-8',
+            'Content-Type': 'application/json;charset=UTF-8',
             'Accept-Language': 'zh-CN',
             'Cookie': cookie
         },
@@ -28,15 +28,3 @@ export async function httpPost(url: string, cookie: string = '', body?: any): Pr
         .then(response => response.json())
         .catch(reason => console.log(reason));  
 }
-
-// async function http(url:string, method: string, cookie: string = '', body: any): Promise<any> {
-//     return fetch(url, {
-//         method: "POST",
-//         headers: {
-//             'Accept': 'application/json',
-//             'Content-Type': 'application/json',
-//             'Cookie': cookie
-//         },
-//         body: JSON.stringify(body)
-//     })
-// }

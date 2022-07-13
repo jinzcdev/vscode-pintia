@@ -89,6 +89,7 @@ export const defaultPtaNode: IPtaNode = {
     tag: [] as string[]
 };
 
+export type CallBack<T> = (msg: string, data?: T) => void;
 
 export const solutionStatusMapping: Map<string, string> = new Map([
     ["OVERRIDDEN", "<td>已被覆盖</td>"],
@@ -501,8 +502,3 @@ export const ptaCompiler = {
     }
 }
 
-function fun(data: any) {
-    console.log(data["SQL"]);
-}
-
-fun(ptaCompiler)
