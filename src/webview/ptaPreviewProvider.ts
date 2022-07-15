@@ -11,7 +11,7 @@ class PtaPreviewProvider extends PtaWebview {
         const problem: IProblem = await ptaApi.getProblem(node.psID, node.pID);
         const problemInfo = node.value.problemInfo;
         this.data = {
-            title: "PTA: " + problem.label,
+            title: problem.label,
             content: this.getContent(Object.assign({}, problemInfo, {
                 label: problem.label,
                 title: problem.title,
@@ -222,12 +222,3 @@ interface IWebViewMessage {
     type: string; // 'command' or 'text'
     value: string; // the value of `type`
 }
-
-
-// import MarkdownIt = require('markdown-it');
-
-
-// import QRCode = require('qrcode')
-
-// import QRCode from 'qrcode'
-// let graphics = await QRCode.toString('somedata', {type: 'svg', margin: 0})   
