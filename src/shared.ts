@@ -112,6 +112,13 @@ export const solutionStatusMapping: Map<string, string> = new Map([
 ]);
 
 
+export enum DescriptionConfiguration {
+    InWebView = "In Webview",
+    InFileComment = "In File Comment",
+    Both = "Both",
+    None = "None",
+}
+
 export const ptaCompiler = {
     // [key: string]: boolean;
     NO_COMPILER: {
