@@ -9,11 +9,17 @@
             "programmingSubmissionDetail": {
                 "compiler": "GXX",
                 "program": "#include <bits/stdc++.h>\nusing namespace std;\nint main() {\n    int n, ans;\n    cin >> n;\n    vector<int> v(n), dp(n);\n    for (int i = 0; i < n; i++) scanf(\"%d\", &v[i]);\n    ans = dp[0] = v[0];\n    for (int i = 1; i < n; i++) {\n        dp[i] = max(dp[i - 1] + v[i], v[i]);\n        ans = max(ans, dp[i]);\n    }\n    cout << ans;\n    return 0;\n}"
+            },
+            "customTestData?": {
+                "hasCustomTestData": true,
+                "content": "100311\n"
             }
         }
     ],
     "problemType": "PROGRAMMING"
 }
+
+
 
 // response
 {

@@ -78,17 +78,18 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode> {
                         })
                     })),
                 ];
-            } else {
-                const total: number = value.summaries[ProblemType.PROGRAMMING].total;
-                // only "PROGRAMMING", return problem list
-                if (!this.isPaged || total < limit) {
-                    // 1-200, 201-400
-                    return explorerNodeManager.getProblemNodes(element.psID, ProblemType.PROGRAMMING);
-                } else {
-                    return explorerNodeManager.getProblemSetPageNodes(element.psID, ProblemType.PROGRAMMING, total, limit);
-                }
             }
-        } else if (element.type === PtaNodeType.ProblemSubSet) {
+            const total: number = value.summaries[ProblemType.PROGRAMMING].total;
+            // only "PROGRAMMING", return problem list
+            if (!this.isPaged || total < limit) {
+                // 1-200, 201-400
+                return explorerNodeManager.getProblemNodes(element.psID, ProblemType.PROGRAMMING);
+            } else {
+                return explorerNodeManager.getProblemSetPageNodes(element.psID, ProblemType.PROGRAMMING, total, limit);
+            }
+        }
+
+        if (element.type === PtaNodeType.ProblemSubSet) {
             const total: number = value.summaries[value.problemType].total;
             // node.type === PtaNodeType.ProblemType
             if (!this.isPaged || total < limit) {
@@ -96,12 +97,15 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode> {
             } else {
                 return explorerNodeManager.getProblemSetPageNodes(element.psID, value.problemType, total, limit);
             }
-        } else if (element.type === PtaNodeType.ProblemPage) {
+        }
+
+        if (element.type === PtaNodeType.ProblemPage) {
             // return explorerNodeManager.getProblemNodes(element.psID, )
             return explorerNodeManager.getProblemNodes(element.psID, value.problemType, value.page, limit);
-        } else {
-            return null;
         }
+
+        return null;
+
     }
 
     public refresh() {

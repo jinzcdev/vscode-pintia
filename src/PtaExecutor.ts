@@ -4,17 +4,18 @@ import { IProblemSubmission } from "./entity/ProblemSubmission";
 import { IProblemSubmissionResult } from "./entity/ProblemSubmissionResult";
 import { ptaApi } from "./utils/api";
 import * as fs from "fs-extra";
-import { CallBack, configPath, ProblemType, PtaLoginMethod } from "./shared";
+import { CallBack, configPath, ProblemType, ptaCompiler, PtaLoginMethod } from "./shared";
 import * as path from "path";
 import { IUserSession, IWechatAuth, AuthStatus, IWechatUserState, IWechatUserInfo } from "./entity/userLoginSession";
 import { ptaLoginProvider } from "./webview/ptaLoginProvider";
 import { EventEmitter } from "events";
 import { ptaManager } from "./PtaManager";
+import { IProblemSubmissionDetail } from "./entity/ProblemSubmissionCode";
 
 
 class PtaExecutor extends EventEmitter implements Disposable {
 
-    public async submitSolution(psID: string, pID: string, problemType: ProblemType, solution: { compiler: string, code: string }, callback: CallBack<IProblemSubmissionResult>): Promise<void> {
+    public async submitSolution(psID: string, pID: string, problemType: ProblemType, solution: { compiler: string, code: string, testCode?: string }, callback: CallBack<IProblemSubmissionResult>): Promise<void> {
 
         const userSession: IUserSession | undefined = ptaManager.getUserSession();
         if (!userSession) {
@@ -22,33 +23,34 @@ class PtaExecutor extends EventEmitter implements Disposable {
             return;
         }
         const cookie = userSession.cookie;
-        const compiler = solution.compiler;
+        let istest: boolean = false;
+
+        const detail: IProblemSubmissionDetail = {
+            problemId: "0",
+            problemSetProblemId: pID
+        };
+        detail[problemType === ProblemType.PROGRAMMING ? "programmingSubmissionDetail" : "codeCompletionSubmissionDetail"] = {
+            compiler: solution.compiler,
+            program: solution.code
+        };
+        if (solution.testCode) {
+            detail.customTestData = {
+                hasCustomTestData: true,
+                content: solution.testCode
+            }
+            istest = true;
+        }
+        
         const submission: IProblemSubmission = await ptaApi.getProblemSetExam(psID, cookie)
             .then(exam => exam.id)
             .then(id => ptaApi.submitSolution(id, cookie, {
-                details: [
-                    problemType === ProblemType.PROGRAMMING ? {
-                        problemId: "0",
-                        problemSetProblemId: pID,
-                        programmingSubmissionDetail: {
-                            compiler: compiler,
-                            program: solution.code
-                        }
-                    } : {
-                        problemId: "0",
-                        problemSetProblemId: pID,
-                        codeCompletionSubmissionDetail: {
-                            compiler: compiler,
-                            program: solution.code
-                        }
-                    }
-                ],
+                details: [detail],
                 problemType: problemType
-            }))
+            }));
 
         let data: IProblemSubmissionResult;
         let interval = setInterval(async () => {
-            data = await ptaApi.getProblemSubmissionResult(submission.submissionId, cookie);
+            data = await ptaApi.getProblemSubmissionResult(submission.submissionId, istest, cookie);
             console.log(`Waiting for ${data.queued} users`);
             if (data.queued === -1) {
                 clearInterval(interval);

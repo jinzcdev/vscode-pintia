@@ -63,7 +63,7 @@ class PtaConfig {
 
 
     public getEditorShortcuts(): string[] {
-        return this.get<string[]>("editorShortcuts", []);
+        return this.get<string[]>("editor.shortcuts", []);
     }
 
     public setEditorShortcuts(editorShortcuts: string[]) {

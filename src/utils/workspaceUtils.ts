@@ -56,7 +56,7 @@ export async function selectWorkspaceFolder(): Promise<string> {
     return workspaceFolderSetting;
 }
 
-/*
+
 
 export async function getActiveFilePath(uri?: vscode.Uri): Promise<string | undefined> {
     let textEditor: vscode.TextEditor | undefined;
@@ -73,10 +73,10 @@ export async function getActiveFilePath(uri?: vscode.Uri): Promise<string | unde
         vscode.window.showWarningMessage("Please save the solution file first.");
         return undefined;
     }
-    // return wsl.useWsl() ? wsl.toWslPath(textEditor.document.uri.fsPath) : textEditor.document.uri.fsPath;
-    // return to do
+    return textEditor.document.uri.fsPath;
 }
 
+/*
 function isSubFolder(from: string, to: string): boolean {
     const relative: string = path.relative(from, to);
     if (relative === "") {

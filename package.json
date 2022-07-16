@@ -141,8 +141,357 @@
                 "title": "Check In PTA",
                 "category": "PTA"
             }
-        ]
+        ],
+        "configuration": {
+            "title": "Pintia",
+            "properties": {
+                "pintia.workspaceFolder": {
+                    "type": "string",
+                    "scope": "application",
+                    "description": "The path of the workspace folder to store the problem files.",
+                    "default": ""
+                },
+                "pintia.hideSolved": {
+                    "type": "boolean",
+                    "default": false,
+                    "scope": "application",
+                    "description": "Hide solved problems."
+                },
+                "pintia.showLocked": {
+                    "type": "boolean",
+                    "default": false,
+                    "scope": "application",
+                    "description": "Show locked problems."
+                },
+                "pintia.defaultLanguage": {
+                    "type": "string",
+                    "enum": [
+                        "bash",
+                        "c",
+                        "cpp",
+                        "csharp",
+                        "golang",
+                        "java",
+                        "javascript",
+                        "kotlin",
+                        "mysql",
+                        "php",
+                        "python",
+                        "python3",
+                        "ruby",
+                        "rust",
+                        "scala",
+                        "swift",
+                        "typescript"
+                    ],
+                    "scope": "application",
+                    "description": "Default language for solving the problems."
+                },
+                "pintia.showDescription": {
+                    "type": "string",
+                    "default": "In Webview",
+                    "enum": [
+                        "In Webview",
+                        "In File Comment",
+                        "Both",
+                        "None"
+                    ],
+                    "enumDescriptions": [
+                        "Show the problem description in a new webview window",
+                        "Show the problem description in the file's comment"
+                    ],
+                    "scope": "application",
+                    "description": "Specify where to show the description."
+                },
+                "pintia.hint.setDefaultLanguage": {
+                    "type": "boolean",
+                    "default": true,
+                    "scope": "application",
+                    "description": "Show a hint to set the default language."
+                },
+                "pintia.enableStatusBar": {
+                    "type": "boolean",
+                    "default": true,
+                    "scope": "application",
+                    "description": "Show the pintia status bar or not."
+                },
+                "pintia.editor.shortcuts": {
+                    "type": "array",
+                    "default": [
+                        "submit",
+                        "test"
+                    ],
+                    "scope": "application",
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "submit",
+                            "test",
+                            "star",
+                            "solution",
+                            "description"
+                        ],
+                        "enumDescriptions": [
+                            "Submit your answer to pintia.",
+                            "Test your answer with customized test cases.",
+                            "Star or unstar the current problem.",
+                            "Show the top voted solution for the current problem.",
+                            "Show the problem description page."
+                        ]
+                    },
+                    "description": "Customize the shortcuts in editors."
+                },
+                "pintia.hint.commentDescription": {
+                    "type": "boolean",
+                    "default": true,
+                    "scope": "application",
+                    "description": "Show a hint to enable comment description in solution code file."
+                },
+                "pintia.filePath": {
+                    "type": "object",
+                    "scope": "application",
+                    "description": "The output folder and filename to save the problem files.",
+                    "properties": {
+                        "default": {
+                            "type": "object",
+                            "properties": {
+                                "folder": {
+                                    "type": "string",
+                                    "examples": [
+                                        "src"
+                                    ]
+                                },
+                                "filename": {
+                                    "type": "string",
+                                    "examples": [
+                                        "${camelCaseName}.${ext}",
+                                        "${PascalCaseName}.${ext}",
+                                        "${id}-${kebab-case-name}.${ext}",
+                                        "${id}_${snake_case_name}.${ext}"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "folder",
+                                "filename"
+                            ]
+                        },
+                        "bash": {
+                            "type": "object",
+                            "properties": {
+                                "folder": {
+                                    "type": "string"
+                                },
+                                "filename": {
+                                    "type": "string"
+                                }
+                            },
+                            "minProperties": 1
+                        },
+                        "c": {
+                            "type": "object",
+                            "properties": {
+                                "folder": {
+                                    "type": "string"
+                                },
+                                "filename": {
+                                    "type": "string"
+                                }
+                            },
+                            "minProperties": 1
+                        },
+                        "cpp": {
+                            "type": "object",
+                            "properties": {
+                                "folder": {
+                                    "type": "string"
+                                },
+                                "filename": {
+                                    "type": "string"
+                                }
+                            },
+                            "minProperties": 1
+                        },
+                        "csharp": {
+                            "type": "object",
+                            "properties": {
+                                "folder": {
+                                    "type": "string"
+                                },
+                                "filename": {
+                                    "type": "string"
+                                }
+                            },
+                            "minProperties": 1
+                        },
+                        "golang": {
+                            "type": "object",
+                            "properties": {
+                                "folder": {
+                                    "type": "string"
+                                },
+                                "filename": {
+                                    "type": "string"
+                                }
+                            },
+                            "minProperties": 1
+                        },
+                        "java": {
+                            "type": "object",
+                            "properties": {
+                                "folder": {
+                                    "type": "string"
+                                },
+                                "filename": {
+                                    "type": "string"
+                                }
+                            },
+                            "minProperties": 1
+                        },
+                        "javascript": {
+                            "type": "object",
+                            "properties": {
+                                "folder": {
+                                    "type": "string"
+                                },
+                                "filename": {
+                                    "type": "string"
+                                }
+                            },
+                            "minProperties": 1
+                        },
+                        "kotlin": {
+                            "type": "object",
+                            "properties": {
+                                "folder": {
+                                    "type": "string"
+                                },
+                                "filename": {
+                                    "type": "string"
+                                }
+                            },
+                            "minProperties": 1
+                        },
+                        "mysql": {
+                            "type": "object",
+                            "properties": {
+                                "folder": {
+                                    "type": "string"
+                                },
+                                "filename": {
+                                    "type": "string"
+                                }
+                            },
+                            "minProperties": 1
+                        },
+                        "php": {
+                            "type": "object",
+                            "properties": {
+                                "folder": {
+                                    "type": "string"
+                                },
+                                "filename": {
+                                    "type": "string"
+                                }
+                            },
+                            "minProperties": 1
+                        },
+                        "python": {
+                            "type": "object",
+                            "properties": {
+                                "folder": {
+                                    "type": "string"
+                                },
+                                "filename": {
+                                    "type": "string"
+                                }
+                            },
+                            "minProperties": 1
+                        },
+                        "python3": {
+                            "type": "object",
+                            "properties": {
+                                "folder": {
+                                    "type": "string"
+                                },
+                                "filename": {
+                                    "type": "string"
+                                }
+                            },
+                            "minProperties": 1
+                        },
+                        "ruby": {
+                            "type": "object",
+                            "properties": {
+                                "folder": {
+                                    "type": "string"
+                                },
+                                "filename": {
+                                    "type": "string"
+                                }
+                            },
+                            "minProperties": 1
+                        },
+                        "rust": {
+                            "type": "object",
+                            "properties": {
+                                "folder": {
+                                    "type": "string"
+                                },
+                                "filename": {
+                                    "type": "string"
+                                }
+                            },
+                            "minProperties": 1
+                        },
+                        "scala": {
+                            "type": "object",
+                            "properties": {
+                                "folder": {
+                                    "type": "string"
+                                },
+                                "filename": {
+                                    "type": "string"
+                                }
+                            },
+                            "minProperties": 1
+                        },
+                        "swift": {
+                            "type": "object",
+                            "properties": {
+                                "folder": {
+                                    "type": "string"
+                                },
+                                "filename": {
+                                    "type": "string"
+                                }
+                            },
+                            "minProperties": 1
+                        }
+                    },
+                    "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                            "folder": {
+                                "type": "string"
+                            },
+                            "filename": {
+                                "type": "string"
+                            }
+                        },
+                        "minProperties": 1
+                    },
+                    "default": {
+                        "default": {
+                            "folder": "",
+                            "filename": "${id}.${kebab-case-name}.${ext}"
+                        }
+                    }
+                }
+            }
+        }
     },
+    
     "scripts": {
         "vscode:prepublish": "npm run compile",
         "compile": "tsc -p ./",

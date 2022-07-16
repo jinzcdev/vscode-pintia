@@ -4,8 +4,8 @@ export interface IProblem {
     label: string;
     score: number;
     problemConfig: {
-        programmingProblemConfig: ProblemConfig;
-        codeCompletionProblemConfig: ProblemConfig;
+        programmingProblemConfig?: ProblemConfig;
+        codeCompletionProblemConfig?: ProblemConfig;
         solutionVisible: boolean;
     };
     deadline: string;

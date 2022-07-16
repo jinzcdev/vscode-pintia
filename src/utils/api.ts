@@ -183,13 +183,15 @@ class PtaAPI {
     /**
      * 
      * https://pintia.cn/api/submissions/{submissionID}
+     * https://pintia.cn/api/submissions/{submissionId}?custom_test_data_submission=true
+     * 
      * 
      * @param submissionID 
      * @param cookie 
      * @returns 
      */
-    public async getProblemSubmissionResult(submissionID: string, cookie: string): Promise<IProblemSubmissionResult> {
-        return await httpGet(this.submissionUrl + submissionID, cookie);
+    public async getProblemSubmissionResult(submissionID: string, customTest: boolean, cookie: string): Promise<IProblemSubmissionResult> {
+        return await httpGet(`https://pintia.cn/api/submissions/${submissionID}${customTest ? "?custom_test_data_submission=true" : ""}`, cookie);
     }
 
     // https://passport.pintia.cn/api/oauth/wechat/official-account/auth-url
