@@ -1,7 +1,6 @@
-import { PtaWebview } from "./PtaWebview";
-import * as vscode from 'vscode';
 import * as QRCode from 'qrcode';
-// import {QRCode} from "qrcode";
+import { PtaWebview } from "./PtaWebview";
+
 
 class PtaLoginProvider extends PtaWebview {
 
@@ -51,7 +50,7 @@ class PtaLoginProvider extends PtaWebview {
     protected getContent(data?: any): string {
         return `
             <div class="banner">
-                <h1>请使用微信扫码此二维码</p>
+                <h1>请使用微信扫码此二维码或<a href="https://pintia.cn/home/bindings">点此</a>绑定</p>
                 <img class="qrcode"
                 src="${data.qrcodeBase64}">
             </div>

@@ -8,12 +8,12 @@ class PtaSubmissionProvider extends PtaWebview {
     public async showSubmission(result: IProblemSubmissionResult) {
         const submissionDetail: IProblemSubmissionDetail = result.submission.submissionDetails[0];
         const judgeResponseContent = result.submission.judgeResponseContents[0];
-        const codeJudgeResponseContent = ProblemType.PROGRAMMING ? judgeResponseContent.programmingJudgeResponseContent
-            : judgeResponseContent.codeCompletionJudgeResponseContent;
+        const codeJudgeResponseContent = judgeResponseContent.programmingJudgeResponseContent ??
+            judgeResponseContent.codeCompletionJudgeResponseContent;
         const testcaseJudgeResults = codeJudgeResponseContent!.testcaseJudgeResults;
 
         this.data = {
-            title: "PTA: Submission",
+            title: "Submission",
             style: this.getStyle({ isHint: Object.keys(result.submission.hints).length > 0 }),
             content: this.getContent({
                 submitAt: result.submission.submitAt,

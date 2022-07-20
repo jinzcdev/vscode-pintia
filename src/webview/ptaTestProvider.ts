@@ -1,33 +1,39 @@
-import { PtaWebview } from "./PtaWebview";
 import { IProblemSubmissionResult } from "../entity/ProblemSubmissionResult";
-import { ProblemType, solutionStatusMapping, ptaCompiler } from "../shared";
-import { IProblemSubmissionDetail } from "../entity/ProblemSubmissionCode";
-import { markdown } from "./markdownEngine";
+import { ptaChannel } from "../ptaChannel";
+import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
+import { markdownEngine } from "./markdownEngine";
+import { PtaWebview } from "./PtaWebview";
+
 
 class PtaTestProvider extends PtaWebview {
 
     public async showTestResult(result: IProblemSubmissionResult, answer?: string) {
-        const judgeResponseContent = result.submission.judgeResponseContents[0];
-        const codeJudgeResponseContent = ProblemType.PROGRAMMING ? judgeResponseContent.programmingJudgeResponseContent
-            : judgeResponseContent.codeCompletionJudgeResponseContent;
-        const testcaseJudgeResults = codeJudgeResponseContent!.testcaseJudgeResults;
+        try {
+            const judgeResponseContent = result.submission.judgeResponseContents[0];
+            const codeJudgeResponseContent = judgeResponseContent.programmingJudgeResponseContent
+                ?? judgeResponseContent.codeCompletionJudgeResponseContent;
+            const testcaseJudgeResults = codeJudgeResponseContent!.testcaseJudgeResults;
 
-        this.data = {
-            title: "PTA: Test",
-            style: this.getStyle(),
-            content: this.getContent({
-                testCase: result.submission.submissionDetails[0].customTestData?.content,
-                answer: answer ? answer : "",
-                myanswer: testcaseJudgeResults.custom.stdout,
-                problemType: result.submission.problemType,
-                compiler: result.submission.compiler,
-                time: result.submission.time,
-                memory: result.submission.memory,
-                compilationOutput: codeJudgeResponseContent!.compilationResult.log
-            })
-        };
+            this.data = {
+                title: "Test",
+                style: this.getStyle(),
+                content: this.getContent({
+                    testCase: result.submission.submissionDetails[0].customTestData?.content,
+                    answer: answer ? answer : "",
+                    myanswer: judgeResponseContent.status === "COMPILE_ERROR" ? "COMPILE_ERROR" : testcaseJudgeResults?.custom.stdout ?? "",
+                    problemType: result.submission.problemType,
+                    compiler: result.submission.compiler,
+                    time: result.submission.time,
+                    memory: result.submission.memory,
+                    compilationOutput: codeJudgeResponseContent!.compilationResult.log
+                })
+            };
 
-        this.show()
+            this.show()
+        } catch (error: any) {
+            ptaChannel.appendLine(error.toString());
+            await promptForOpenOutputChannel("Failed to test!", DialogType.error);
+        }
     }
 
     protected getStyle(data?: any): string {
@@ -46,6 +52,7 @@ class PtaTestProvider extends PtaWebview {
                     width: 90%;
                     margin: 0 auto;
                     font-size: 15px;
+                    line-height: 1.5;
                 }
 
                 h2 {
@@ -57,11 +64,11 @@ class PtaTestProvider extends PtaWebview {
                 }
 
                 table {
-                    width: 95%;
+                    width: 75%;
                     margin: 0 auto;
                     border-collapse: collapse;
                     text-align: center;
-                    font-size: 14px;
+                    font-size: 15px;
                 }
 
                 thead {
@@ -73,17 +80,41 @@ class PtaTestProvider extends PtaWebview {
                     border-bottom: 0.8px solid var(--border-color)
                 }
 
+                .code-preview {
+                    width: 100%;
+                    border: 0.5px solid var(--border-color);
+                    margin-top: 15px;
+                    padding: 12px;
+                    font-size: 16px;
+                }
+
+                pre, code {
+                    margin: 0;
+                    padding: 0;
+                }
+
+                code {
+                    color: var(--vscode-editor-color)
+                    max-height: 250px;
+                    overflow: scroll;
+                    display: block;
+                }
             </style>`;
     }
 
     protected getContent(data?: any): string {
         return `
             <h2>测试结果</h2>
-            ${markdown.render([
-                `| 测试用例 | 运行结果 | 预期结果 |`,
-                `| :-: | :-: | :-: |`,
-                `| ${data.testCase.replaceAll(/\n/g, "<br>")} | ${data.answer.replaceAll(/\n/g, "<br>")} | ${data.myanswer.replaceAll(/\n/g, "<br>")} |`
-            ].join("\n"))}
+            ${markdownEngine.render([
+            `| 测试用例 | 运行结果 | 预期结果 |`,
+            `| :-: | :-: | :-: |`,
+            `| ${data.testCase.replaceAll(/\n/g, "<br>")} | ${data.myanswer.replaceAll(/\n/g, "<br>")} | ${data.answer.replaceAll(/\n/g, "<br>")} |`
+        ].join("\n"))}
+
+            <h2>编译器输出</h2>
+            <div class="code-preview">
+                <pre><code>${data.compilationOutput}</code></pre>
+            </div>
         `;
     }
 

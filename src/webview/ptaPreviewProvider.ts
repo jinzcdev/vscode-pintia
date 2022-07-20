@@ -1,15 +1,22 @@
 
+import * as vscode from "vscode";
 import { IProblem } from '../entity/Problem';
+import { IProblemInfo } from '../entity/ProblemInfo';
 import { PtaNode } from '../explorer/PtaNode';
+import { ptaConfig } from '../ptaConfig';
+import { IPtaCode, langCompilerMapping } from '../shared';
 import { ptaApi } from '../utils/api';
-import { markdown } from './markdownEngine';
+import { markdownEngine } from './markdownEngine';
 import { PtaWebview } from './PtaWebview';
 
 class PtaPreviewProvider extends PtaWebview {
 
+    private ptaCode?: IPtaCode;
     public async showPreview(node: PtaNode) {
         const problem: IProblem = await ptaApi.getProblem(node.psID, node.pID);
-        const problemInfo = node.value.problemInfo;
+        const problemInfo: IProblemInfo = node.value.problemInfo!;
+        const compiler: string = langCompilerMapping.get(ptaConfig.getDefaultLanguage()) ?? "GXX";
+        this.ptaCode = { psID: problem.problemSetId, psName: node.value.problemSet, pID: problem.id, problemType: node.value.problemType, compiler: compiler, title: problem.label + " " + problem.title };
         this.data = {
             title: problem.label,
             content: this.getContent(Object.assign({}, problemInfo, {
@@ -170,7 +177,7 @@ class PtaPreviewProvider extends PtaWebview {
         return `
             <div class="banner" >
                 <div class="banner-header">
-                    ${markdown.render(`# [${data.title}](https://pintia.cn/problem-sets/${data.problemSetId}/problems/${data.id})`)}
+                    ${markdownEngine.render(`# [${data.title}](https://pintia.cn/problem-sets/${data.problemSetId}/problems/${data.id})`)}
                 </div>
                 <div class="ques-info">
                     <div class="detail">分数 ${data.score} &nbsp; 提交人数 ${data.submitCount} &nbsp; 通过人数 ${data.acceptCount} &nbsp; 通过率 ${data.submitCount === 0 ? 0 : (data.acceptCount / data.submitCount * 100).toFixed(2)}%</div>
@@ -179,7 +186,7 @@ class PtaPreviewProvider extends PtaWebview {
                 <hr class="banner-line"></hr>
             </div>
 
-            ${markdown.render(this.fotmatMarkdown(data.content)).replace(/<pre>/g, "<pre onclick='copyCode(this)'>")}
+            ${markdownEngine.render(this.fotmatMarkdown(data.content)).replace(/<pre>/g, "<pre onclick='copyCode(this)'>")}
 
             <button id="solve">Code Now</button>
 
@@ -189,14 +196,17 @@ class PtaPreviewProvider extends PtaWebview {
                 button.onclick = () => {
                     vscode.postMessage({
                         type: 'command',
-                        value: 'ShowProblem'
+                        value: 'pintia.codeProblem'
                     });
                 };
 
                 function copyCode(event) {
                     var content = event.innerText;
                     navigator.clipboard.writeText(content).then(() => {
-                        console.log("Copied!");
+                        vscode.postMessage({
+                            type: 'text',
+                            value: 'Successfully copied to the clipboard!'
+                        });
                     });
                 }
             </script>
@@ -204,14 +214,14 @@ class PtaPreviewProvider extends PtaWebview {
     }
 
     protected async onDidReceiveMessage(msg: IWebViewMessage): Promise<void> {
-        if (msg.type === 'command') {
-            // execute commands
-            // await vscode.commands.executeCommand(msg.value);
-            console.log(msg.value);
-        } else {
-            navigator.clipboard.writeText(msg.value).then(() => {
-                console.log("Copied!");
-            });
+        switch (msg.type) {
+            case "command":
+                await vscode.commands.executeCommand(msg.value, this.ptaCode);
+                break;
+            case "text":
+                vscode.window.showInformationMessage(msg.value);
+                break;
+            default:
         }
     }
 }

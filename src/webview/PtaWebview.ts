@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
 import { Disposable } from "vscode";
-import { IProblem } from "../entity/Problem";
 
 export abstract class PtaWebview implements Disposable {
 
     protected currentPanel: vscode.WebviewPanel | undefined = undefined;
     protected data: { title: string, style: string, content: string } = { title: "", style: "", content: "" };
     private listeners: Disposable[] = [];
+    private callback?: (data?: any) => void;
 
     protected abstract getStyle(data?: any): string;
     protected abstract getContent(data?: any): string;
@@ -22,7 +22,7 @@ export abstract class PtaWebview implements Disposable {
         } else {
             this.currentPanel = vscode.window.createWebviewPanel(
                 'PTA',
-                this.data.title,
+                `PTA: ${this.data.title}`,
                 vscode.ViewColumn.One,
                 {
                     enableScripts: true
@@ -51,6 +51,10 @@ export abstract class PtaWebview implements Disposable {
         `;
     }
 
+    public onDidDisposeCallBack(callback: ((data?: any) => void) | undefined) {
+        this.callback = callback;
+    }
+
     public dispose() {
         if (this.currentPanel) {
             this.currentPanel.dispose();
@@ -63,6 +67,9 @@ export abstract class PtaWebview implements Disposable {
             listener.dispose();
         }
         this.listeners = [];
+        if (this.callback) {
+            this.callback();
+        }
     }
 
     protected async onDidReceiveMessage(_msg: any): Promise<void> { }
