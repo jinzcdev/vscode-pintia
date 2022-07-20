@@ -1,9 +1,11 @@
-import { IQuickPickItem, UserStatus } from "../shared";
 import * as vscode from "vscode";
-import { IUserSession } from "../entity/userLoginSession";
-import { ptaApi } from "../utils/api";
-import { ptaManager } from "../PtaManager";
 import { ICheckIn } from "../entity/ICheckIn";
+import { IUserSession } from "../entity/userLoginSession";
+import { ptaManager } from "../PtaManager";
+import { IQuickPickItem } from "../shared";
+import { ptaApi } from "../utils/api";
+import { openUrl } from "../utils/uiUtils";
+
 
 export async function showUserManager(): Promise<void> {
     const userSession: IUserSession | undefined = ptaManager.getUserSession();
@@ -11,29 +13,29 @@ export async function showUserManager(): Promise<void> {
     if (userSession) {
         picks.push(
             {
-                label: "Home",
-                detail: "Open user home in browser",
+                label: "$(home) Home",
+                detail: "Open the user's home in browser",
                 value: "HOME"
             },
             {
-                label: "Check In",
+                label: "$(log-in) Check In",
                 detail: "Check in the education store of PTA",
                 value: "CHECKIN"
             },
             {
-                label: "Sign Out",
+                label: "$(log-out) Sign Out",
                 detail: "Sign out your account",
                 value: "SIGNOUT"
             });
     } else {
         picks.push(
             {
-                label: "Sign In",
+                label: "$(log-in) Sign In",
                 detail: "Sign in your PTA account",
                 value: "SIGNIN"
             },
             {
-                label: "Register",
+                label: "$(person-add) Register",
                 detail: "Register a new account",
                 value: "REGISTER"
             });
@@ -61,4 +63,8 @@ export async function checkInPTA(): Promise<void> {
             vscode.window.showInformationMessage(response.error.message);
         }
     }
+}
+
+export async function openPintiaHome(): Promise<void> {
+    openUrl("https://pintia.cn/problem-sets/dashboard");
 }

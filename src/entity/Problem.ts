@@ -1,4 +1,4 @@
-
+// https://pintia.cn/api/problem-sets/{problemSetID}/problems/{problemID}
 export interface IProblem {
     id: string;
     label: string;
@@ -25,7 +25,7 @@ export interface IProblem {
         subdomain: string;
         logo: string;
     };
-    compiler: string;
+    compiler: string;   // compiler to be allowed to use in this problem.
     problemStatus: string;
     lastSubmissionId: string;
     solution: string;
@@ -34,6 +34,19 @@ export interface IProblem {
     description: string;
     problemPoolIndex: number;
     indexInProblemPool: number;
+
+    lastSubmissionDetail?: {
+        problemSetProblemId: string; // "0" denotes no submission.
+        programmingSubmissionDetail?: {
+            compiler: string;
+            program: string;
+        };
+        codeCompletionSubmissionDetail?: {
+            compiler: string;
+            program: string;
+        };
+        problemId: string;
+    },
 }
 
 
