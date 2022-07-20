@@ -15,14 +15,14 @@ class PtaConfig {
     }
 
     public getWorkspaceFolder(): string {
-        return this.get<string>("workspaceFolder", "");
+        return this.getConfiguration().get<string>("workspaceFolder", "");
     }
 
     public setWorkspaceFolder(workspaceFolder: string) {
         this.update("workspaceFolder", workspaceFolder);
     }
     public getHideSolved(): boolean {
-        return this.get<boolean>("hideSolved", false);
+        return this.getConfiguration().get<boolean>("hideSolved", false);
     }
 
     public setHideSolved(hideSolved: boolean) {
@@ -30,7 +30,7 @@ class PtaConfig {
     }
 
     public getShowLocked(): boolean {
-        return this.get<boolean>("showLocked", true);
+        return this.getConfiguration().get<boolean>("showLocked", true);
     }
 
     public setShowLocked(showLocked: boolean) {
@@ -38,7 +38,7 @@ class PtaConfig {
     }
 
     public getDefaultLanguage(): string {
-        return this.get<string>("defaultLanguage", "");
+        return this.getConfiguration().get<string>("defaultLanguage", "");
     }
 
     public setDefaultLanguage(defaultLanguage: string) {
@@ -46,7 +46,7 @@ class PtaConfig {
     }
 
     public getEnableStatusBar(): boolean {
-        return this.get<boolean>("enableStatusBar", true);
+        return this.getConfiguration().get<boolean>("enableStatusBar", true);
     }
 
     public setEnableStatusBar(enableStatusBar: boolean) {
@@ -54,7 +54,7 @@ class PtaConfig {
     }
 
     public getFilePath(): string {
-        return this.get<string>("filePath", "");
+        return this.getConfiguration().get<string>("filePath", "");
     }
 
     public setFilePath(filePath: string) {
@@ -63,11 +63,19 @@ class PtaConfig {
 
 
     public getEditorShortcuts(): string[] {
-        return this.get<string[]>("editor.shortcuts", []);
+        return this.getConfiguration().get<string[]>("editor.shortcuts", []);
     }
 
     public setEditorShortcuts(editorShortcuts: string[]) {
         this.update("editor.shortcuts", editorShortcuts);
+    }
+
+    public getPageSize(): number {
+        return this.getConfiguration().get<number>("paging.pageSize", 100);
+    }
+
+    public setPageSize(pageSize: number) {
+        this.update("page.pageSize", pageSize);
     }
 }
 

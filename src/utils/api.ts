@@ -1,21 +1,23 @@
-import { IProblemSet } from "../entity/ProblemSet";
-import { IProblemInfo } from "../entity/ProblemInfo";
-import { ProblemType } from "../shared";
-import { httpGet, httpPost } from "./httpUtil";
 import { IProblem } from "../entity/Problem";
-import { IProblemSummary } from "../entity/ProblemSummary";
+import { IProblemInfo } from "../entity/ProblemInfo";
+import { IProblemSet } from "../entity/ProblemSet";
 import { IProblemSetExam } from "../entity/ProblemSetExam";
-import { IProblemCode } from "../entity/ProblemSubmissionCode";
 import { IProblemSubmission } from "../entity/ProblemSubmission";
+import { IProblemCode } from "../entity/ProblemSubmissionCode";
 import { IProblemSubmissionResult } from "../entity/ProblemSubmissionResult";
+import { IProblemSummary } from "../entity/ProblemSummary";
+import { cacheFilePath, ProblemType } from "../shared";
+import { httpGet, httpPost } from "./httpUtil";
 
-import { configPath } from "../shared";
-import { IWechatAuth, IWechatAuthState, IWechatUserInfo, IWechatUserState } from "../entity/userLoginSession";
-import fetch from "node-fetch";
 import * as fs from "fs-extra";
+import fetch from "node-fetch";
 import * as path from "path";
-import { IPtaUser } from "../entity/PtaUser";
 import { ICheckIn } from "../entity/ICheckIn";
+import { IDashSection } from "../entity/IDashSection";
+import { IExamProblemStatus } from "../entity/IExamProblemStatus";
+import { IPtaUser } from "../entity/PtaUser";
+import { IWechatAuth, IWechatAuthState, IWechatUserInfo, IWechatUserState } from "../entity/userLoginSession";
+import { ptaChannel } from "../ptaChannel";
 
 class PtaAPI {
 
@@ -27,31 +29,59 @@ class PtaAPI {
     private readonly wechatAuthState: string = "https://passport.pintia.cn/api/oauth/wechat/official-account/state/";
     private readonly wechatAuthUser: string = "https://passport.pintia.cn/api/oauth/wechat/state/";
 
-    private readonly cachePath: string = path.join(configPath, "cache");
+
+    public async getDashSections(): Promise<IDashSection[]> {
+        const filePath = path.join(cacheFilePath, "dashboard.json");
+        if (await fs.pathExists(filePath)) {
+            ptaChannel.appendLine(`[INFO] Read the cache of dashboard from the "${filePath}"`);
+            return await fs.readJSON(filePath);
+        }
+
+        const sections: IDashSection[] = await httpGet("https://pintia.cn/api/content/dashboard")
+            .then(json => json["content"])
+            .then(content => JSON.parse(content).sections);
+        await fs.createFile(filePath);
+        await fs.writeJSON(filePath, sections);
+        return sections;
+    }
+
+
     /**
      * 
      * https://pintia.cn/api/problem-sets/always-available
      * 
      * @returns 
      */
-    public async getAllProblemSets(): Promise<IProblemSet[]> {
-        const filePath = path.join(this.cachePath, "problemSets.json");
+    public async getAllProblemSets(cookie?: string): Promise<IProblemSet[]> {
+        const filePath = path.join(cacheFilePath, "problemSets.json");
         if (await fs.pathExists(filePath)) {
+            ptaChannel.appendLine(`[INFO] Read the cache of problem sets from the "${filePath}"`);
             return await fs.readJSON(filePath);
         }
 
-        const data = await httpGet(this.problemUrl + "always-available").then(json => json["problemSets"]);
+        const data: IProblemSet[] = await httpGet(this.problemUrl + "always-available").then(json => json["problemSets"]);
         const problemSet: IProblemSet[] = [];
         for (const item of data) {
             const summaries: IProblemSummary = await this.getProblemSummary(item.id);  // id: ProblemSetID
             summaries.numType = Object.keys(summaries).length;
             item.summaries = summaries;
-
+            if (cookie) {
+                const permission: number | undefined = await this.getProblemPermission(item.id, cookie);
+                item.permission = {
+                    permission: permission ?? 0
+                }
+            }
             problemSet.push(item);
         }
         await fs.createFile(filePath);
         await fs.writeJson(filePath, problemSet);
         return problemSet;
+    }
+
+    public async getProblemPermission(psID: string, cookie: string): Promise<number | undefined> {
+        const problemSet: IProblemSet = await httpGet(`https://pintia.cn/api/problem-sets/${psID}/exams`, cookie)
+            .then(json => json["problemSet"]);
+        return problemSet.permission?.permission;
     }
 
     /**
@@ -101,8 +131,9 @@ class PtaAPI {
     }
 
     public async getAllProblemInfoList(psID: string, problemType: ProblemType): Promise<IProblemInfo[]> {
-        const filePath = path.join(this.cachePath, psID, problemType + ".json");
+        const filePath = path.join(cacheFilePath, psID, problemType + ".json");
         if (await fs.pathExists(filePath)) {
+            ptaChannel.appendLine(`[INFO] Read the problem list from the "${filePath}"`);
             return await fs.readJSON(filePath);
         }
 
@@ -141,18 +172,26 @@ class PtaAPI {
      * @param pID 
      * @returns 
      */
-    public async getProblem(psID: string, pID: string): Promise<IProblem> {
-        const filePath = path.join(this.cachePath, psID, pID + ".json");
-        if (await fs.pathExists(filePath)) {
+    public async getProblem(psID: string, pID: string, cookie?: string): Promise<IProblem> {
+        const filePath = path.join(cacheFilePath, psID, pID + ".json");
+        // That cookie is not undefined denotes requirement for submission result, therefore, 
+        // the problem need to be updated.
+        if (!cookie && await fs.pathExists(filePath)) {
+            ptaChannel.appendLine(`[INFO] Read the problem detail from the "${filePath}"`);
             return await fs.readJSON(filePath);
         }
 
-        const data: IProblem = await httpGet(this.problemUrl + `${psID}/problems/${pID}`)
+        const data: IProblem = await httpGet(this.problemUrl + `${psID}/problems/${pID}`, cookie)
             .then(json => json["problemSetProblem"]);
 
         await fs.createFile(filePath);
         await fs.writeJson(filePath, data);
         return data;
+    }
+
+    public async getExamProblemStatus(psID: string, cookie: string): Promise<IExamProblemStatus[] | undefined> {
+        await this.getProblemSetExam(psID, cookie);
+        return await httpGet(`https://pintia.cn/api/problem-sets/${psID}/exam-problem-status`, cookie).then(json => json["problemStatus"]);
     }
 
     /**
@@ -164,8 +203,30 @@ class PtaAPI {
      */
     public async getProblemSetExam(psID: string, cookie: string): Promise<IProblemSetExam> {
         // throw new Error("Getting exam need cookie.");
+        const exam = await httpGet(this.problemUrl + `${psID}/exams`, cookie).then(json => json["exam"]);
+        if (!exam) {
+            await httpPost(this.problemUrl + `${psID}/exams`, cookie);
+        }
         return await httpGet(this.problemUrl + `${psID}/exams`, cookie).then(json => json["exam"]);
     }
+
+    public async getProblemSet(psID: string): Promise<IProblemSet> {
+        const filePath = path.join(cacheFilePath, psID + ".json");
+        if (await fs.pathExists(filePath)) {
+            ptaChannel.appendLine(`[INFO] Read the information of problem set from the "${filePath}"`);
+            return await fs.readJSON(filePath);
+        }
+        const problemSet = await httpGet(this.problemUrl + `${psID}/exams`).then(json => json["problemSet"]);
+        await fs.createFile(filePath);
+        await fs.writeJson(filePath, problemSet);
+        return problemSet;
+    }
+
+    public async getProblemSetCompilers(psID: string): Promise<string[]> {
+        const problemSet: IProblemSet = await this.getProblemSet(psID);
+        return problemSet.problemSetConfig.compilers;
+    }
+
 
     /**
      * 
@@ -190,8 +251,12 @@ class PtaAPI {
      * @param cookie 
      * @returns 
      */
-    public async getProblemSubmissionResult(submissionID: string, customTest: boolean, cookie: string): Promise<IProblemSubmissionResult> {
-        return await httpGet(`https://pintia.cn/api/submissions/${submissionID}${customTest ? "?custom_test_data_submission=true" : ""}`, cookie);
+    public async getProblemSubmissionResult(submissionID: string, cookie: string): Promise<IProblemSubmissionResult> {
+        return await httpGet(`https://pintia.cn/api/submissions/${submissionID}`, cookie);
+    }
+
+    public async getProblemTestResult(submissionID: string, cookie: string): Promise<IProblemSubmissionResult> {
+        return await httpGet(`https://pintia.cn/api/submissions/${submissionID}?custom_test_data_submission=true`, cookie);
     }
 
     // https://passport.pintia.cn/api/oauth/wechat/official-account/auth-url

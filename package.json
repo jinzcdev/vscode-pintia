@@ -14,9 +14,14 @@
         "Snippets"
     ],
     "activationEvents": [
-        "onView:pintiaExplorer",
+        "onCommand:pintia.openPintiaHome",
+        "onCommand:pintia.clearCache",
         "onCommand:pintia.signIn",
-        "onCommand:pintia.signOut"
+        "onCommand:pintia.signOut",
+        "onCommand:pintia.refreshExplorer",
+        "onCommand:pintia.checkIn",
+        "onCommand:pintia.changeDefaultLanguage",
+        "onView:pintiaExplorer"
     ],
     "main": "./out/extension.js",
     "contributes": {
@@ -37,109 +42,63 @@
                 }
             ]
         },
+        "menus": {
+            "view/title": [
+                {
+                    "command": "pintia.openPintiaHome",
+                    "when": "view == pintiaExplorer",
+                    "group": "navigation@0"
+                },
+                {
+                    "command": "pintia.signIn",
+                    "when": "view == pintiaExplorer",
+                    "group": "navigation@1"
+                },
+                {
+                    "command": "pintia.refreshExplorer",
+                    "when": "view == pintiaExplorer",
+                    "group": "navigation@2"
+                }
+            ]
+        },
         "commands": [
             {
-                "command": "pintia.deleteCache",
-                "title": "Delete Cache",
-                "category": "PTA"
+                "command": "pintia.openPintiaHome",
+                "title": "Open PTA Home",
+                "category": "Pintia",
+                "icon": "$(globe)"
             },
             {
-                "command": "pintia.togglePTACn",
-                "title": "Switch Endpoint",
-                "category": "PTA",
-                "icon": "$(globe)"
+                "command": "pintia.clearCache",
+                "title": "Clear Cache",
+                "category": "Pintia"
             },
             {
                 "command": "pintia.signIn",
                 "title": "Sign In",
-                "category": "PTA",
+                "category": "Pintia",
                 "icon": "$(sign-in)"
             },
             {
                 "command": "pintia.signOut",
                 "title": "Sign Out",
-                "category": "PTA"
-            },
-            {
-                "command": "pintia.manageSessions",
-                "title": "Manage Sessions",
-                "category": "PTA"
+                "category": "Pintia"
             },
             {
                 "command": "pintia.refreshExplorer",
                 "title": "Refresh",
-                "category": "PTA",
+                "category": "Pintia",
                 "icon": "$(refresh)"
             },
             {
-                "command": "pintia.pickOne",
-                "title": "Pick One",
-                "category": "PTA"
-            },
-            {
-                "command": "pintia.showProblem",
-                "title": "Show Problem",
-                "category": "PTA"
-            },
-            {
-                "command": "pintia.previewProblem",
-                "title": "Preview Problem",
-                "category": "PTA"
-            },
-            {
-                "command": "pintia.searchProblem",
-                "title": "Search Problem",
-                "category": "PTA",
-                "icon": "$(search)"
-            },
-            {
-                "command": "pintia.showSolution",
-                "title": "Show Top Voted Solution",
-                "category": "PTA"
-            },
-            {
-                "command": "pintia.testSolution",
-                "title": "Test in PTA",
-                "category": "PTA"
-            },
-            {
-                "command": "pintia.submitSolution",
-                "title": "Submit to PTA",
-                "category": "PTA"
-            },
-            {
-                "command": "pintia.addFavorite",
-                "title": "Add to Favorite List",
-                "category": "PTA",
-                "icon": {
-                    "light": "resources/light/like.png",
-                    "dark": "resources/dark/like.png"
-                }
-            },
-            {
-                "command": "pintia.removeFavorite",
-                "title": "Remove from Favorite List",
-                "category": "PTA",
-                "icon": {
-                    "light": "resources/light/dislike.png",
-                    "dark": "resources/dark/dislike.png"
-                }
-            },
-            {
-                "command": "pintia.switchDefaultLanguage",
-                "title": "Switch Default Language",
-                "category": "PTA"
-            },
-            {
-                "command": "pintia.problems.sort",
-                "title": "Sort Problems",
-                "category": "PTA",
-                "icon": "$(sort-precedence)"
+                "command": "pintia.changeDefaultLanguage",
+                "title": "Change Default Language",
+                "category": "Pintia"
             },
             {
                 "command": "pintia.checkIn",
                 "title": "Check In PTA",
-                "category": "PTA"
+                "category": "Pintia"
             }
         ],
         "configuration": {
@@ -151,69 +110,72 @@
                     "description": "The path of the workspace folder to store the problem files.",
                     "default": ""
                 },
-                "pintia.hideSolved": {
-                    "type": "boolean",
-                    "default": false,
+                "pintia.paging.pageSize": {
+                    "type": "number",
+                    "default": 100,
+                    "enum": [
+                        0,
+                        25,
+                        50,
+                        75,
+                        100,
+                        125,
+                        150,
+                        200
+                    ],
                     "scope": "application",
-                    "description": "Hide solved problems."
+                    "description": "Whether to page the problem list when the problem set is too large. It is not paged when pageSize is 0."
                 },
                 "pintia.showLocked": {
                     "type": "boolean",
-                    "default": false,
+                    "default": true,
                     "scope": "application",
                     "description": "Show locked problems."
                 },
                 "pintia.defaultLanguage": {
                     "type": "string",
+                    "default": "C++ (g++)",
                     "enum": [
-                        "bash",
-                        "c",
-                        "cpp",
-                        "csharp",
-                        "golang",
-                        "java",
-                        "javascript",
-                        "kotlin",
-                        "mysql",
-                        "php",
-                        "python",
-                        "python3",
-                        "ruby",
-                        "rust",
-                        "scala",
-                        "swift",
-                        "typescript"
+                        "C (gcc)",
+                        "C++ (g++)",
+                        "C (clang)",
+                        "C++ (clang++)",
+                        "Java (javac)",
+                        "Python (python2)",
+                        "Python (python3)",
+                        "Ruby (ruby)",
+                        "Bash (bash)",
+                        "Plaintext (cat)",
+                        "CommonLisp  (sbcl)",
+                        "Pascal (fpc)",
+                        "Go (go)",
+                        "Haskell (ghc)",
+                        "Lua (lua)",
+                        "Lua (luajit)",
+                        "C# (mcs)",
+                        "JavaScript (node)",
+                        "OCaml (ocamlc)",
+                        "PHP (php)",
+                        "Perl (perl)",
+                        "AWK (awk)",
+                        "D (dmd)",
+                        "Racket (racket)",
+                        "Vala (valac)",
+                        "Visual Basic (vbnc)",
+                        "Kotlin (kotlinc)",
+                        "Swift (swiftc)",
+                        "Objective-C (gcc)",
+                        "Fortran95 (gfortran)",
+                        "Octave (octave-cli)",
+                        "R (R)",
+                        "ASM (nasm.sh)",
+                        "Rust (rustc)",
+                        "Scala (scalac)",
+                        "Python (pypy3)",
+                        "SQL (SQL)"
                     ],
                     "scope": "application",
                     "description": "Default language for solving the problems."
-                },
-                "pintia.showDescription": {
-                    "type": "string",
-                    "default": "In Webview",
-                    "enum": [
-                        "In Webview",
-                        "In File Comment",
-                        "Both",
-                        "None"
-                    ],
-                    "enumDescriptions": [
-                        "Show the problem description in a new webview window",
-                        "Show the problem description in the file's comment"
-                    ],
-                    "scope": "application",
-                    "description": "Specify where to show the description."
-                },
-                "pintia.hint.setDefaultLanguage": {
-                    "type": "boolean",
-                    "default": true,
-                    "scope": "application",
-                    "description": "Show a hint to set the default language."
-                },
-                "pintia.enableStatusBar": {
-                    "type": "boolean",
-                    "default": true,
-                    "scope": "application",
-                    "description": "Show the pintia status bar or not."
                 },
                 "pintia.editor.shortcuts": {
                     "type": "array",
@@ -226,272 +188,60 @@
                         "type": "string",
                         "enum": [
                             "submit",
-                            "test",
-                            "star",
-                            "solution",
-                            "description"
+                            "test"
                         ],
                         "enumDescriptions": [
                             "Submit your answer to pintia.",
-                            "Test your answer with customized test cases.",
-                            "Star or unstar the current problem.",
-                            "Show the top voted solution for the current problem.",
-                            "Show the problem description page."
+                            "Test your answer with customized test cases."
                         ]
                     },
                     "description": "Customize the shortcuts in editors."
-                },
-                "pintia.hint.commentDescription": {
-                    "type": "boolean",
-                    "default": true,
-                    "scope": "application",
-                    "description": "Show a hint to enable comment description in solution code file."
-                },
-                "pintia.filePath": {
-                    "type": "object",
-                    "scope": "application",
-                    "description": "The output folder and filename to save the problem files.",
-                    "properties": {
-                        "default": {
-                            "type": "object",
-                            "properties": {
-                                "folder": {
-                                    "type": "string",
-                                    "examples": [
-                                        "src"
-                                    ]
-                                },
-                                "filename": {
-                                    "type": "string",
-                                    "examples": [
-                                        "${camelCaseName}.${ext}",
-                                        "${PascalCaseName}.${ext}",
-                                        "${id}-${kebab-case-name}.${ext}",
-                                        "${id}_${snake_case_name}.${ext}"
-                                    ]
-                                }
-                            },
-                            "required": [
-                                "folder",
-                                "filename"
-                            ]
-                        },
-                        "bash": {
-                            "type": "object",
-                            "properties": {
-                                "folder": {
-                                    "type": "string"
-                                },
-                                "filename": {
-                                    "type": "string"
-                                }
-                            },
-                            "minProperties": 1
-                        },
-                        "c": {
-                            "type": "object",
-                            "properties": {
-                                "folder": {
-                                    "type": "string"
-                                },
-                                "filename": {
-                                    "type": "string"
-                                }
-                            },
-                            "minProperties": 1
-                        },
-                        "cpp": {
-                            "type": "object",
-                            "properties": {
-                                "folder": {
-                                    "type": "string"
-                                },
-                                "filename": {
-                                    "type": "string"
-                                }
-                            },
-                            "minProperties": 1
-                        },
-                        "csharp": {
-                            "type": "object",
-                            "properties": {
-                                "folder": {
-                                    "type": "string"
-                                },
-                                "filename": {
-                                    "type": "string"
-                                }
-                            },
-                            "minProperties": 1
-                        },
-                        "golang": {
-                            "type": "object",
-                            "properties": {
-                                "folder": {
-                                    "type": "string"
-                                },
-                                "filename": {
-                                    "type": "string"
-                                }
-                            },
-                            "minProperties": 1
-                        },
-                        "java": {
-                            "type": "object",
-                            "properties": {
-                                "folder": {
-                                    "type": "string"
-                                },
-                                "filename": {
-                                    "type": "string"
-                                }
-                            },
-                            "minProperties": 1
-                        },
-                        "javascript": {
-                            "type": "object",
-                            "properties": {
-                                "folder": {
-                                    "type": "string"
-                                },
-                                "filename": {
-                                    "type": "string"
-                                }
-                            },
-                            "minProperties": 1
-                        },
-                        "kotlin": {
-                            "type": "object",
-                            "properties": {
-                                "folder": {
-                                    "type": "string"
-                                },
-                                "filename": {
-                                    "type": "string"
-                                }
-                            },
-                            "minProperties": 1
-                        },
-                        "mysql": {
-                            "type": "object",
-                            "properties": {
-                                "folder": {
-                                    "type": "string"
-                                },
-                                "filename": {
-                                    "type": "string"
-                                }
-                            },
-                            "minProperties": 1
-                        },
-                        "php": {
-                            "type": "object",
-                            "properties": {
-                                "folder": {
-                                    "type": "string"
-                                },
-                                "filename": {
-                                    "type": "string"
-                                }
-                            },
-                            "minProperties": 1
-                        },
-                        "python": {
-                            "type": "object",
-                            "properties": {
-                                "folder": {
-                                    "type": "string"
-                                },
-                                "filename": {
-                                    "type": "string"
-                                }
-                            },
-                            "minProperties": 1
-                        },
-                        "python3": {
-                            "type": "object",
-                            "properties": {
-                                "folder": {
-                                    "type": "string"
-                                },
-                                "filename": {
-                                    "type": "string"
-                                }
-                            },
-                            "minProperties": 1
-                        },
-                        "ruby": {
-                            "type": "object",
-                            "properties": {
-                                "folder": {
-                                    "type": "string"
-                                },
-                                "filename": {
-                                    "type": "string"
-                                }
-                            },
-                            "minProperties": 1
-                        },
-                        "rust": {
-                            "type": "object",
-                            "properties": {
-                                "folder": {
-                                    "type": "string"
-                                },
-                                "filename": {
-                                    "type": "string"
-                                }
-                            },
-                            "minProperties": 1
-                        },
-                        "scala": {
-                            "type": "object",
-                            "properties": {
-                                "folder": {
-                                    "type": "string"
-                                },
-                                "filename": {
-                                    "type": "string"
-                                }
-                            },
-                            "minProperties": 1
-                        },
-                        "swift": {
-                            "type": "object",
-                            "properties": {
-                                "folder": {
-                                    "type": "string"
-                                },
-                                "filename": {
-                                    "type": "string"
-                                }
-                            },
-                            "minProperties": 1
-                        }
-                    },
-                    "additionalProperties": {
-                        "type": "object",
-                        "properties": {
-                            "folder": {
-                                "type": "string"
-                            },
-                            "filename": {
-                                "type": "string"
-                            }
-                        },
-                        "minProperties": 1
-                    },
-                    "default": {
-                        "default": {
-                            "folder": "",
-                            "filename": "${id}.${kebab-case-name}.${ext}"
-                        }
-                    }
                 }
             }
-        }
+        },
+        "snippets": [
+            {
+                "language": "c",
+                "path": "./snippets/snippets.json"
+            },
+            {
+                "language": "cpp",
+                "path": "./snippets/snippets.json"
+            },
+            {
+                "language": "python",
+                "path": "./snippets/snippets.json"
+            },
+            {
+                "language": "java",
+                "path": "./snippets/snippets.json"
+            },
+            {
+                "language": "javascript",
+                "path": "./snippets/snippets.json"
+            },
+            {
+                "language": "csharp",
+                "path": "./snippets/snippets.json"
+            },
+            {
+                "language": "go",
+                "path": "./snippets/snippets.json"
+            },
+            {
+                "language": "swift",
+                "path": "./snippets/snippets.json"
+            },
+            {
+                "language": "vb",
+                "path": "./snippets/snippets.json"
+            },
+            {
+                "language": "groovy",
+                "path": "./snippets/snippets.json"
+            }
+        ]
     },
-    
     "scripts": {
         "vscode:prepublish": "npm run compile",
         "compile": "tsc -p ./",
@@ -520,6 +270,7 @@
         "vscode-test": "^1.5.0"
     },
     "dependencies": {
+        "commenting": "^1.1.0",
         "fs-extra": "^10.1.0",
         "katex": "^0.16.0",
         "markdown-it": "^12.2.3",

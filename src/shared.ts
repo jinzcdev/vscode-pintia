@@ -5,7 +5,9 @@ import * as path from "path";
 import * as vscode from "vscode";
 import { IProblemInfo } from "./entity/ProblemInfo";
 
-export const configPath = path.join(os.homedir(), ".pintia")
+export const configPath: string = path.join(os.homedir(), ".pintia");
+export const cacheFilePath: string = path.join(configPath, "cache");
+
 
 export enum UserStatus {
     SignedIn = 1,
@@ -21,11 +23,12 @@ export interface IQuickPickItem<T> extends vscode.QuickPickItem {
     value: T;
 }
 
-export enum ProblemState {
-    AC = 1,
-    NotAC = 2,
-    Unknown = 3,
+export enum ProblemSubmissionState {
+    PROBLEM_ACCEPTED = "PROBLEM_ACCEPTED",
+    PROBLEM_WRONG_ANSWER = "PROBLEM_WRONG_ANSWER",
+    PROBLEM_NO_ANSWER = "PROBLEM_NO_ANSWER",
 }
+
 
 export enum ProblemType {
     PROGRAMMING = "PROGRAMMING",
@@ -33,21 +36,36 @@ export enum ProblemType {
 }
 
 export enum PtaNodeType {
+    Dashboard = 0,
     ProblemSet = 1,
     ProblemSubSet = 2,
     ProblemPage = 3,
     Problem = 4
 }
 
+export interface IPtaCode {
+    psID: string;
+    pID: string;
+    compiler: string;
+    psName?: string;
+    problemType?: ProblemType;
+    problemSet?: string;
+    title?: string;
+    code?: string;
+    customTests?: string[];
+}
 export interface IPtaNode {
+    dashID: number;
     pID: string;
     psID: string;
     label: string;
     type: PtaNodeType;
-    value: IPtaNodeValue;
+    score: number;
     isFavorite: boolean;
-    state: ProblemState;
+    state: ProblemSubmissionState;
     tag: string[];
+    value: IPtaNodeValue;
+    locked: boolean;
 }
 
 export interface IPtaNodeValue {
@@ -55,12 +73,14 @@ export interface IPtaNodeValue {
     total: number;
     page: number;
     limit: number;
+    problemSet: string;
     problemTotal: number;
     problemType: ProblemType;
     problemInfo?: IProblemInfo;
 }
 
 export const defaultPtaNode: IPtaNode = {
+    dashID: 0,
     pID: "",
     psID: "",
     label: "",
@@ -80,13 +100,16 @@ export const defaultPtaNode: IPtaNode = {
         total: 0,
         page: 0,
         limit: 0,
+        problemSet: "",
         problemTotal: 0,
         problemType: ProblemType.PROGRAMMING,
         problemInfo: undefined
     },
     isFavorite: false,
-    state: ProblemState.Unknown,
-    tag: [] as string[]
+    state: ProblemSubmissionState.PROBLEM_NO_ANSWER,
+    score: 0,
+    tag: [] as string[],
+    locked: false
 };
 
 export type CallBack<T> = (msg: string, data?: T) => void;
@@ -111,6 +134,95 @@ export const solutionStatusMapping: Map<string, string> = new Map([
     ["RUNTIME_ERROR", "<td style='color: #00b000;'>运行时错误</td>"],
 ]);
 
+export const langCompilerMapping: Map<string, string> = new Map([
+    // ["", "NO_COMPILER"],
+    ["C (gcc)", "GCC"],
+    ["C++ (g++)", "GXX"],
+    ["C (clang)", "CLANG"],
+    ["C++ (clang++)", "CLANGXX"],
+    ["Java (javac)", "JAVAC"],
+    ["Python (python2)", "PYTHON2"],
+    ["Python (python3)", "PYTHON3"],
+    ["Ruby (ruby)", "RUBY"],
+    ["Bash (bash)", "BASH"],
+    ["Plaintext (cat)", "CAT"],
+    ["CommonLisp  (sbcl)", "CLISP"],
+    ["Pascal (fpc)", "FPC"],
+    ["Go (go)", "GO"],
+    ["Haskell (ghc)", "GHC"],
+    ["Lua (lua)", "LUA"],
+    ["Lua (luajit)", "LUAJIT"],
+    ["C# (mcs)", "MCS"],
+    ["JavaScript (node)", "NODE"],
+    ["OCaml (ocamlc)", "OCAMLC"],
+    ["PHP (php)", "PHP"],
+    ["Perl (perl)", "PERL"],
+    ["AWK (awk)", "AWK"],
+    ["D (dmd)", "DMD"],
+    ["Racket (racket)", "RKT"],
+    ["Vala (valac)", "VALAC"],
+    ["Visual Basic (vbnc)", "VBNC"],
+    ["Kotlin (kotlinc)", "KOTLIN"],
+    ["Swift (swiftc)", "SWIFT"],
+    ["Objective-C (gcc)", "OBJC"],
+    ["Fortran95 (gfortran)", "FORTRAN"],
+    ["Octave (octave-cli)", "OCTAVE"],
+    ["R (R)", "RLANG"],
+    ["ASM (nasm.sh)", "ASM"],
+    ["Rust (rustc)", "RUST"],
+    ["Scala (scalac)", "SCALA"],
+    ["Python (pypy3)", "PYPY3"],
+    ["SQL (SQL)", "SQL"]
+]);
+
+export const compilerLangMapping: Map<string, string> = new Map([
+    ["NO_COMPILER", ""],
+    ["GCC", "C (gcc)"],
+    ["GXX", "C++ (g++)"],
+    ["CLANG", "C (clang)"],
+    ["CLANGXX", "C++ (clang++)"],
+    ["JAVAC", "Java (javac)"],
+    ["PYTHON2", "Python (python2)"],
+    ["PYTHON3", "Python (python3)"],
+    ["RUBY", "Ruby (ruby)"],
+    ["BASH", "Bash (bash)"],
+    ["CAT", "Plaintext (cat)"],
+    ["CLISP", "CommonLisp  (sbcl)"],
+    ["FPC", "Pascal (fpc)"],
+    ["GO", "Go (go)"],
+    ["GHC", "Haskell (ghc)"],
+    ["LUA", "Lua (lua)"],
+    ["LUAJIT", "Lua (luajit)"],
+    ["MCS", "C# (mcs)"],
+    ["NODE", "JavaScript (node)"],
+    ["OCAMLC", "OCaml (ocamlc)"],
+    ["PHP", "PHP (php)"],
+    ["PERL", "Perl (perl)"],
+    ["AWK", "AWK (awk)"],
+    ["DMD", "D (dmd)"],
+    ["RKT", "Racket (racket)"],
+    ["VALAC", "Vala (valac)"],
+    ["VBNC", "Visual Basic (vbnc)"],
+    ["KOTLIN", "Kotlin (kotlinc)"],
+    ["SWIFT", "Swift (swiftc)"],
+    ["OBJC", "Objective-C (gcc)"],
+    ["FORTRAN", "Fortran95 (gfortran)"],
+    ["OCTAVE", "Octave (octave-cli)"],
+    ["RLANG", "R (R)"],
+    ["ASM", "ASM (nasm.sh)"],
+    ["RUST", "Rust (rustc)"],
+    ["SCALA", "Scala (scalac)"],
+    ["PYPY3", "Python (pypy3)"],
+    ["SQL", "SQL (SQL)"]
+]);
+
+export const commentFormatMapping: Map<string, { single: string, start: string, middle: string, end: string }> = new Map([
+    ["C++ (g++)", { single: "// ", start: "/* ", middle: " * ", end: " */" }],
+    ["Python (python2)", { single: "# ", start: "'''", middle: "   ", end: "'''" }],
+    ["Python (python3)", { single: "# ", start: "'''", middle: "   ", end: "'''" }],
+    ["Python (pypy3)", { single: "# ", start: "'''", middle: "   ", end: "'''" }],
+    ["Bash (bash)", { single: "# ", start: "# ", middle: "# ", end: "" }],
+]);
 
 export enum DescriptionConfiguration {
     InWebView = "In Webview",
@@ -120,7 +232,6 @@ export enum DescriptionConfiguration {
 }
 
 export const ptaCompiler = {
-    // [key: string]: boolean;
     NO_COMPILER: {
         name: "NO_COMPILER",
         ordinal: 0,
