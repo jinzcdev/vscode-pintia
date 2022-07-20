@@ -7,6 +7,8 @@ import { ptaApi } from "./utils/api";
 import * as fs from "fs-extra";
 import * as path from "path";
 import { IPtaUser } from "./entity/PtaUser";
+import { ptaChannel } from "./ptaChannel";
+import { DialogType, promptForOpenOutputChannel } from "./utils/uiUtils";
 
 
 class PtaManager extends EventEmitter {
@@ -24,14 +26,14 @@ class PtaManager extends EventEmitter {
         const picks: IQuickPickItem<PtaLoginMethod>[] = [];
         picks.push(
             {
-                label: "QR Code",
-                detail: "Use wechat QRCode to login",
+                label: "$(device-camera) QR Code",
+                detail: "Use WeChat QRCode to login",
                 value: PtaLoginMethod.WeChat
             },
             {
-                label: "PTA Account",
+                label: "$(account) PTA Account",
                 detail: "Use Pintia account to login",
-                value: PtaLoginMethod.PTA
+                value: PtaLoginMethod.PTA,
             }
         );
 
@@ -57,8 +59,9 @@ class PtaManager extends EventEmitter {
                 }
             });
         }
-        catch (error) {
-            console.log(error);
+        catch (error: any) {
+            ptaChannel.appendLine(error.toString());
+            await promptForOpenOutputChannel(`Failed to submit the solution. Please open the output channel for details.`, DialogType.error);
         }
     }
 
@@ -79,6 +82,7 @@ class PtaManager extends EventEmitter {
         const filePath = path.join(configPath, "user.json");
         try {
             if (await fs.pathExists(filePath)) {
+                ptaChannel.appendLine(`[INFO] Read the usersession from the "${filePath}"`);
                 const loginSession: IUserSession = await fs.readJSON(filePath);
                 const user: IPtaUser | undefined = await ptaApi.getCurrentUser(loginSession.cookie);
                 if (user) {

@@ -4,113 +4,213 @@ import { IProblemSubmission } from "./entity/ProblemSubmission";
 import { IProblemSubmissionResult } from "./entity/ProblemSubmissionResult";
 import { ptaApi } from "./utils/api";
 import * as fs from "fs-extra";
-import { CallBack, configPath, ProblemType, ptaCompiler, PtaLoginMethod } from "./shared";
+import { cacheFilePath, CallBack, configPath, ProblemType, PtaLoginMethod } from "./shared";
 import * as path from "path";
 import { IUserSession, IWechatAuth, AuthStatus, IWechatUserState, IWechatUserInfo } from "./entity/userLoginSession";
 import { ptaLoginProvider } from "./webview/ptaLoginProvider";
 import { EventEmitter } from "events";
 import { ptaManager } from "./PtaManager";
 import { IProblemSubmissionDetail } from "./entity/ProblemSubmissionCode";
+import * as vscode from "vscode";
+import { ptaChannel } from "./ptaChannel";
+import { DialogType, promptForOpenOutputChannel } from "./utils/uiUtils";
+import * as cache from "./commands/cache";
 
 
 class PtaExecutor extends EventEmitter implements Disposable {
 
-    public async submitSolution(psID: string, pID: string, problemType: ProblemType, solution: { compiler: string, code: string, testCode?: string }, callback: CallBack<IProblemSubmissionResult>): Promise<void> {
+    public async submitSolution(psID: string, pID: string, solution: { compiler: string, code: string }, callback: CallBack<IProblemSubmissionResult>): Promise<void> {
+        await vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: "Submitting to PTA...",
+            cancellable: false
+        }, async (p: vscode.Progress<{ message?: string; increment?: number }>) => {
+            return new Promise<void>(async (resolve: () => void, reject: (e: Error) => void): Promise<void> => {
+                try {
+                    const userSession: IUserSession | undefined = ptaManager.getUserSession();
+                    if (!userSession) {
+                        vscode.window.showInformationMessage("Login session has expired!");
+                        return;
+                    }
+                    const cookie = userSession.cookie;
+                    const problemType: ProblemType = await ptaApi.getProblem(psID, pID).then(e => e.type) as ProblemType;
 
-        const userSession: IUserSession | undefined = ptaManager.getUserSession();
-        if (!userSession) {
-            console.log("Login Session doesn't exist!");
-            return;
-        }
-        const cookie = userSession.cookie;
-        let istest: boolean = false;
+                    const detail: IProblemSubmissionDetail = {
+                        problemId: "0",
+                        problemSetProblemId: pID
+                    };
+                    detail[problemType === ProblemType.PROGRAMMING ? "programmingSubmissionDetail" : "codeCompletionSubmissionDetail"] = {
+                        compiler: solution.compiler,
+                        program: solution.code
+                    };
 
-        const detail: IProblemSubmissionDetail = {
-            problemId: "0",
-            problemSetProblemId: pID
-        };
-        detail[problemType === ProblemType.PROGRAMMING ? "programmingSubmissionDetail" : "codeCompletionSubmissionDetail"] = {
-            compiler: solution.compiler,
-            program: solution.code
-        };
-        if (solution.testCode) {
-            detail.customTestData = {
-                hasCustomTestData: true,
-                content: solution.testCode
-            }
-            istest = true;
-        }
-        
-        const submission: IProblemSubmission = await ptaApi.getProblemSetExam(psID, cookie)
-            .then(exam => exam.id)
-            .then(id => ptaApi.submitSolution(id, cookie, {
-                details: [detail],
-                problemType: problemType
-            }));
+                    const submission: IProblemSubmission = await ptaApi.getProblemSetExam(psID, cookie)
+                        .then(exam => exam.id)
+                        .then(id => ptaApi.submitSolution(id, cookie, {
+                            details: [detail],
+                            problemType: problemType
+                        }));
+                    if (submission.error) {
+                        throw JSON.stringify(submission.error);
+                    }
+                    let data: IProblemSubmissionResult;
+                    let interval = setInterval(async () => {
+                        data = await ptaApi.getProblemSubmissionResult(submission.submissionId, cookie);
+                        // console.log(`Waiting for ${data.queued} users`);
+                        if (data.queued === -1 && data.submission.status !== "WAITING") {
+                            resolve();
+                            clearInterval(interval);
+                            callback("SUCCESS", data);
+                        }
+                    }, 1000);
+                } catch (error: any) {
+                    reject(error);
+                    ptaChannel.appendLine(error.toString());
+                    await promptForOpenOutputChannel("Submitting solution Failed. Please open output channel for details.", DialogType.error);
+                }
+            });
+        });
+    }
 
-        let data: IProblemSubmissionResult;
-        let interval = setInterval(async () => {
-            data = await ptaApi.getProblemSubmissionResult(submission.submissionId, istest, cookie);
-            console.log(`Waiting for ${data.queued} users`);
-            if (data.queued === -1) {
-                clearInterval(interval);
-                callback("SUCCESS", data);
-            }
-        }, 1000);
+    public async testSolution(psID: string, pID: string, solution: { compiler: string, code: string, testInput: string }, callback: CallBack<IProblemSubmissionResult>): Promise<void> {
+        await vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: "Testing the sample...",
+            cancellable: false
+        }, async (p: vscode.Progress<{ message?: string; increment?: number }>) => {
+            return new Promise<void>(async (resolve: () => void, reject: (e: Error) => void): Promise<void> => {
+
+                try {
+                    const userSession: IUserSession | undefined = ptaManager.getUserSession();
+                    if (!userSession) {
+                        vscode.window.showInformationMessage("Login session has expired!");
+                        return;
+                    }
+
+                    // if (!langCompilerMapping.has(solution.compiler)) {
+                    //     throw `[ERROR] The language ${solution.compiler} is not supported.`;
+                    // }
+
+                    const cookie = userSession.cookie;
+                    const detail: IProblemSubmissionDetail = {
+                        problemId: "0",
+                        problemSetProblemId: pID,
+                        customTestData: {
+                            hasCustomTestData: true,
+                            content: solution.testInput
+                        }
+                    };
+
+                    const problemType: ProblemType = await ptaApi.getProblem(psID, pID).then(e => e.type) as ProblemType;
+
+                    detail[problemType === ProblemType.PROGRAMMING ? "programmingSubmissionDetail" : "codeCompletionSubmissionDetail"] = {
+                        compiler: solution.compiler,
+                        program: solution.code
+                    };
+
+
+                    const submission: IProblemSubmission = await ptaApi.getProblemSetExam(psID, cookie)
+                        .then(exam => exam.id)
+                        .then(id => ptaApi.submitSolution(id, cookie, {
+                            details: [detail],
+                            problemType: problemType
+                        }));
+                    if (submission.error) {
+                        throw JSON.stringify(submission.error);
+                    }
+                    let data: IProblemSubmissionResult, cnt: number = 0;
+                    let interval = setInterval(async () => {
+                        data = await ptaApi.getProblemTestResult(submission.submissionId, cookie);
+                        // console.log(`Waiting for ${data.queued} users`);
+                        if (data.queued === -1 && data.submission.status !== "WAITING") {
+                            resolve();
+                            clearInterval(interval);
+                            callback("SUCCESS", data);
+                        }
+                        if (++cnt == 60) {
+                            throw "[ERROR] Submission timeout";
+                        }
+                    }, 1000);
+                } catch (error: any) {
+                    ptaChannel.appendLine(error.toString());
+                    await promptForOpenOutputChannel("Testing sample failed. Please open output channel for details.", DialogType.error);
+                    reject(error);
+                }
+            });
+        });
     }
 
     public async signIn(value: PtaLoginMethod, callback: CallBack<IUserSession>): Promise<void> {
         if (value === PtaLoginMethod.WeChat) {
             await this.wechatSignIn(callback);
         } else {
+            vscode.window.showInformationMessage("Logging in with PTA account will be implemented in the future.");
             await this.accountSignIn(callback);
         }
     }
 
     public async signOut(): Promise<void> {
-        const filePath = path.join(configPath, "user.json");
-        if (await fs.pathExists(filePath)) {
-            const loginSession: IUserSession = await fs.readJSON(filePath);
-            Promise.all([ptaApi.signOut(loginSession.cookie), fs.remove(filePath)]);
+        const userFilePath = path.join(configPath, "user.json");
+        if (await fs.pathExists(userFilePath)) {
+            ptaChannel.appendLine(`[INFO] Logout the current user successfully and remove user information from ${userFilePath}.`);
+            const loginSession: IUserSession = await fs.readJSON(userFilePath);
+            Promise.all([ptaApi.signOut(loginSession.cookie), fs.remove(userFilePath)]);
         }
+        await cache.clearCache();
     }
 
     public async wechatSignIn(callback: CallBack<IUserSession>): Promise<void> {
-        const auth: IWechatAuth = await ptaApi.getWechatAuth();
-        await ptaLoginProvider.showQRCode(auth.url);
-        let cnt = 0;
-        let interval = setInterval(async () => {
-            const authState = await ptaApi.getWechatAuthState(auth.state);
-            if (authState.status === AuthStatus.SUCCESSFUL) {
+        try {
+            const auth: IWechatAuth = await ptaApi.getWechatAuth();
+            await ptaLoginProvider.showQRCode(auth.url);
+            let cnt = 0;
+            let interval = setInterval(async () => {
+                const authState = await ptaApi.getWechatAuthState(auth.state);
+                if (authState.status === AuthStatus.SUCCESSFUL) {
 
-                const userState: IWechatUserState = await ptaApi.getWechatAuthUser(auth.state);
-                const userInfo: IWechatUserInfo = await ptaApi.getWechatUserInfo(auth.state, userState.id);
+                    const userState: IWechatUserState = await ptaApi.getWechatAuthUser(auth.state);
+                    const userInfo: IWechatUserInfo = await ptaApi.getWechatUserInfo(auth.state, userState.id);
 
-                callback("SUCCESS", {
-                    id: userInfo.user.id,
-                    user: userInfo.user.nickname,
-                    email: userInfo.user.email,
-                    loginMethod: PtaLoginMethod.WeChat,
-                    cookie: userInfo.cookie
-                });
+                    callback("SUCCESS", {
+                        id: userInfo.user.id,
+                        user: userInfo.user.nickname,
+                        email: userInfo.user.email,
+                        loginMethod: PtaLoginMethod.WeChat,
+                        cookie: userInfo.cookie
+                    });
 
-                ptaLoginProvider.dispose();
+                    ptaLoginProvider.dispose();
+                    clearInterval(interval);
+                }
+                if (++cnt === 60) {
+                    callback("TIMEOUT");
+                    ptaLoginProvider.dispose();
+                    clearInterval(interval);
+                }
+            }, 2000);
+            ptaLoginProvider.onDidDisposeCallBack(() => {
+                // vscode.window.showInformationMessage("Cancel to login.");
                 clearInterval(interval);
-            }
-            if (++cnt === 60) {
-                callback("TIMEOUT", undefined);
-                ptaLoginProvider.dispose();
-                clearInterval(interval);
-            }
-        }, 2000);
+            });
+        } catch (error: any) {
+            ptaChannel.append(error.toString());
+            await promptForOpenOutputChannel("Failed to login PTA. Please open the output channel for details.", DialogType.error);
+        }
     }
 
     public async accountSignIn(callback: (msg: string, data?: IUserSession) => void): Promise<void> {
         return Promise.resolve();
     }
 
+    public async clearCache(): Promise<void> {
+        if (await fs.pathExists(cacheFilePath)) {
+            await fs.remove(cacheFilePath);
+            ptaChannel.appendLine(`[INFO] Clear the cache from the "${cacheFilePath}"`);
+        }
+    }
+
+
     public dispose() {
-        throw new Error("Method not implemented.");
     }
 }
 
