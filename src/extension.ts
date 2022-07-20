@@ -1,41 +1,58 @@
 import * as vscode from 'vscode';
-import { pintiaTreeDataProvider } from './explorer/ptaTreeDataProvider';
-import { ptaManager } from './PtaManager';
-import { PtaNode } from './explorer/PtaNode';
-import { ptaPreviewProvider } from './webview/ptaPreviewProvider';
-import { ptaStatusBarController } from './statusbar/ptaStatusBarController';
-import * as user from "./commands/user";
-import * as submit from "./commands/submit";
-import { ptaSubmissionProvider } from './webview/ptaSubmissionProvider';
-import { selectWorkspaceFolder } from './utils/workspaceUtils';
 import { codeLensController } from './codelens/CodeLensController';
+import * as cache from "./commands/cache";
+import * as language from "./commands/language";
+import * as show from "./commands/show";
+import * as submit from "./commands/submit";
+import * as user from "./commands/user";
+import { PtaNode } from './explorer/PtaNode';
+import { ptaTreeDataProvider } from './explorer/ptaTreeDataProvider';
+import { ptaChannel } from './ptaChannel';
 import { ptaConfig } from './ptaConfig';
+import { ptaExecutor } from './PtaExecutor';
+import { ptaManager } from './PtaManager';
+import { IPtaCode } from './shared';
+import { ptaStatusBarController } from './statusbar/ptaStatusBarController';
+import { ptaLoginProvider } from './webview/ptaLoginProvider';
+import { ptaPreviewProvider } from './webview/ptaPreviewProvider';
+import { ptaSubmissionProvider } from './webview/ptaSubmissionProvider';
+import { ptaTestProvider } from './webview/ptaTestProvider';
+
 
 export async function activate(context: vscode.ExtensionContext) {
 
 	ptaManager.on("statusChanged", () => {
-		// vscode.window.showInformationMessage("statusChanged!");
-		pintiaTreeDataProvider.refresh();
+		ptaTreeDataProvider.refresh();
 		ptaStatusBarController.updateStatusBar(ptaManager.getUserSession());
 	});
 
-	pintiaTreeDataProvider.initialize(context);
+	ptaTreeDataProvider.initialize(context);
 	console.log(ptaConfig.getEditorShortcuts());
 
 	context.subscriptions.push(
 		ptaPreviewProvider,
+		ptaLoginProvider,
+		ptaSubmissionProvider,
 		ptaStatusBarController,
+		ptaTestProvider,
 		codeLensController,
-		vscode.commands.registerCommand("pintia.signIn", () => ptaManager.signIn().catch(val => vscode.window.showInformationMessage(val))),
+		ptaExecutor,
+		ptaChannel,
+		vscode.commands.registerCommand("pintia.openPintiaHome", () => user.openPintiaHome()),
+		vscode.commands.registerCommand("pintia.refreshExplorer", () => ptaTreeDataProvider.refresh()),
+		vscode.commands.registerCommand("pintia.clearCache", () => cache.clearCache()),
+		vscode.commands.registerCommand("pintia.signIn", () => ptaManager.signIn()),
 		vscode.commands.registerCommand("pintia.signOut", () => ptaManager.signOut()),
 		vscode.commands.registerCommand("pintia.previewProblem", async (node: PtaNode) => ptaPreviewProvider.showPreview(node)),
 		vscode.commands.registerCommand("pintia.manageUser", () => user.showUserManager()),
 		vscode.commands.registerCommand("pintia.checkIn", () => user.checkInPTA()),
-		// vscode.commands.registerCommand("pintia.submitSolution", async () => { selectWorkspaceFolder(); }),
-		vscode.commands.registerCommand("pintia.submitSolution", async (uri: vscode.Uri, testCode?: string) => { submit.submitSolution(uri, testCode); }),
-// 		vscode.commands.registerCommand("pintia.submitSolution", () => ptaSubmissionProvider.showSubmission(JSON.parse(`
-// {"queued": -1, "submission": { "id": "1516021537063739392", "user": { "studentUser": { "studentNumber": "", "name": "", "id": "0" } }, "problemType": "PROGRAMMING", "problemSetProblem": { "id": "709", "label": "7-1", "type": "PROGRAMMING", "problemPoolIndex": 1, "indexInProblemPool": 1 }, "submitAt": "2022-04-18T11:51:15Z", "status": "ACCEPTED", "score": 20, "compiler": "GXX", "time": 0.012, "memory": 1273856, "submissionDetails": [ { "problemSetProblemId": "709", "programmingSubmissionDetail": { "compiler": "GXX", "program": "program" }, "problemId": "0" } ], "judgeResponseContents": [ { "status": "ACCEPTED", "score": 20, "programmingJudgeResponseContent": { "compilationResult": { "log": "thisi is compilation result.", "success": true, "error": "" }, "checkerCompilationResult": { "log": "", "success": false, "error": "" }, "testcaseJudgeResults": { "0": { "result": "ACCEPTED", "exceed": "UNKNOWN_TESTCASE_EXCEED", "time": 0.004, "memory": 466944, "exitcode": 0, "termsig": 0, "error": "", "stdout": "", "stderr": "", "checkerOutput": "", "testcaseScore": 12, "stdoutTruncated": false, "stderrTruncated": false }, "1": { "result": "ACCEPTED", "exceed": "UNKNOWN_TESTCASE_EXCEED", "time": 0.003, "memory": 339968, "exitcode": 0, "termsig": 0, "error": "", "stdout": "", "stderr": "", "checkerOutput": "", "testcaseScore": 2, "stdoutTruncated": false, "stderrTruncated": false }, "2": { "result": "ACCEPTED", "exceed": "UNKNOWN_TESTCASE_EXCEED", "time": 0.004, "memory": 335872, "exitcode": 0, "termsig": 0, "error": "", "stdout": "", "stderr": "", "checkerOutput": "", "testcaseScore": 2, "stdoutTruncated": false, "stderrTruncated": false }, "3": { "result": "ACCEPTED", "exceed": "UNKNOWN_TESTCASE_EXCEED", "time": 0.006, "memory": 618496, "exitcode": 0, "termsig": 0, "error": "", "stdout": "", "stderr": "", "checkerOutput": "", "testcaseScore": 2, "stdoutTruncated": false, "stderrTruncated": false }, "4": { "result": "ACCEPTED", "exceed": "UNKNOWN_TESTCASE_EXCEED", "time": 0.012, "memory": 1273856, "exitcode": 0, "termsig": 0, "error": "", "stdout": "", "stderr": "", "checkerOutput": "", "testcaseScore": 2, "stdoutTruncated": false, "stderrTruncated": false } } }, "problemSetProblemId": "709" } ], "hints": { "0": "sample 有正负，负数开头结尾，最大和有更新", "1": "100个随机数", "2": "1000个随机数", "3": "10000个随机数", "4": "100000个随机数" }, "problemSetId": "15", "previewSubmission": false, "cause": ""}}`))),
-		vscode.window.createTreeView("pintiaExplorer", { treeDataProvider: pintiaTreeDataProvider, showCollapseAll: false }),
+		vscode.commands.registerCommand("pintia.codeProblem", async (ptaCode: IPtaCode) => await show.showCodingEditor(ptaCode)),
+		vscode.commands.registerCommand("pintia.testCustomSample", async (ptaCode: IPtaCode, index: number) => await submit.testCustomSample(ptaCode, index)),
+		vscode.commands.registerCommand("pintia.submitSolution", async (ptaCode: IPtaCode) => submit.submitSolution(ptaCode)),
+		vscode.commands.registerCommand("pintia.testSolution", async (ptaCode: IPtaCode) => submit.testSolution(ptaCode)),
+		vscode.commands.registerCommand("pintia.changeDefaultLanguage", () => language.changeDefaultLanguage()),
+		vscode.window.createTreeView("pintiaExplorer", { treeDataProvider: ptaTreeDataProvider, showCollapseAll: true }),
+
 	);
 
 	await ptaManager.fetchLoginStatus();
