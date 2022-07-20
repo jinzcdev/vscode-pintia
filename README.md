@@ -1,70 +1,113 @@
-# PTA README
+# Pintia
 
-This is the README for your extension "PTA". After writing up a brief description, we recommend including the following sections.
+> Solve PTA problems in VS Code
 
-## Features
+<p align="center">
+  <img style="width: 60%;" src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/resources/pintia_logo.svg?token=GHSAT0AAAAAABWUAKICY7AK7TIZWTLGB6MIYWYNM4Q" alt="">
+</p>
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
 
-For example if there is an image subfolder under your extension project workspace:
+<p align="center">
+  <a href="https://marketplace.visualstudio.com/items?itemName=PTA.vscode-pintia">
+    <img src="https://img.shields.io/visual-studio-marketplace/d/PTA.vscode-pintia.svg?style=flat-square" alt="">
+  </a>
+  <a href="https://github.com/jinzcdev/vscode-pintia/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/jinzcdev/vscode-pintia.svg?style=flat-square" alt="">
+  </a>
+</p>
 
-\!\[feature X\]\(images/feature-x.png\)
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+- English Document | [中文文档](https://github.com/jinzcdev/vscode-pintia/blob/main/docs/README_zh-CN.md)
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- [VS Code 1.66.0+](https://code.visualstudio.com/)
 
-## Extension Settings
+## Quick Start
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+![demo](https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/gifs/demo.gif)
 
-For example:
+## Features
 
-This extension contributes the following settings:
+### Sign In/Out
 
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
+<p align="center">
+  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/sign_in.png" alt="Sign in" />
+</p>
 
-## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+- Simply click `Sign in to Pintia` in the `Pintia Explorer` will let you **sign in** with your Pintia account. (Now, it is allowed to **sign in** Pintia using **WeChat**.)
+
+- You can also use the following command to sign in/out:
+  - **Pintia: Sign in**
+  - **Pintia: Sign out**
+
+---
+
+### Preview a Problem
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/pick_problem.png" alt="Pick a Problem" />
+</p>
+
+
+- Directly click on the problem to see the problem description.
+
+  > Note：You can specify the path of the workspace folder to store the problem files by updating the setting `pintia.workspaceFolder`. The default value is：**$HOME/.pintia/codes**.
+
+  > You can change the default language by triggering the command: `Pintia: Change Default Language`.
+
+---
+
+### Editor Shortcuts
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/shortcuts.png" alt="Editor Shortcuts" />
+</p>
+
+
+- The extension supports 2 editor shortcuts (aka Code Lens):
+
+  - `Submit`: Submit your answer to Pintia.
+  - `Test`: Test your answer with customized test cases.
+
+  > Note: You can customize the shortcuts using the setting: `Ppntia.editor.shortcuts`. By default, only `Submit` and `Test` shortcuts are enabled.
+
+---
+
+### Custom Test Samples
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/shortcuts.png" alt="Editor Shortcuts" />
+</p>
+
+
+- You can put your codes between `@pintia code=start` and `@pintia code=end` (enter `ptacode` to quickly add them).
+- Also, you can put your custom test samples between `@pintia test=start` and `@pintia test=end` (enter `ptatest` to quickly add them).
+
+---
+
+## Settings
+
+| Setting Name              | Description                                                  | Default Value      |
+| ------------------------- | ------------------------------------------------------------ | ------------------ |
+| `pintia.showLocked`       | Specify to show the locked problems or not. Some problem sets could be submitted when entering the reader's code. | `true`             |
+| `pintia.defaultLanguage`  | Specify the default language used to solve the problem. Supported languages are: `C (gcc)`,`C++ (g++)`,`C (clang)`,`C++ (clang++)`,`Java (javac)`,`Python (python2)`,`Python (python3)`,`Ruby (ruby)`,`Bash (bash)`,`Plaintext (cat)`,`CommonLisp  (sbcl)`,`Pascal (fpc)`,`Go (go)`,`Haskell (ghc)`,`Lua (lua)`,`Lua (luajit)`,`C# (mcs)`,`JavaScript (node)`,`OCaml (ocamlc)`,`PHP (php)`,`Perl (perl)`,`AWK (awk)`,`D (dmd)`,`Racket (racket)`,`Vala (valac)`,`Visual Basic (vbnc)`,`Kotlin (kotlinc)`,`Swift (swiftc)`,`Objective-C (gcc)`,`Fortran95 (gfortran)`,`Octave (octave-cli)`,`R (R)`,`ASM (nasm.sh)`,`Rust (rustc)`,`Scala (scalac)`,`Python (pypy3)`,`SQL (SQL)` | `C++ (g++)`              |
+| `pintia.workspaceFolder`  | Specify the path of the workspace folder to store the problem files. | `""`               |
+| `pintia.enableStatusBar`  | Specify whether the Pintia status bar will be shown or not.  | `true`             |
+| `pintia.editor.shortcuts` | Specify the customized shortcuts in editors. Supported values are: `submit`, `test`. | `["submit, test"]` |
+
+## Want Help?
+
+When you meet any problem, you can check out the [Troubleshooting](https://github.com/jinzcdev/vscode-pintia/wiki/Troubleshooting) and [FAQ](https://github.com/jinzcdev/vscode-pintia/wiki/FAQ) first.
+
+If your problem still cannot be addressed, feel free to [file an issue](https://github.com/jinzcdev/vscode-pintia/issues/new/choose).
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+Refer to [CHANGELOG](https://github.com/jinzcdev/vscode-pintia/blob/main/CHANGELOG.md)
 
-### 1.0.0
+## Acknowledgement
 
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
------------------------------------------------------------------------------------------------------------
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+- The project's functionality is heavily based on that of the [jinzcdev/vscode-pintia](https://github.com/jinzcdev/vscode-pintia).
+- Special thanks to our [contributors](https://github.com/jinzcdev/vscode-pintia/blob/main/ACKNOWLEDGEMENTS.md).
