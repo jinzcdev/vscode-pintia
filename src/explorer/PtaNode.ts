@@ -1,9 +1,13 @@
 
-import { IPtaNode, IPtaNodeValue, PtaNodeType } from "../shared";
+import { IPtaNode, IPtaNodeValue, ProblemSubmissionState, PtaNodeType } from "../shared";
 
 export class PtaNode {
 
     constructor(private data: IPtaNode) { }
+
+    public get dashID(): number {
+        return this.data.dashID;
+    }
 
     public get pID(): string {
         return this.data.pID;
@@ -19,6 +23,18 @@ export class PtaNode {
 
     public get type(): PtaNodeType {
         return this.data.type;
+    }
+
+    public get state(): ProblemSubmissionState {
+        return this.data.state;
+    }
+
+    public get score(): number {
+        return this.data.score;
+    }
+
+    public get locked(): boolean {
+        return this.data.locked;
     }
 
     public get value(): IPtaNodeValue {

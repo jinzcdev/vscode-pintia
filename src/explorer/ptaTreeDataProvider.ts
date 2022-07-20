@@ -1,20 +1,30 @@
 
 import * as vscode from "vscode";
+import * as path from "path";
 import { PtaNode } from "./PtaNode";
-import { defaultPtaNode, IPtaNodeValue, ProblemType, PtaNodeType } from "../shared";
+import { defaultPtaNode, IPtaNodeValue, ProblemSubmissionState, ProblemType, PtaNodeType } from "../shared";
 import { ptaManager } from "../PtaManager";
 import { explorerNodeManager } from "./explorerNodeManager";
+import { ptaConfig } from "../ptaConfig";
 
 
-export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode> {
+export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vscode.Disposable {
 
     private context: vscode.ExtensionContext | undefined;
-    private isPaged: boolean = true;
-
+    private configurationChangeListener: vscode.Disposable;
 
     private onDidChangeTreeDataEvent: vscode.EventEmitter<PtaNode | undefined | null> = new vscode.EventEmitter<PtaNode | undefined | null>();
     // tslint:disable-next-line:member-ordering
     public readonly onDidChangeTreeData: vscode.Event<any> = this.onDidChangeTreeDataEvent.event;
+
+
+    public constructor() {
+        this.configurationChangeListener = vscode.workspace.onDidChangeConfiguration((event: vscode.ConfigurationChangeEvent) => {
+            if (event.affectsConfiguration("pintia.paging.pageSize") || event.affectsConfiguration("pintia.showLocked")) {
+                this.onDidChangeTreeDataEvent.fire(null);
+            }
+        }, this);
+    }
 
     public initialize(context: vscode.ExtensionContext): void {
         this.context = context;
@@ -31,10 +41,17 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode> {
                 }
             };
         }
+        if (element.type === PtaNodeType.Dashboard) {
+            return {
+                label: element.label,
+                collapsibleState: vscode.TreeItemCollapsibleState.None
+            }
+        }
         return {
-            label: element.label,
+            label: element.type === PtaNodeType.Problem ? `${element.label} (${element.score})` : element.label,
             collapsibleState: element.type === PtaNodeType.Problem ?
                 vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Collapsed,
+            iconPath: this.parseIconPathFromProblemState(element),
             command: element.type === PtaNodeType.Problem ? {
                 title: "Preview Problem",
                 command: "pintia.previewProblem",
@@ -43,7 +60,9 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode> {
         };
     }
     getChildren(element?: PtaNode): vscode.ProviderResult<PtaNode[]> {
-        const limit = 200;
+        const limit: number = ptaConfig.getPageSize();
+        const paged: boolean = limit !== 0;
+
         if (!ptaManager.getUserSession()) {
             return [
                 new PtaNode(Object.assign({}, defaultPtaNode, {
@@ -55,7 +74,12 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode> {
         if (!element) {
             // root directoty
             return explorerNodeManager.getRootNodes();
+            // return explorerNodeManager.getProblemSetNodes(1);
         }
+        // if (element.type === PtaNodeType.Dashboard) {
+        //     return explorerNodeManager.getProblemSetNodes(element.dashID);
+        // }
+
         const value: IPtaNodeValue = element.value;
         if (element.type === PtaNodeType.ProblemSet) {
             if (value.summaries.numType > 1) {
@@ -81,37 +105,64 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode> {
             }
             const total: number = value.summaries[ProblemType.PROGRAMMING].total;
             // only "PROGRAMMING", return problem list
-            if (!this.isPaged || total < limit) {
+            if (!paged || total < limit) {
                 // 1-200, 201-400
-                return explorerNodeManager.getProblemNodes(element.psID, ProblemType.PROGRAMMING);
+                return explorerNodeManager.getProblemNodes(element.psID, element.value.problemSet, ProblemType.PROGRAMMING);
             } else {
-                return explorerNodeManager.getProblemSetPageNodes(element.psID, ProblemType.PROGRAMMING, total, limit);
+                return explorerNodeManager.getProblemSetPageNodes(element.psID, element.value.problemSet, ProblemType.PROGRAMMING, total, limit);
             }
         }
 
         if (element.type === PtaNodeType.ProblemSubSet) {
             const total: number = value.summaries[value.problemType].total;
             // node.type === PtaNodeType.ProblemType
-            if (!this.isPaged || total < limit) {
-                return explorerNodeManager.getProblemNodes(element.psID, value.problemType);
+            if (!paged || total < limit) {
+                return explorerNodeManager.getProblemNodes(element.psID, element.value.problemSet, value.problemType);
             } else {
-                return explorerNodeManager.getProblemSetPageNodes(element.psID, value.problemType, total, limit);
+                return explorerNodeManager.getProblemSetPageNodes(element.psID, element.value.problemSet, value.problemType, total, limit);
             }
         }
 
         if (element.type === PtaNodeType.ProblemPage) {
             // return explorerNodeManager.getProblemNodes(element.psID, )
-            return explorerNodeManager.getProblemNodes(element.psID, value.problemType, value.page, limit);
+            return explorerNodeManager.getProblemNodes(element.psID, element.value.problemSet, value.problemType, value.page, limit);
         }
 
         return null;
 
     }
 
+    private parseIconPathFromProblemState(element: PtaNode): string {
+        if (!this.context) {
+            return "";
+        }
+        if (element.type === PtaNodeType.ProblemSet && element.locked) {
+            return this.context.asAbsolutePath(path.join("resources", "lock.png"));
+        }
+        if (element.type !== PtaNodeType.Problem) {
+            return "";
+        }
+        switch (element.state) {
+            case ProblemSubmissionState.PROBLEM_ACCEPTED:
+                return this.context.asAbsolutePath(path.join("resources", "check.png"));
+            case ProblemSubmissionState.PROBLEM_WRONG_ANSWER:
+                return this.context.asAbsolutePath(path.join("resources", "x.png"));
+            case ProblemSubmissionState.PROBLEM_NO_ANSWER:
+                return this.context.asAbsolutePath(path.join("resources", "blank.png"));
+            default:
+                return "";
+        }
+    }
+
     public refresh() {
         this.onDidChangeTreeDataEvent.fire(null);
     }
+
+    public dispose() {
+        this.configurationChangeListener.dispose();
+    }
+
 }
 
 
-export const pintiaTreeDataProvider: PtaTreeDataProvider = new PtaTreeDataProvider();
+export const ptaTreeDataProvider: PtaTreeDataProvider = new PtaTreeDataProvider();

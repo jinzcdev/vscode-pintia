@@ -1,0 +1,187 @@
+{
+    "name": "dashboard",
+    "content": {
+        "sections": [
+            {
+                "id": "1",
+                "title": "教材",
+                "displayConfigs": [
+                    {
+                        "problemSetId": "1526027869896364032",
+                        "backgroundStyle": "linear-gradient(180deg, #F3F5F9 0%, #EEF1F5 100%)",
+                        "coverType": "image",
+                        "image": "a315186b-8ff1-4c4f-a754-d8cd92ce5fcf.png"
+                    },
+                    {
+                        "problemSetId": "1298273728383766528",
+                        "coverType": "image",
+                        "backgroundStyle": "linear-gradient(180deg, #F3F5F9 0%, #EEF1F5 100%)",
+                        "image": "e7d7b169-a5a0-4fdd-941b-3d0460981927.png"
+                    },
+                    {
+                        "problemSetId": "1298274031405453312",
+                        "backgroundStyle": "linear-gradient(180deg, #F3F5F9 0%, #EEF1F5 100%)",
+                        "coverType": "image",
+                        "image": "66a811de-3eb6-4330-9fa5-92d9bb44438f.png"
+                    },
+                    {
+                        "problemSetId": "12",
+                        "backgroundStyle": "linear-gradient(180deg, #F3F5F9 0%, #EEF1F5 100%)",
+                        "coverType": "image",
+                        "image": "57f42665-45c8-435c-b115-56f52891c8e1.png"
+                    },
+                    {
+                        "problemSetId": "13",
+                        "backgroundStyle": "linear-gradient(180deg, #F3F5F9 0%, #EEF1F5 100%)",
+                        "coverType": "image",
+                        "image": "f07b36f8-380f-4210-8d1d-91bc30d85396.png"
+                    },
+                    {
+                        "problemSetId": "434",
+                        "backgroundStyle": "linear-gradient(180deg, #F3F5F9 0%, #EEF1F5 100%)",
+                        "coverType": "image",
+                        "image": "3f4e1ab0-0409-49eb-98e4-6159f9600975.png"
+                    },
+                    {
+                        "problemSetId": "988034414048743424",
+                        "backgroundStyle": "linear-gradient(180deg, #F3F5F9 0%, #EEF1F5 100%)",
+                        "coverType": "image",
+                        "image": "742dc9dd-ea93-4b4a-8773-ca6e67e262c7.png"
+                    },
+                    {
+                        "problemSetId": "1111652100718116864",
+                        "backgroundStyle": "linear-gradient(180deg, #F3F5F9 0%, #EEF1F5 100%)",
+                        "coverType": "image",
+                        "image": "0463a96e-6b9b-492d-9fa1-eb504301bded.png"
+                    }
+                ]
+            },
+            {
+                "id": "4",
+                "title": "练习",
+                "displayConfigs": [
+                    {
+                        "problemSetId": "91827364545",
+                        "backgroundStyle": "linear-gradient(180deg, #F4A5CB 0%, #EE697F 100%)",
+                        "coverType": "icon",
+                        "icon": "ptae"
+                    },
+                    {
+                        "problemSetId": "91827364544",
+                        "coverType": "icon",
+                        "icon": "ptae",
+                        "backgroundStyle": "linear-gradient(180deg, #F3C54E 0%, #EA7750 100%)"
+                    },
+                    {
+                        "problemSetId": "994805046380707840",
+                        "coverType": "icon",
+                        "icon": "ptae",
+                        "backgroundStyle": "linear-gradient(180deg, #A29CF6 0%, #847CF3 100%)"
+                    },
+                    {
+                        "problemSetId": "14",
+                        "coverType": "icon",
+                        "icon": "ptae",
+                        "backgroundStyle": "linear-gradient(180deg, #5FCCFF 0%, #72A5F2 100%)"
+                    },
+                    {
+                        "problemSetId": "16",
+                        "backgroundStyle": "linear-gradient(180deg, #6278EC 0%, #3E53BE 100%)",
+                        "coverType": "icon",
+                        "icon": "ptae"
+                    },
+                    {
+                        "problemSetId": "15",
+                        "backgroundStyle": "linear-gradient(180deg, #99DE66 0%, #6BB44E 100%)",
+                        "coverType": "icon",
+                        "icon": "ptae"
+                    }
+                ]
+            },
+            {
+                "id": "2",
+                "title": "考试",
+                "displayConfigs": [
+                    {
+                        "problemSetId": "994805260223102976",
+                        "coverType": "icon",
+                        "icon": "pat",
+                        "backgroundStyle": "linear-gradient(180deg, #5FCCFF 0%, #72A5F2 100%)"
+                    },
+                    {
+                        "problemSetId": "994805148990160896",
+                        "backgroundStyle": "linear-gradient(180deg, #F3C54E 0%, #EA7750 100%)",
+                        "coverType": "icon",
+                        "icon": "pat"
+                    },
+                    {
+                        "problemSetId": "994805342720868352",
+                        "coverType": "icon",
+                        "icon": "pat",
+                        "backgroundStyle": "linear-gradient(180deg, #A29CF6 0%, #847CF3 100%)"
+                    },
+                    {
+                        "problemSetId": "17",
+                        "backgroundStyle": "linear-gradient(180deg, #5FCCFF 0%, #72A5F2 100%)",
+                        "coverType": "icon",
+                        "icon": "ptae"
+                    }
+                ]
+            },
+            {
+                "id": "3",
+                "title": "其他",
+                "displayConfigs": [
+                    {
+                        "problemSetId": "4",
+                        "backgroundStyle": "linear-gradient(180deg, #A29CF6 0%, #847CF3 100%)",
+                        "coverType": "icon",
+                        "icon": "pat"
+                    },
+                    {
+                        "problemSetId": "1194252822872756224",
+                        "coverType": "icon",
+                        "icon": "exam",
+                        "backgroundStyle": "linear-gradient(180deg, #A29CF6 0%, #847CF3 100%)"
+                    },
+                    {
+                        "problemSetId": "91827364628",
+                        "backgroundStyle": "linear-gradient(180deg, #6278EC 0%, #3E53BE 100%)",
+                        "coverType": "icon",
+                        "icon": "zoj"
+                    },
+                    {
+                        "problemSetId": "91827364500",
+                        "backgroundStyle": "linear-gradient(180deg, #6278EC 0%, #3E53BE 100%)",
+                        "coverType": "icon",
+                        "icon": "zoj"
+                    },
+                    {
+                        "problemSetId": "91827364539",
+                        "backgroundStyle": "linear-gradient(180deg, #6278EC 0%, #3E53BE 100%)",
+                        "coverType": "icon",
+                        "icon": "zoj"
+                    },
+                    {
+                        "problemSetId": "91827364540",
+                        "backgroundStyle": "linear-gradient(180deg, #6278EC 0%, #3E53BE 100%)",
+                        "coverType": "icon",
+                        "icon": "zoj"
+                    },
+                    {
+                        "problemSetId": "91827364647",
+                        "backgroundStyle": "linear-gradient(180deg, #6278EC 0%, #3E53BE 100%)",
+                        "coverType": "icon",
+                        "icon": "zoj"
+                    },
+                    {
+                        "problemSetId": "91827364593",
+                        "backgroundStyle": "linear-gradient(180deg, #6278EC 0%, #3E53BE 100%)",
+                        "coverType": "icon",
+                        "icon": "zoj"
+                    }
+                ]
+            }
+        ]
+    }
+}

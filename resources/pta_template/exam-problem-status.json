@@ -1,0 +1,30 @@
+{
+    "problemStatus": [
+        {
+            "id": "994805528788582400",
+            "label": "1001",
+            "score": 20,
+            "problemSubmissionStatus": "PROBLEM_ACCEPTED",
+            "problemType": "PROGRAMMING",
+            "problemPoolIndex": 0,
+            "indexInProblemPool": 1
+        },
+        {
+            "id": "994805526272000000",
+            "label": "1002",
+            "score": 25,
+            "problemSubmissionStatus": "PROBLEM_ACCEPTED",
+            "problemType": "PROGRAMMING",
+            "problemPoolIndex": 1,
+            "indexInProblemPool": 1
+        },
+        ...
+    ]
+}
+
+{
+    "error": {
+        "code": "EXAM_NOT_FOUND",
+        "message": "Exam Not Found"
+    }
+}
