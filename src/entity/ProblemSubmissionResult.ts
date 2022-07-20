@@ -43,6 +43,10 @@ export interface IProblemSubmissionResult {
         previewSubmission: boolean;
         cause: string;
     };
+    error?: {
+        code: string;
+        message: string;
+    }
 }
 
 interface JudgeResponseContent {

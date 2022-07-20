@@ -18,11 +18,11 @@ export async function selectWorkspaceFolder(): Promise<string> {
     }
     let needAsk: boolean = true;
     await fs.ensureDir(workspaceFolderSetting);
-    // for (const folder of vscode.workspace.workspaceFolders || []) {
-    //     if (isSubFolder(folder.uri.fsPath, workspaceFolderSetting)) {
-    //         needAsk = false;
-    //     }
-    // }
+    for (const folder of vscode.workspace.workspaceFolders || []) {
+        if (isSubFolder(folder.uri.fsPath, workspaceFolderSetting)) {
+            needAsk = false;
+        }
+    }
 
     if (needAsk) {
         const choice: string | undefined = await vscode.window.showQuickPick(
@@ -76,7 +76,7 @@ export async function getActiveFilePath(uri?: vscode.Uri): Promise<string | unde
     return textEditor.document.uri.fsPath;
 }
 
-/*
+
 function isSubFolder(from: string, to: string): boolean {
     const relative: string = path.relative(from, to);
     if (relative === "") {
@@ -84,7 +84,6 @@ function isSubFolder(from: string, to: string): boolean {
     }
     return !relative.startsWith("..") && !path.isAbsolute(relative);
 }
-*/
 
 async function determinePintiaFolder(): Promise<string> {
     let result: string;

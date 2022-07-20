@@ -1,9 +1,7 @@
 
 import * as vscode from "vscode";
-import { explorerNodeManager } from "../explorer/explorerNodeManager";
-import { PtaNode } from "../explorer/PtaNode";
-import { ptaChannel } from "../ptaChannel";
 import { ptaConfig } from "../ptaConfig";
+import { IPtaCode } from "../shared";
 
 export class CustomCodeLensProvider implements vscode.CodeLensProvider {
 
@@ -18,22 +16,24 @@ export class CustomCodeLensProvider implements vscode.CodeLensProvider {
     }
 
     public provideCodeLenses(document: vscode.TextDocument): vscode.ProviderResult<vscode.CodeLens[]> {
+
         const shortcuts: string[] = ptaConfig.getEditorShortcuts();
         if (!shortcuts || shortcuts.length === 0) {
-            return;
+            return undefined;
         }
 
         const content: string = document.getText();
-        const matchResult: RegExpMatchArray | null = content.match(/@pintia psid=(.*) pid=(.*) type=(.*) compiler=(.*)/);
-
-        if (!matchResult) {
+        const ptaCode: IPtaCode | null = this.parseCodeInfo(content);
+        if (!ptaCode) {
             return undefined;
         }
-        const nodeId: string | undefined = matchResult[1];
-        // let node: PtaNode | undefined;
-        // if (nodeId) {
-        //     node = explorerNodeManager.getNodeById(nodeId);
-        // }
+
+        const code: ICodeBlock[] = this.parseCodeBlock(content, "@pintia code=start", "@pintia code=end");
+        if (code.length !== 0) {
+            ptaCode.code = code[0].code;
+        }
+        const customTestDatas: ICodeBlock[] = this.parseCodeBlock(content, "@pintia test=start", "@pintia test=end");
+        ptaCode.customTests = customTestDatas.map((value, _) => value.code);
 
         let codeLensLine: number = document.lineCount - 1;
         for (let i: number = document.lineCount - 1; i >= 0; i--) {
@@ -53,46 +53,67 @@ export class CustomCodeLensProvider implements vscode.CodeLensProvider {
             codeLens.push(new vscode.CodeLens(range, {
                 title: "Submit",
                 command: "pintia.submitSolution",
-                arguments: [document.uri],  // passed to the calling function
+                arguments: [ptaCode],  // passed to the calling function
             }));
         }
 
         if (shortcuts.indexOf("test") >= 0) {
             codeLens.push(new vscode.CodeLens(range, {
                 title: "Test",
-                command: "pintia.submitSolution",
-                arguments: [document.uri, "100311"],
+                command: "pintia.testSolution",
+                arguments: [ptaCode],
             }));
         }
 
-        /*
-        if (shortcuts.indexOf("star") >= 0 && node) {
-            codeLens.push(new vscode.CodeLens(range, {
-                title: node.isFavorite ? "Unstar" : "Star",
-                command: node.isFavorite ? "pintia.removeFavorite" : "pintia.addFavorite",
-                arguments: [node],
-            }));
+        for (let i = 0; i < customTestDatas.length; i++) {
+            const testCase = customTestDatas[i];
+            codeLens.push(new vscode.CodeLens(
+                new vscode.Range(testCase.lineNum, 0, testCase.lineNum, 0), {
+                title: `Test custom sample ${i + 1}`,
+                command: "pintia.testCustomSample",
+                arguments: [ptaCode, i]
+            }
+            ));
         }
-
-        if (shortcuts.indexOf("solution") >= 0) {
-            codeLens.push(new vscode.CodeLens(range, {
-                title: "Solution",
-                command: "pintia.showSolution",
-                arguments: [document.uri],
-            }));
-        }
-
-        if (shortcuts.indexOf("description") >= 0) {
-            codeLens.push(new vscode.CodeLens(range, {
-                title: "Description",
-                command: "pintia.previewProblem",
-                arguments: [document.uri],
-            }));
-        }
-        */
-
         return codeLens;
     }
+
+    private parseCodeInfo(data: string): IPtaCode | null {
+        const matchResult: RegExpMatchArray | null = data.match(/@pintia psid=(.*) pid=(.*) compiler=(.*)/);
+        if (!matchResult) {
+            return null;
+        }
+        return {
+            psID: matchResult[1],
+            pID: matchResult[2],
+            compiler: matchResult[3]
+        }
+    }
+
+    private parseCodeBlock(data: string, start: string, end: string): ICodeBlock[] {
+        const codeblock: ICodeBlock[] = [], lines: string[] = data.split('\n');
+        let startLine: number = -1;
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i].indexOf(start) != -1) {
+                startLine = i + 1;
+            } else if (lines[i].indexOf(end) != -1 && startLine != -1 && startLine < i) {
+                const code: string = lines.slice(startLine, i).join("\n");
+                if (!code.trim().length) continue;
+                codeblock.push({
+                    lineNum: startLine,
+                    code: lines.slice(startLine, i).join("\n")
+                });
+                startLine = -1;
+            }
+        }
+        return codeblock;
+    }
+
+}
+
+interface ICodeBlock {
+    lineNum: number;
+    code: string
 }
 
 export const customCodeLensProvider: CustomCodeLensProvider = new CustomCodeLensProvider();

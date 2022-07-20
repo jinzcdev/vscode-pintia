@@ -1,0 +1,20 @@
+{
+    "Custom Test Sample": {
+        "prefix": "ptatest",
+        "body": [
+            "$LINE_COMMENT @pintia test=start",
+            "${1: Put your custom test sample here}",
+            "$LINE_COMMENT @pintia test=end"
+        ],
+        "description": "Put your custom test samples in `@pintia test=start/end` and the extension will automatically recognize it when you click the `Test` button."
+    },
+    "$schema": {
+        "prefix": "ptacode",
+        "body": [
+            "$LINE_COMMENT @pintia code=start",
+            "${1: Put your code here}",
+            "$LINE_COMMENT @pintia code=end"
+        ],
+        "description": "Put your custom test samples in `@pintia test=start/end` and the extension will automatically recognize it when you click the `Test` button."
+    }
+}
