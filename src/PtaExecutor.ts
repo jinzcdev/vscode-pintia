@@ -56,7 +56,6 @@ class PtaExecutor extends EventEmitter implements Disposable {
                     let data: IProblemSubmissionResult;
                     let interval = setInterval(async () => {
                         data = await ptaApi.getProblemSubmissionResult(submission.submissionId, cookie);
-                        // console.log(`Waiting for ${data.queued} users`);
                         if (data.queued === -1 && data.submission.status !== "WAITING") {
                             resolve();
                             clearInterval(interval);
@@ -121,7 +120,6 @@ class PtaExecutor extends EventEmitter implements Disposable {
                     let data: IProblemSubmissionResult, cnt: number = 0;
                     let interval = setInterval(async () => {
                         data = await ptaApi.getProblemTestResult(submission.submissionId, cookie);
-                        // console.log(`Waiting for ${data.queued} users`);
                         if (data.queued === -1 && data.submission.status !== "WAITING") {
                             resolve();
                             clearInterval(interval);
@@ -133,7 +131,7 @@ class PtaExecutor extends EventEmitter implements Disposable {
                     }, 1000);
                 } catch (error: any) {
                     ptaChannel.appendLine(error.toString());
-                    await promptForOpenOutputChannel("Testing sample failed. Please open output channel for details.", DialogType.error);
+                    await promptForOpenOutputChannel("Testing sample failed. Please open the output channel for details.", DialogType.error);
                     reject(error);
                 }
             });

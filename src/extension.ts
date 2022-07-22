@@ -8,7 +8,6 @@ import * as user from "./commands/user";
 import { PtaNode } from './explorer/PtaNode';
 import { ptaTreeDataProvider } from './explorer/ptaTreeDataProvider';
 import { ptaChannel } from './ptaChannel';
-import { ptaConfig } from './ptaConfig';
 import { ptaExecutor } from './PtaExecutor';
 import { ptaManager } from './PtaManager';
 import { IPtaCode } from './shared';
@@ -27,7 +26,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	});
 
 	ptaTreeDataProvider.initialize(context);
-	console.log(ptaConfig.getEditorShortcuts());
 
 	context.subscriptions.push(
 		ptaPreviewProvider,

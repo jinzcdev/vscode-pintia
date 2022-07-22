@@ -72,9 +72,9 @@ class PtaManager extends EventEmitter {
             this.userSession = undefined;
             this.userStatus = UserStatus.SignedOut;
             this.emit("statusChanged");
-        } catch (error) {
-            // swallow the error when sign out.
-            console.log(error);
+        } catch (error: any) {
+            ptaChannel.appendLine(error.toString());
+            promptForOpenOutputChannel("Signout failed. Please open the output channel for details.", DialogType.error)
         }
     }
 

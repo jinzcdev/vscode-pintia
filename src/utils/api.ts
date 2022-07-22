@@ -155,12 +155,8 @@ class PtaAPI {
 
     private async getProblemNum(psID: string, problemType: ProblemType): Promise<number> {
         return await this.getProblemSummary(psID)
-            .then(json => {
-                // console.log(json);
-                return json[problemType];
-            })
-            .then(summary => summary.total)
-            .catch(reason => console.log("Problem summary error: " + reason));
+            .then(json => json[problemType])
+            .then(summary => summary.total);
     }
 
 
@@ -307,9 +303,7 @@ class PtaAPI {
                 'Content-Type': 'application/json',
                 'Cookie': cookie
             }
-        })
-            // .then(response => {})
-            .catch(reason => console.log(reason));
+        });
     }
 
     public async checkin(cookie: string): Promise<ICheckIn> {
