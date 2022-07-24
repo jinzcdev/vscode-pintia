@@ -79,6 +79,7 @@ export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
 
 
         if (!await fs.pathExists(finalPath)) {
+            await fs.createFile(finalPath);
 
             const problem: IProblem = await ptaApi.getProblem(ptaCode.psID, ptaCode.pID, ptaManager.getUserSession()?.cookie);
 
