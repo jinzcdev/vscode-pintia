@@ -9,6 +9,7 @@ import * as user from "./commands/user";
 import { PtaNode } from './explorer/PtaNode';
 import { ptaTreeDataProvider } from './explorer/ptaTreeDataProvider';
 import { ptaChannel } from './ptaChannel';
+import { ptaConfig } from "./ptaConfig";
 import { ptaExecutor } from './PtaExecutor';
 import { ptaManager } from './PtaManager';
 import { configPath, IPtaCode } from './shared';
@@ -56,6 +57,10 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	await fs.mkdirs(configPath);
 	await ptaManager.fetchLoginStatus();
+
+	if (ptaConfig.getAutoCheckIn()) {
+		await user.checkInPTA();
+	}
 }
 
 export function deactivate() { }

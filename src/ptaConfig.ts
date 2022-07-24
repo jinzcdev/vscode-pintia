@@ -53,6 +53,14 @@ class PtaConfig {
         this.update("enableStatusBar", enableStatusBar);
     }
 
+    public getAutoCheckIn(): boolean {
+        return this.getConfiguration().get<boolean>("autoCheckIn", false);
+    }
+
+    public setAutoCheckIn(autoCheckIn: boolean) {
+        this.update("autoCheckIn", autoCheckIn);
+    }
+
     public getFilePath(): string {
         return this.getConfiguration().get<string>("filePath", "");
     }
