@@ -1,3 +1,4 @@
+import * as fs from "fs-extra";
 import * as vscode from 'vscode';
 import { codeLensController } from './codelens/CodeLensController';
 import * as cache from "./commands/cache";
@@ -10,7 +11,7 @@ import { ptaTreeDataProvider } from './explorer/ptaTreeDataProvider';
 import { ptaChannel } from './ptaChannel';
 import { ptaExecutor } from './PtaExecutor';
 import { ptaManager } from './PtaManager';
-import { IPtaCode } from './shared';
+import { configPath, IPtaCode } from './shared';
 import { ptaStatusBarController } from './statusbar/ptaStatusBarController';
 import { ptaLoginProvider } from './webview/ptaLoginProvider';
 import { ptaPreviewProvider } from './webview/ptaPreviewProvider';
@@ -53,6 +54,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	);
 
+	await fs.mkdirs(configPath);
 	await ptaManager.fetchLoginStatus();
 }
 

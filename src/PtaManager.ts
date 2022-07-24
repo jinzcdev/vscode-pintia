@@ -41,28 +41,46 @@ class PtaManager extends EventEmitter {
         if (!choice) {
             return;
         }
-        try {
-            await ptaExecutor.signIn(choice.value, async (msg: string, data?: IUserSession) => {
-                switch (msg) {
-                    case "SUCCESS":
-                        await fs.writeJson(path.join(configPath, 'user.json'), data);
-                        vscode.window.showInformationMessage(`Successfully, ${choice.value}.`);
-                        this.userSession = data;
-                        this.userStatus = UserStatus.SignedIn;
 
-                        this.emit("statusChanged");
-                        break;
-                    case "TIMEOUT":
-                        vscode.window.showErrorMessage("Login timed out!");
+        await vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: "Waiting for sign in...",
+            cancellable: false
+        }, async (p: vscode.Progress<{ message?: string; increment?: number }>) => {
+            return new Promise<void>(async (resolve: () => void, reject: (e: Error) => void): Promise<void> => {
+                try {
+                    await ptaExecutor.signIn(choice.value, async (msg: string, data?: IUserSession) => {
+                        switch (msg) {
+                            case "SUCCESS":
+                                fs.writeJson(path.join(configPath, 'user.json'), data)
+                                    .catch(reason => {
+                                        ptaChannel.appendLine(reason);
+                                        reject(reason);
+                                    });
+                                vscode.window.showInformationMessage(`Successfully, ${choice.value}.`);
+                                this.userSession = data;
+                                this.userStatus = UserStatus.SignedIn;
 
-                    default:
+                                ptaChannel.appendLine(`Login successfully and save \`user.json\` to ${path}`);
+
+                                this.emit("statusChanged");
+                                break;
+                            case "TIMEOUT":
+                                vscode.window.showErrorMessage("Login timed out!");
+                                ptaChannel.appendLine("Login timed out!");
+                                break;
+                            default:
+                        }
+                        resolve();
+                    });
+                }
+                catch (error: any) {
+                    ptaChannel.appendLine(error.toString());
+                    await promptForOpenOutputChannel(`Failed to login PTA. Please open the output channel for details.`, DialogType.error);
+                    reject(error);
                 }
             });
-        }
-        catch (error: any) {
-            ptaChannel.appendLine(error.toString());
-            await promptForOpenOutputChannel(`Failed to submit the solution. Please open the output channel for details.`, DialogType.error);
-        }
+        });
     }
 
     public async signOut(): Promise<void> {
