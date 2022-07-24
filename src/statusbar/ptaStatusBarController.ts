@@ -1,9 +1,7 @@
-// Copyright (c) jdneo. All rights reserved.
-// Licensed under the MIT license.
 
-import { ConfigurationChangeEvent, Disposable, workspace, WorkspaceConfiguration } from "vscode";
+import { ConfigurationChangeEvent, Disposable, workspace } from "vscode";
 import { IUserSession } from "../entity/userLoginSession";
-import { UserStatus } from "../shared";
+import { ptaConfig } from "../ptaConfig";
 import { PtaStatusBarItem } from "./PtaStatusBarItem";
 
 class PtaStatusBarController implements Disposable {
@@ -15,7 +13,7 @@ class PtaStatusBarController implements Disposable {
         this.setStatusBarVisibility();
 
         this.configurationChangeListener = workspace.onDidChangeConfiguration((event: ConfigurationChangeEvent) => {
-            if (event.affectsConfiguration("pta.enableStatusBar")) {
+            if (event.affectsConfiguration("pintia.enableStatusBar")) {
                 this.setStatusBarVisibility();
             }
         }, this);
@@ -39,8 +37,7 @@ class PtaStatusBarController implements Disposable {
     }
 
     private isStatusBarEnabled(): boolean {
-        const configuration: WorkspaceConfiguration = workspace.getConfiguration();
-        return configuration.get<boolean>("pta.enableStatusBar", true);
+        return ptaConfig.getEnableStatusBar();
     }
 }
 

@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import { IUserSession } from "../entity/userLoginSession";
-import { UserStatus } from "../shared";
 
 export class PtaStatusBarItem implements vscode.Disposable {
     private readonly statusBarItem: vscode.StatusBarItem;
