@@ -46,6 +46,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand("pintia.previewProblem", async (node: PtaNode) => ptaPreviewProvider.showPreview(node)),
 		vscode.commands.registerCommand("pintia.manageUser", () => user.showUserManager()),
 		vscode.commands.registerCommand("pintia.checkIn", () => user.checkInPTA()),
+		vscode.commands.registerCommand("pintia.reportIssue", () => user.reportIssue()),
 		vscode.commands.registerCommand("pintia.codeProblem", async (ptaCode: IPtaCode) => await show.showCodingEditor(ptaCode)),
 		vscode.commands.registerCommand("pintia.testCustomSample", async (ptaCode: IPtaCode, index: number) => await submit.testCustomSample(ptaCode, index)),
 		vscode.commands.registerCommand("pintia.submitSolution", async (ptaCode: IPtaCode) => submit.submitSolution(ptaCode)),

@@ -21,6 +21,7 @@
         "onCommand:pintia.refreshExplorer",
         "onCommand:pintia.checkIn",
         "onCommand:pintia.changeDefaultLanguage",
+        "onCommand:pintia.reportIssue",
         "onView:pintiaExplorer"
     ],
     "main": "./out/extension.js",
@@ -58,6 +59,11 @@
                     "command": "pintia.refreshExplorer",
                     "when": "view == pintiaExplorer",
                     "group": "navigation@2"
+                },
+                {
+                    "command": "pintia.reportIssue",
+                    "when": "view == pintiaExplorer",
+                    "group": "navigation@3"
                 }
             ]
         },
@@ -99,6 +105,12 @@
                 "command": "pintia.checkIn",
                 "title": "Check In PTA",
                 "category": "Pintia"
+            },
+            {
+                "command": "pintia.reportIssue",
+                "title": "Report Issue",
+                "category": "Pintia",
+                "icon": "$(comment)"
             }
         ],
         "configuration": {
@@ -131,6 +143,18 @@
                     "default": true,
                     "scope": "application",
                     "description": "Show locked problems."
+                },
+                "pintia.enableStatusBar": {
+                    "type": "boolean",
+                    "default": true,
+                    "scope": "application",
+                    "description": "Specify whether the Pintia status bar will be shown or not."
+                },
+                "pintia.autoCheckIn": {
+                    "type": "boolean",
+                    "default": false,
+                    "scope": "application",
+                    "description": "Specify whether to check in Pintia's education supermarket or not when the Pintia Extension is activated."
                 },
                 "pintia.defaultLanguage": {
                     "type": "string",

@@ -87,3 +87,7 @@ export async function checkedInStatus(): Promise<boolean> {
 export async function openPintiaHome(): Promise<void> {
     openUrl("https://pintia.cn/problem-sets/dashboard");
 }
+
+export async function reportIssue(): Promise<void> {
+    openUrl("https://github.com/jinzcdev/vscode-pintia/issues");
+}
