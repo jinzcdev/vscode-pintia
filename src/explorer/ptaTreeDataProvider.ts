@@ -6,6 +6,7 @@ import { defaultPtaNode, IPtaNodeValue, ProblemSubmissionState, ProblemType, Pta
 import { ptaManager } from "../PtaManager";
 import { explorerNodeManager } from "./explorerNodeManager";
 import { ptaConfig } from "../ptaConfig";
+import { IProblemSummary } from "../entity/ProblemSummary";
 
 
 export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vscode.Disposable {
@@ -82,39 +83,22 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
 
         const value: IPtaNodeValue = element.value;
         if (element.type === PtaNodeType.ProblemSet) {
-            if (value.summaries.numType > 1) {
-                // container two kinds of problems (CODE_COMPLETION, PROGRAMMING)
-                return [
-                    new PtaNode(Object.assign({}, defaultPtaNode, {
-                        psID: element.psID,
-                        type: PtaNodeType.ProblemSubSet,
-                        label: "函数题",
-                        value: Object.assign({}, value, {
-                            problemType: ProblemType.CODE_COMPLETION,
-                        })
-                    })),
-                    new PtaNode(Object.assign({}, defaultPtaNode, {
-                        psID: element.psID,
-                        type: PtaNodeType.ProblemSubSet,
-                        label: "编程题",
-                        value: Object.assign({}, value, {
-                            problemType: ProblemType.PROGRAMMING
-                        })
-                    })),
-                ];
+            if (Object.keys(value.summaries).length > 1) {
+                return explorerNodeManager.getSubProblemSet(element);
             }
-            const total: number = value.summaries[ProblemType.PROGRAMMING].total;
-            // only "PROGRAMMING", return problem list
+            const problemType: string = Object.keys(value.summaries)[0];
+            const total: number = value.summaries[problemType as keyof IProblemSummary]?.total ?? 0;
+
             if (!paged || total < limit) {
                 // 1-200, 201-400
-                return explorerNodeManager.getProblemNodes(element.psID, element.value.problemSet, ProblemType.PROGRAMMING);
+                return explorerNodeManager.getProblemNodes(element.psID, element.value.problemSet, problemType as ProblemType);
             } else {
-                return explorerNodeManager.getProblemSetPageNodes(element.psID, element.value.problemSet, ProblemType.PROGRAMMING, total, limit);
+                return explorerNodeManager.getProblemSetPageNodes(element.psID, element.value.problemSet, problemType as ProblemType, total, limit);
             }
         }
 
         if (element.type === PtaNodeType.ProblemSubSet) {
-            const total: number = value.summaries[value.problemType].total;
+            const total: number = value.summaries[value.problemType]?.total ?? 0;
             // node.type === PtaNodeType.ProblemType
             if (!paged || total < limit) {
                 return explorerNodeManager.getProblemNodes(element.psID, element.value.problemSet, value.problemType);
@@ -124,7 +108,6 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
         }
 
         if (element.type === PtaNodeType.ProblemPage) {
-            // return explorerNodeManager.getProblemNodes(element.psID, )
             return explorerNodeManager.getProblemNodes(element.psID, element.value.problemSet, value.problemType, value.page, limit);
         }
 

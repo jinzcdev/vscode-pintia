@@ -4,11 +4,12 @@ import { IDashSection } from "../entity/IDashSection";
 import { IExamProblemStatus } from "../entity/IExamProblemStatus";
 import { IProblemInfo } from "../entity/ProblemInfo";
 import { IProblemSet } from "../entity/ProblemSet";
+import { IProblemSummary } from "../entity/ProblemSummary";
 import { IUserSession } from "../entity/userLoginSession";
 import { ptaChannel } from "../ptaChannel";
 import { ptaConfig } from "../ptaConfig";
 import { ptaManager } from "../PtaManager";
-import { defaultPtaNode, ProblemSubmissionState, ProblemType, PtaNodeType } from "../shared";
+import { defaultPtaNode, IPtaNodeValue, ProblemSubmissionState, ProblemType, problemTypeNameMapping, PtaNodeType } from "../shared";
 import { ptaApi } from "../utils/api";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import { PtaNode } from "./PtaNode";
@@ -68,6 +69,26 @@ class ExplorerNodeManager implements Disposable {
         return ptaNodeList;
     }
     */
+
+    public async getSubProblemSet(node: PtaNode): Promise<PtaNode[]> {
+        // container two kinds of problems (CODE_COMPLETION, PROGRAMMING, MULTIPLE_FILE)
+        const value: IPtaNodeValue = node.value;
+        const summaries: IProblemSummary = value.summaries;
+        const nodeList: PtaNode[] = [];
+        for (const problemType in summaries) {
+            if (Object.prototype.hasOwnProperty.call(summaries, problemType)) {
+                nodeList.push(new PtaNode(Object.assign({}, defaultPtaNode, {
+                    psID: node.psID,
+                    type: PtaNodeType.ProblemSubSet,
+                    label: problemTypeNameMapping.get(problemType) ?? "ERROR",
+                    value: Object.assign({}, value, {
+                        problemType: problemType as ProblemType,
+                    })
+                })));
+            }
+        }
+        return nodeList;
+    }
 
     public async getProblemNodes(psID: string, psName: string, problemType: ProblemType, page?: number, limit?: number): Promise<PtaNode[]> {
         try {
