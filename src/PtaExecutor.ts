@@ -187,8 +187,10 @@ class PtaExecutor extends EventEmitter implements Disposable {
                 }
             }, 2000);
             ptaLoginProvider.onDidDisposeCallBack(() => {
-                // vscode.window.showInformationMessage("Cancel to login.");
                 clearInterval(interval);
+                if (!ptaManager.getUserSession()) {
+                    callback("CANCEL");
+                }
             });
         } catch (error: any) {
             ptaChannel.append(error.toString());

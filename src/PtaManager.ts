@@ -31,7 +31,7 @@ class PtaManager extends EventEmitter {
                 value: PtaLoginMethod.WeChat
             },
             {
-                label: "$(account) PTA Account",
+                label: "$(account) PTA Account (Not Implemented)",
                 detail: "Use Pintia account to login",
                 value: PtaLoginMethod.PTA,
             }
@@ -39,6 +39,11 @@ class PtaManager extends EventEmitter {
 
         const choice: IQuickPickItem<PtaLoginMethod> | undefined = await vscode.window.showQuickPick(picks);
         if (!choice) {
+            return;
+        }
+
+        if (choice.value === PtaLoginMethod.PTA) {
+            vscode.window.showInformationMessage("Logging in with PTA account will be implemented in the future.");
             return;
         }
 
@@ -68,6 +73,10 @@ class PtaManager extends EventEmitter {
                             case "TIMEOUT":
                                 vscode.window.showErrorMessage("Login timed out!");
                                 ptaChannel.appendLine("Login timed out!");
+                                break;
+                            case "CANCEL":
+                                vscode.window.showErrorMessage("Login is cancelled.");
+                                ptaChannel.appendLine("[INFO] Login is cancelled");
                                 break;
                             default:
                         }
