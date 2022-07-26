@@ -67,7 +67,7 @@ class PtaTestProvider extends PtaWebview {
                     width: 75%;
                     margin: 0 auto;
                     border-collapse: collapse;
-                    text-align: center;
+                    text-align: left;
                     font-size: 15px;
                 }
 
@@ -105,11 +105,21 @@ class PtaTestProvider extends PtaWebview {
     protected getContent(data?: any): string {
         return `
             <h2>测试结果</h2>
-            ${markdownEngine.render([
-            `| 测试用例 | 运行结果 | 预期结果 |`,
-            `| :-: | :-: | :-: |`,
-            `| ${data.testCase.replaceAll(/\n/g, "<br>")} | ${data.myanswer.replaceAll(/\n/g, "<br>")} | ${data.answer.replaceAll(/\n/g, "<br>")} |`
-        ].join("\n"))}
+
+            <table>
+                <thead>
+                    <th>测试用例</th>
+                    <th>运行结果</th>
+                    <th>预期结果</th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><pre><code>${data.testCase}</pre></code></td>
+                        <td><pre><code>${data.myanswer}</pre></code></td>
+                        <td><pre><code>${data.answer}</pre></code></td>
+                    </tr>
+                </tbody>
+            </table>
 
             <h2>编译器输出</h2>
             <div class="code-preview">
