@@ -1,13 +1,29 @@
 {
     "name": "vscode-pintia",
-    "displayName": "PTA",
+    "displayName": "Pintia",
     "description": "Solve PTA problems in VS Code",
     "version": "0.0.1",
     "author": "Zhichao Jin",
     "publisher": "jinzcdev",
+    "license": "MIT",
+    "icon": "resources/pta_logo.png",
     "engines": {
         "vscode": "^1.66.0"
     },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jinzcdev/vscode-pintia"
+    },
+    "homepage": "https://github.com/jinzcdev/vscode-pintia",
+    "keywords": [
+        "pintia",
+        "pta",
+        "pat",
+        "interview",
+        "algorithm",
+        "oj"
+    ],
+    "preview": true,
     "categories": [
         "Education",
         "Other",
