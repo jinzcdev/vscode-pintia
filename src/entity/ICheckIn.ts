@@ -13,3 +13,13 @@ export interface ICheckIn {
         message: string;
     };
 }
+
+export interface ICheckInStatus {
+    exists: boolean;
+    rewardContent: {
+        rewards: [{
+            purchaseObjectType: string;
+            amount: number;
+        }]
+    }
+}

@@ -12,7 +12,7 @@ import { httpGet, httpPost } from "./httpUtil";
 import * as fs from "fs-extra";
 import fetch from "node-fetch";
 import * as path from "path";
-import { ICheckIn } from "../entity/ICheckIn";
+import { ICheckIn, ICheckInStatus } from "../entity/ICheckIn";
 import { IDashSection } from "../entity/IDashSection";
 import { IExamProblemStatus } from "../entity/IExamProblemStatus";
 import { IPtaUser } from "../entity/PtaUser";
@@ -63,7 +63,6 @@ class PtaAPI {
         const problemSet: IProblemSet[] = [];
         for (const item of data) {
             const summaries: IProblemSummary = await this.getProblemSummary(item.id);  // id: ProblemSetID
-            summaries.numType = Object.keys(summaries).length;
             item.summaries = summaries;
             if (cookie) {
                 const permission: number | undefined = await this.getProblemPermission(item.id, cookie);
@@ -104,7 +103,7 @@ class PtaAPI {
      * @param psID ProblemSetID
      * @returns 
      */
-    public async getProblemSummary(psID: string): Promise<any> {
+    public async getProblemSummary(psID: string): Promise<IProblemSummary> {
         return await httpGet(this.problemUrl + `${psID}/problem-summaries`)
             .then(json => json["summaries"]);
     }
@@ -156,7 +155,7 @@ class PtaAPI {
     private async getProblemNum(psID: string, problemType: ProblemType): Promise<number> {
         return await this.getProblemSummary(psID)
             .then(json => json[problemType])
-            .then(summary => summary.total);
+            .then(summary => summary?.total ?? 0);
     }
 
 
@@ -308,6 +307,10 @@ class PtaAPI {
 
     public async checkin(cookie: string): Promise<ICheckIn> {
         return await httpPost("https://pintia.cn/api/users/checkin", cookie);
+    }
+
+    public async getCheckInStatus(cookie: string): Promise<ICheckInStatus> {
+        return await httpGet("https://pintia.cn/api/users/rewards/DAILY_CHECK_IN", cookie);
     }
 }
 

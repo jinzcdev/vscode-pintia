@@ -1,10 +1,11 @@
 import * as vscode from "vscode";
 import { ICheckIn } from "../entity/ICheckIn";
 import { IUserSession } from "../entity/userLoginSession";
+import { ptaChannel } from "../ptaChannel";
 import { ptaManager } from "../PtaManager";
 import { IQuickPickItem } from "../shared";
 import { ptaApi } from "../utils/api";
-import { openUrl } from "../utils/uiUtils";
+import { DialogType, openUrl, promptForOpenOutputChannel } from "../utils/uiUtils";
 
 
 export async function showUserManager(): Promise<void> {
@@ -54,15 +55,33 @@ export async function showUserManager(): Promise<void> {
 }
 
 export async function checkInPTA(): Promise<void> {
-    const userSession: IUserSession | undefined = ptaManager.getUserSession();
-    if (userSession) {
-        const response: ICheckIn = await ptaApi.checkin(userSession.cookie);
-        if (response.rewards) {
-            vscode.window.showInformationMessage("Successfully, check in PTA.");
-        } else {
-            vscode.window.showInformationMessage(response.error.message);
+    try {
+        const userSession: IUserSession | undefined = ptaManager.getUserSession();
+        if (userSession) {
+            const response: ICheckIn = await ptaApi.checkin(userSession.cookie);
+            if (response.rewards) {
+                vscode.window.showInformationMessage("Successfully, check in PTA.");
+            } else {
+                vscode.window.showInformationMessage(response.error.message);
+            }
         }
+    } catch (error: any) {
+        ptaChannel.appendLine(error.toString());
+        promptForOpenOutputChannel("Failed to check in. Please open the output channel for details.", DialogType.error);
     }
+}
+
+export async function checkedInStatus(): Promise<boolean> {
+    try {
+        const userSession: IUserSession | undefined = ptaManager.getUserSession();
+        if (userSession) {
+            return await ptaApi.getCheckInStatus(userSession.cookie).then(e => e.exists);
+        }
+    } catch (error: any) {
+        ptaChannel.appendLine(error.toString());
+        promptForOpenOutputChannel("Failed to check in. Please open the output channel for details.", DialogType.error);
+    }
+    return false;
 }
 
 export async function openPintiaHome(): Promise<void> {

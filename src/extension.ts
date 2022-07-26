@@ -58,7 +58,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	await fs.mkdirs(configPath);
 	await ptaManager.fetchLoginStatus();
 
-	if (ptaConfig.getAutoCheckIn()) {
+	if (ptaConfig.getAutoCheckIn() && !await user.checkedInStatus()) {
 		await user.checkInPTA();
 	}
 }
