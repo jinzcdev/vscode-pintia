@@ -1,16 +1,18 @@
 
 export interface IProblemSummary {
 
-    PROGRAMMING: {
+    PROGRAMMING?: {
         total: number;
         totalScore: number;
     }
 
-    CODE_COMPLETION: {
+    CODE_COMPLETION?: {
         total: number;
         totalScore: number;
     }
 
-    numType: number;
-
+    MULTIPLE_FILE?: {
+        total: number;
+        totalScore: number;
+    }
 }

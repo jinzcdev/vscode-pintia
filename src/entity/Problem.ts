@@ -6,6 +6,7 @@ export interface IProblem {
     problemConfig: {
         programmingProblemConfig?: ProblemConfig;
         codeCompletionProblemConfig?: ProblemConfig;
+        multipleFileProblemConfig?: MultipleFileProblemConfig;
         solutionVisible: boolean;
     };
     deadline: string;
@@ -69,4 +70,23 @@ interface ProblemConfig {
     customizeLimits: [];
     stackSizeLimit: 0;
     tools: [];
+}
+
+/**
+ * multipleFileProblemConfig
+ */
+interface MultipleFileProblemConfig {
+    memoryLimit: number;
+    cpuCount: number;
+    template: string;
+    files: [{
+        path: string;
+        directory: boolean;
+    }];
+    judgeZip: string,
+    originalScore: 100,
+    compiles: string[];
+    tools: string[];
+    withLocalhostNetwork: boolean;
+    fileContents: {}
 }

@@ -33,6 +33,7 @@ export interface IProblemSubmissionResult {
             // "codeCompletionJudgeResponseContent" or "programmingJudgeResponseContent"
             codeCompletionJudgeResponseContent?: JudgeResponseContent;
             programmingJudgeResponseContent?: JudgeResponseContent;
+            multipleFileJudgeResponseContent?: MultipleFileJudgeResponseContent;
             problemSetProblemId: string;
         }];
         hints: any;
@@ -79,4 +80,10 @@ interface JudgeResponseContent {
         "stderrTruncated": false
     };
     */
+}
+
+interface MultipleFileJudgeResponseContent {
+    stderr: string;
+    stdout: string;
+    info: string;
 }

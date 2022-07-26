@@ -3,7 +3,7 @@
 
 export interface IProblemCode {
     details: IProblemSubmissionDetail[];
-    problemType: string; // PROGRAMMING or CODE_COMPLETION
+    problemType: string; // PROGRAMMING, CODE_COMPLETION, MULTIPLE_FILE
 }
 
 export interface IProblemSubmissionDetail {
@@ -11,6 +11,8 @@ export interface IProblemSubmissionDetail {
     problemSetProblemId: string;
     codeCompletionSubmissionDetail?: SubmissionDetail;
     programmingSubmissionDetail?: SubmissionDetail;
+    multipleFileSubmissionDetail?: MultipleFileSubmissionDetail;
+
     customTestData?: {
         hasCustomTestData: boolean;
         content: string;
@@ -20,4 +22,20 @@ export interface IProblemSubmissionDetail {
 interface SubmissionDetail {
     compiler: string;
     program: string;
+}
+
+interface MultipleFileSubmissionDetail {
+    memoryLimit: number;
+    cpuCount: number;
+    template: number;
+    files: [{
+        path: string;
+        directory: boolean;
+    }],
+    judgeZip: string;
+    originalScore: number;
+    compiles: string[];
+    tools: string[];
+    withLocalhostNetwork: boolean;
+    fileContents: {}
 }

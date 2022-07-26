@@ -32,7 +32,8 @@ export enum ProblemSubmissionState {
 
 export enum ProblemType {
     PROGRAMMING = "PROGRAMMING",
-    CODE_COMPLETION = "CODE_COMPLETION"
+    CODE_COMPLETION = "CODE_COMPLETION",
+    MULTIPLE_FILE = "MULTIPLE_FILE"
 }
 
 export enum PtaNodeType {
@@ -95,7 +96,10 @@ export const defaultPtaNode: IPtaNode = {
                 total: 0,
                 totalScore: 0
             },
-            numType: 1
+            MULTIPLE_FILE: {
+                total: 0,
+                totalScore: 0
+            }
         },
         total: 0,
         page: 0,
@@ -222,6 +226,12 @@ export const commentFormatMapping: Map<string, { single: string, start: string, 
     ["Python (python3)", { single: "# ", start: "'''", middle: "   ", end: "'''" }],
     ["Python (pypy3)", { single: "# ", start: "'''", middle: "   ", end: "'''" }],
     ["Bash (bash)", { single: "# ", start: "# ", middle: "# ", end: "" }],
+]);
+
+export const problemTypeNameMapping: Map<string, string> = new Map([
+    ["PROGRAMMING", "编程题"],
+    ["CODE_COMPLETION", "函数题"],
+    ["MULTIPLE_FILE", "多文件编程题"]
 ]);
 
 export enum DescriptionConfiguration {
