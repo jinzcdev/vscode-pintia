@@ -1,4 +1,5 @@
 import fetch from "node-fetch";
+import { ptaChannel } from "../ptaChannel";
 
 export async function httpGet(url: string, cookie: string = ''): Promise<any> {
     const json = await fetch(url, {
@@ -11,7 +12,7 @@ export async function httpGet(url: string, cookie: string = ''): Promise<any> {
         }
     })
         .then(response => response.json());
-    // ptaChannel.appendLine(JSON.stringify(json));
+    ptaChannel.appendLine(`[HTTP Get] ${url}`);
     return json;
 }
 
@@ -27,6 +28,7 @@ export async function httpPost(url: string, cookie: string = '', body?: any): Pr
         body: JSON.stringify(body)
     })
         .then(response => response.json());
-    // ptaChannel.appendLine(JSON.stringify(json));
+    ptaChannel.appendLine(`[HTTP Post] ${url}`);
+    ptaChannel.appendLine(JSON.stringify(body ?? ""));
     return json;
 }
