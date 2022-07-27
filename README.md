@@ -8,8 +8,8 @@
 
 
 <p align="center">
-  <a href="https://marketplace.visualstudio.com/items?itemName=Pintia.vscode-pintia">
-    <img src="https://img.shields.io/visual-studio-marketplace/d/Pintia.vscode-pintia.svg?style=flat-square" alt="">
+  <a href="https://marketplace.visualstudio.com/items?itemName=jinzcdev.vscode-pintia">
+    <img src="https://img.shields.io/visual-studio-marketplace/d/jinzcdev.vscode-pintia.svg?style=flat-square" alt="">
   </a>
   <a href="https://github.com/jinzcdev/vscode-pintia/blob/main/LICENSE">
     <img src="https://img.shields.io/github/license/jinzcdev/vscode-pintia.svg?style=flat-square" alt="">
