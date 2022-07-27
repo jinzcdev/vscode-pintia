@@ -2,35 +2,17 @@
 
 ## [Unreleased]
 
-- PTA Extension
+- Sign in to Pintia with PTA Account
+- Support for `MultipleFile` of problem types
+- Editor shortcuts `Description`
 
-
-## [0.0.1] - 2022/06/19
-
-### Added
-
-- New feature
-- Nothing
-
-### Changed
-
-- Fix the issue
-
-### Removed
-
-- Remove the log
-
-## [0.0.2] - 2022/06/22
+## [0.1.0] - 2022/07/27
 
 ### Added
 
-- New feature
-- Nothing
-
-### Changed
-
-- Fix the issue
-
-### Removed
-
-- Remove the log
+- Sign in/out to Pintia(PTA) with WeChat QRCode
+- Show public problems in explorer
+- Preview the problem in the VS Code
+- Submit/Test solutions to Pintia
+- Add multiple custom test samples in editor
+- Check in the education supermarket of Pintia

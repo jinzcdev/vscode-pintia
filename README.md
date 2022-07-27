@@ -3,13 +3,13 @@
 > Solve PTA problems in VS Code
 
 <p align="center">
-  <img style="width: 60%;" src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/blob/main/resources/pintia_logo.png" alt="">
+  <img style="width: 55%;" src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/resources/pintia_logo.png" alt="">
 </p>
 
 
 <p align="center">
-  <a href="https://marketplace.visualstudio.com/items?itemName=PTA.vscode-pintia">
-    <img src="https://img.shields.io/visual-studio-marketplace/d/PTA.vscode-pintia.svg?style=flat-square" alt="">
+  <a href="https://marketplace.visualstudio.com/items?itemName=Pintia.vscode-pintia">
+    <img src="https://img.shields.io/visual-studio-marketplace/d/Pintia.vscode-pintia.svg?style=flat-square" alt="">
   </a>
   <a href="https://github.com/jinzcdev/vscode-pintia/blob/main/LICENSE">
     <img src="https://img.shields.io/github/license/jinzcdev/vscode-pintia.svg?style=flat-square" alt="">
@@ -32,11 +32,11 @@
 ### Sign In/Out
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/sign_in.png" alt="Sign in" />
+  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/signin.png" alt="Sign in" />
 </p>
 
 
-- Simply click `Sign in to Pintia` in the `Pintia Explorer` will let you **sign in** with your Pintia account. (Now, it is allowed to **sign in** Pintia using **WeChat**.)
+- Simply click `Sign in to Pintia` in the `Pintia Explorer` will let you **sign in** with your Pintia account. (Currently, only **WeChat QR** codes are supported for signin)
 
 - You can also use the following command to sign in/out:
   - **Pintia: Sign in**
@@ -47,7 +47,7 @@
 ### Preview a Problem
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/pick_problem.png" alt="Pick a Problem" />
+  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/preview.png" alt="Preview Problem" />
 </p>
 
 
@@ -69,16 +69,14 @@
 - The extension supports 2 editor shortcuts (aka Code Lens):
 
   - `Submit`: Submit your answer to Pintia.
-  - `Test`: Test your answer with customized test cases.
-
-  > Note: You can customize the shortcuts using the setting: `Ppntia.editor.shortcuts`. By default, only `Submit` and `Test` shortcuts are enabled.
+  - `Test`: Test your answer with customized test cases or default ones.
 
 ---
 
 ### Custom Test Samples
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/shortcuts.png" alt="Editor Shortcuts" />
+  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/gifs/codelens.gif" alt="Custom Test Samples" />
 </p>
 
 
@@ -96,6 +94,8 @@
 | `pintia.workspaceFolder`  | Specify the path of the workspace folder to store the problem files. | `""`               |
 | `pintia.enableStatusBar`  | Specify whether the Pintia status bar will be shown or not.  | `true`             |
 | `pintia.editor.shortcuts` | Specify the customized shortcuts in editors. Supported values are: `submit`, `test`. | `["submit, test"]` |
+| `pintia.paging.pageSize` | Whether to page the problem list when the problem set is too large. It is not paged when pageSize is 0. | `100` |
+| `pintia.autoCheckIn` | Specify whether to check in Pintia's education supermarket or not when the Pintia Extension is activated. | `false` |
 
 ## Want Help?
 
@@ -109,5 +109,4 @@ Refer to [CHANGELOG](https://github.com/jinzcdev/vscode-pintia/blob/main/CHANGEL
 
 ## Acknowledgement
 
-- The project's functionality is heavily based on that of the [jinzcdev/vscode-pintia](https://github.com/jinzcdev/vscode-pintia).
-- Special thanks to our [contributors](https://github.com/jinzcdev/vscode-pintia/blob/main/ACKNOWLEDGEMENTS.md).
+- The design of the `Pintia Extension` references the design of the [LeetCode](https://marketplace.visualstudio.com/items?itemName=LeetCode.vscode-leetcode) in many of its features.
