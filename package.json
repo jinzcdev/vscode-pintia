@@ -38,7 +38,7 @@
         "onCommand:pintia.reportIssue",
         "onView:pintiaExplorer"
     ],
-    "main": "./out/extension.js",
+    "main": "./out/extension",
     "contributes": {
         "viewsContainers": {
             "activitybar": [
@@ -302,15 +302,13 @@
         "eslint": "^7.19.0",
         "glob": "^7.2.3",
         "mocha": "^10.0.0",
-        "node-fetch": "^2.6.7",
-        "qrcode": "^1.5.0",
         "typescript": "^4.7.4",
         "vscode-test": "^1.5.0"
     },
     "dependencies": {
-        "commenting": "^1.1.0",
+        "node-fetch": "^2.6.7",
+        "qrcode": "^1.5.0",
         "fs-extra": "^10.1.0",
-        "katex": "^0.16.0",
         "markdown-it": "^12.2.3",
         "markdown-it-texmath": "^1.0.0"
     }
