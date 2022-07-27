@@ -82,7 +82,7 @@
 
 - You can put your codes between `@pintia code=start` and `@pintia code=end` (enter `ptacode` to quickly add them).
 - Also, you can put your custom test samples between `@pintia test=start` and `@pintia test=end` (enter `ptatest` to quickly add them).
-
+And then click `Test custom sample` to quickly test your code.
 ---
 
 ## Settings
