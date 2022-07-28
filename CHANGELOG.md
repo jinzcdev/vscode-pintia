@@ -16,3 +16,13 @@
 - Submit/Test solutions to Pintia
 - Add multiple custom test samples in editor
 - Check in the education supermarket of Pintia
+
+## [0.1.1] - 2022/07/28
+
+### Changed
+
+- Fix the issue that user's session cannot be saved
+
+### Removed
+
+- Remove the tip for users to cancel signin

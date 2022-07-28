@@ -57,7 +57,9 @@ class PtaManager extends EventEmitter {
                     await ptaExecutor.signIn(choice.value, async (msg: string, data?: IUserSession) => {
                         switch (msg) {
                             case "SUCCESS":
-                                fs.writeJson(path.join(configPath, 'user.json'), data)
+                                const userSessionPath: string = path.join(configPath, 'user.json');
+                                await fs.createFile(userSessionPath);
+                                await fs.writeJson(userSessionPath, data)
                                     .catch(reason => {
                                         ptaChannel.appendLine(reason);
                                         reject(reason);
@@ -73,10 +75,6 @@ class PtaManager extends EventEmitter {
                             case "TIMEOUT":
                                 vscode.window.showErrorMessage("Login timed out!");
                                 ptaChannel.appendLine("Login timed out!");
-                                break;
-                            case "CANCEL":
-                                vscode.window.showErrorMessage("Login is cancelled.");
-                                ptaChannel.appendLine("[INFO] Login is cancelled");
                                 break;
                             default:
                         }

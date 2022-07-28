@@ -188,9 +188,6 @@ class PtaExecutor extends EventEmitter implements Disposable {
             }, 2000);
             ptaLoginProvider.onDidDisposeCallBack(() => {
                 clearInterval(interval);
-                if (!ptaManager.getUserSession()) {
-                    callback("CANCEL");
-                }
             });
         } catch (error: any) {
             ptaChannel.append(error.toString());

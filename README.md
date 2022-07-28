@@ -93,7 +93,7 @@ And then click `Test custom sample` to quickly test your code.
 | `pintia.defaultLanguage`  | Specify the default language used to solve the problem. Supported languages are: `C (gcc)`,`C++ (g++)`,`C (clang)`,`C++ (clang++)`,`Java (javac)`,`Python (python2)`,`Python (python3)`,`Ruby (ruby)`,`Bash (bash)`,`Plaintext (cat)`,`CommonLisp  (sbcl)`,`Pascal (fpc)`,`Go (go)`,`Haskell (ghc)`,`Lua (lua)`,`Lua (luajit)`,`C# (mcs)`,`JavaScript (node)`,`OCaml (ocamlc)`,`PHP (php)`,`Perl (perl)`,`AWK (awk)`,`D (dmd)`,`Racket (racket)`,`Vala (valac)`,`Visual Basic (vbnc)`,`Kotlin (kotlinc)`,`Swift (swiftc)`,`Objective-C (gcc)`,`Fortran95 (gfortran)`,`Octave (octave-cli)`,`R (R)`,`ASM (nasm.sh)`,`Rust (rustc)`,`Scala (scalac)`,`Python (pypy3)`,`SQL (SQL)` | `C++ (g++)`              |
 | `pintia.workspaceFolder`  | Specify the path of the workspace folder to store the problem files. | `""`               |
 | `pintia.enableStatusBar`  | Specify whether the Pintia status bar will be shown or not.  | `true`             |
-| `pintia.editor.shortcuts` | Specify the customized shortcuts in editors. Supported values are: `submit`, `test`. | `["submit, test"]` |
+| `pintia.editor.shortcuts` | Specify the customized shortcuts in editors. Supported values are: `submit`, `test`. | `["submit", "test"]` |
 | `pintia.paging.pageSize` | Whether to page the problem list when the problem set is too large. It is not paged when pageSize is 0. | `100` |
 | `pintia.autoCheckIn` | Specify whether to check in Pintia's education supermarket or not when the Pintia Extension is activated. | `false` |
 
