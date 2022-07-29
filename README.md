@@ -53,7 +53,7 @@
 - Directly click on the problem to see the problem description.
 
   > :star: **Note:** 
-  > - You can specify the path of the workspace folder to store the problem files by updating the setting `pintia.workspaceFolder`. The default value is：**$HOME/.pintia/codes**.
+  > - You can specify the path of the workspace folder to store the problem files by updating the setting `pintia.workspaceFolder`. The default value is：**\$HOME/.pintia/codes**.
   > - You can change the default language by triggering the command: `Pintia: Change Default Language`.
 
 ---
@@ -86,28 +86,36 @@ And then click `Test custom sample` to quickly test your code.
 
 ---
 
-## 2. Settings
+## 2. Usage
+
+Use `Ctrl+P` (in Windows) or `Command+P` (in Mac) to open the command panel and enter `pintia` for quick access to the `Pintia Extension`'s related commands.
+
+<p align="center">
+  <img src="https://gitee.com/jinzcdev/vscode-pintia/raw/main/docs/imgs/commands.png" alt="Command Palette" />
+</p>
+
+## 3. Settings
 
 | Setting Name              | Description                                                  | Default Value      |
 | ------------------------- | ------------------------------------------------------------ | ------------------ |
 | `pintia.showLocked`       | Specify to show the locked problem sets or not. (Some problem sets require verification of the user's reader code before they can be submitted) | `true`             |
-| `pintia.defaultLanguage`  | Specify the default language used to solve the problem. Supported languages are: `C (gcc)`,`C++ (g++)`,`C (clang)`,`C++ (clang++)`,`Java (javac)`,`Python (python2)`,`Python (python3)`,`Ruby (ruby)`,`Bash (bash)`,`Plaintext (cat)`,`CommonLisp  (sbcl)`,`Pascal (fpc)`,`Go (go)`,`Haskell (ghc)`,`Lua (lua)`,`Lua (luajit)`,`C# (mcs)`,`JavaScript (node)`,`OCaml (ocamlc)`,`PHP (php)`,`Perl (perl)`,`AWK (awk)`,`D (dmd)`,`Racket (racket)`,`Vala (valac)`,`Visual Basic (vbnc)`,`Kotlin (kotlinc)`,`Swift (swiftc)`,`Objective-C (gcc)`,`Fortran95 (gfortran)`,`Octave (octave-cli)`,`R (R)`,`ASM (nasm.sh)`,`Rust (rustc)`,`Scala (scalac)`,`Python (pypy3)`,`SQL (SQL)` | `C++ (g++)`              |
+| `pintia.defaultLanguage`  | Specify the default language used to solve the problem. Supported languages are: `C (gcc)`, `C++ (g++)`, `C (clang)`, `C++ (clang++)`, `Java (javac)`, `Python (python2)`, `Python (python3)`, `Ruby (ruby)`, `Bash (bash)`, `Plaintext (cat)`, `CommonLisp (sbcl)`, `Pascal (fpc)`, `Go (go)`, `Haskell (ghc)`, `Lua (lua)`, `Lua (luajit)`, `C# (mcs)`, `JavaScript (node)`, `OCaml (ocamlc)`, `PHP (php)`, `Perl (perl)`, `AWK (awk)`, `D (dmd)`, `Racket (racket)`, `Vala (valac)`, `Visual Basic (vbnc)`, `Kotlin (kotlinc)`, `Swift (swiftc)`, `Objective-C (gcc)`, `Fortran95 (gfortran)`, `Octave (octave-cli)`, `R (R)`, `ASM (nasm. sh)`, `Rust (rustc)`, `Scala (scalac)`, `Python (pypy3)`, `SQL (SQL)` | `C++ (g++)`              |
 | `pintia.workspaceFolder`  | Specify the path of the workspace folder to store the problem files. | `""`               |
 | `pintia.enableStatusBar`  | Specify whether the Pintia status bar will be shown or not.  | `true`             |
 | `pintia.editor.shortcuts` | Specify the customized shortcuts in editors. Supported values are: `submit`, `test`. | `["submit", "test"]` |
 | `pintia.paging.pageSize` | Whether to page the problem list when the problem set is too large. It is not paged when pageSize is 0. | `100` |
 | `pintia.autoCheckIn` | Specify whether to check in Pintia's education supermarket or not when the Pintia Extension is activated. | `false` |
 
-## 3. Want Help?
+## 4. Want Help?
 
 When you meet any problem, you can check out the [Troubleshooting](https://github.com/jinzcdev/vscode-pintia/wiki/Troubleshooting) and [FAQ](https://github.com/jinzcdev/vscode-pintia/wiki/FAQ) first.
 
 If your problem still cannot be addressed, feel free to [file an issue](https://github.com/jinzcdev/vscode-pintia/issues/new/choose).
 
-## 4. Release Notes
+## 5. Release Notes
 
 Refer to [CHANGELOG](https://github.com/jinzcdev/vscode-pintia/blob/main/CHANGELOG.md) | [中文文档](https://github.com/jinzcdev/vscode-pintia/blob/main/docs/CHANGELOG_zh-CN.md)
 
-## 5. Acknowledgement
+## 6. Acknowledgement
 
 - The design of the `Pintia Extension` references the design of the [LeetCode](https://marketplace.visualstudio.com/items?itemName=LeetCode.vscode-leetcode) in many of its features.

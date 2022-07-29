@@ -79,7 +79,7 @@ export async function checkedInStatus(): Promise<boolean> {
         }
     } catch (error: any) {
         ptaChannel.appendLine(error.toString());
-        promptForOpenOutputChannel("Failed to check in. Please open the output channel for details.", DialogType.error);
+        promptForOpenOutputChannel("Failed to get the status of checkin. Please open the output channel for details.", DialogType.error);
     }
     return false;
 }
