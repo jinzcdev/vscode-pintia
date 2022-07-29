@@ -150,11 +150,13 @@ class PtaExecutor extends EventEmitter implements Disposable {
     public async signOut(): Promise<void> {
         const userFilePath = path.join(configPath, "user.json");
         if (await fs.pathExists(userFilePath)) {
-            ptaChannel.appendLine(`[INFO] Logout the current user successfully and remove user information from ${userFilePath}.`);
             const loginSession: IUserSession = await fs.readJSON(userFilePath);
-            Promise.all([ptaApi.signOut(loginSession.cookie), fs.remove(userFilePath)]);
+            await Promise.all([ptaApi.signOut(loginSession.cookie), fs.remove(userFilePath), cache.clearCache()]);
+            vscode.window.showInformationMessage("Successfully signed out.");
+            ptaChannel.appendLine(`[INFO] Logout the current user successfully and remove user information from ${userFilePath}.`);
+        } else {
+            vscode.window.showInformationMessage("The user is not logged in.");
         }
-        await cache.clearCache();
     }
 
     public async wechatSignIn(callback: CallBack<IUserSession>): Promise<void> {
@@ -188,6 +190,7 @@ class PtaExecutor extends EventEmitter implements Disposable {
             }, 2000);
             ptaLoginProvider.onDidDisposeCallBack(() => {
                 clearInterval(interval);
+                callback("");
             });
         } catch (error: any) {
             ptaChannel.append(error.toString());

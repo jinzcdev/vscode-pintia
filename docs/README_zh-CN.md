@@ -3,7 +3,7 @@
 > 在 VS Code 中练习Pintia公共题集
 
 <p align="center">
-  <img style="width: 55%;" src="https://gitee.com/jinzcdev/vscode-pintia/raw/main/resources/pintia_logo.png" alt="">
+  <img style="width: 50%; max-width: 60%;" src="https://gitee.com/jinzcdev/vscode-pintia/raw/main/resources/pintia_logo.png" alt="">
 </p>
 
 <p align="center">
@@ -87,6 +87,10 @@
 > :star: **Note:** 在点击`submit`或`test`提交你的代码时，只有在包裹在`@pintia code=start`和`@pintia code=end`之间的代码会被提交给 Pintia 判题器。
 
 ---
+
+## 2. 使用
+
+您能通过
 
 ## 2. 插件配置项
 

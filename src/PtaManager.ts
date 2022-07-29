@@ -93,7 +93,6 @@ class PtaManager extends EventEmitter {
     public async signOut(): Promise<void> {
         try {
             await ptaExecutor.signOut();
-            vscode.window.showInformationMessage("Successfully signed out.");
             this.userSession = undefined;
             this.userStatus = UserStatus.SignedOut;
             this.emit("statusChanged");

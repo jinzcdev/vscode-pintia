@@ -38,3 +38,4 @@
 ### Changed
 
 - Optimize the size of the package
+- Fix the issue where the message "Waiting for login" is still displayed when login is cancelled.

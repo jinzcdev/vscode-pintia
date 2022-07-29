@@ -10,3 +10,9 @@ vsc-extension-quickstart.md
 **/.eslintrc.json
 **/*.map
 **/*.ts
+
+test/**
+package-lock.json
+**/*.gif
+docs
+.github
