@@ -2,7 +2,7 @@
     "name": "vscode-pintia",
     "displayName": "Pintia",
     "description": "Solve PTA problems in VS Code",
-    "version": "0.1.0",
+    "version": "0.1.2",
     "author": "Zhichao Jin",
     "publisher": "jinzcdev",
     "license": "MIT",
@@ -306,10 +306,11 @@
         "vscode-test": "^1.5.0"
     },
     "dependencies": {
-        "node-fetch": "^2.6.7",
-        "qrcode": "^1.5.0",
         "fs-extra": "^10.1.0",
+        "katex": "^0.16.0",
         "markdown-it": "^12.2.3",
-        "markdown-it-texmath": "^1.0.0"
+        "markdown-it-texmath": "^1.0.0",
+        "node-fetch": "^2.6.7",
+        "qrcode": "^1.5.0"
     }
 }
