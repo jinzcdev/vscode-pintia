@@ -16,3 +16,4 @@ package-lock.json
 **/*.gif
 docs
 .github
+resources/pta_template
