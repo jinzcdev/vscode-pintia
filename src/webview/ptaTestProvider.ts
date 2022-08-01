@@ -1,7 +1,6 @@
 import { IProblemSubmissionResult } from "../entity/ProblemSubmissionResult";
 import { ptaChannel } from "../ptaChannel";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
-import { markdownEngine } from "./markdownEngine";
 import { PtaWebview } from "./PtaWebview";
 
 

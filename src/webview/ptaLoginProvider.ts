@@ -11,7 +11,7 @@ class PtaLoginProvider extends PtaWebview {
         });
 
         this.data = {
-            title: "PTA: QRCode",
+            title: "QRCode",
             style: this.getStyle(),
             content: this.getContent({
                 qrcodeBase64: qrcodeBase64

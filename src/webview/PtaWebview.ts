@@ -12,11 +12,8 @@ export abstract class PtaWebview implements Disposable {
     protected abstract getContent(data?: any): string;
 
     protected show(): void {
-        // const columnToShowIn = vscode.window.activeTextEditor
-        //     ? vscode.window.activeTextEditor.viewColumn
-        //     : undefined;
         if (this.currentPanel) {
-            this.currentPanel.title = "PTA: " + this.data.title;
+            this.currentPanel.title = `PTA: ${this.data.title}`;
             this.currentPanel.webview.html = this.getWebviewContent();
             this.currentPanel.reveal(vscode.ViewColumn.One);
         } else {
