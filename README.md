@@ -88,7 +88,7 @@ And then click `Test custom sample` to quickly test your code.
 
 ## 2. Usage
 
-Use `Ctrl+P` (in Windows) or `Command+P` (in Mac) to open the command panel and enter `pintia` for quick access to the `Pintia Extension`'s related commands.
+Use `Ctrl+Shift+P` (in Windows) or `Command+Shift+P` (in Mac) to open the command panel and enter `pintia` for quick access to the `Pintia Extension`'s related commands.
 
 <p align="center">
   <img src="https://gitee.com/jinzcdev/vscode-pintia/raw/main/docs/imgs/commands.png" alt="Command Palette" />

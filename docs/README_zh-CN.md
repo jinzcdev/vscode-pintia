@@ -90,7 +90,7 @@
 
 ## 2. 插件使用
 
-使用 `Ctrl+P` (in Windows) 或 `Command+P` (in Mac)打开命令面板并输入 `pintia` 可快速使用插件的相关命令。
+使用 `Ctrl+Shift+P` (in Windows) 或 `Command+Shift+P` (in Mac)打开命令面板并输入 `pintia` 可快速使用插件的相关命令。
 
 <p align="center">
   <img src="https://gitee.com/jinzcdev/vscode-pintia/raw/main/docs/imgs/commands.png" alt="命令面板" />
