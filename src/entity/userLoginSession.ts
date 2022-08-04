@@ -1,5 +1,5 @@
 import { PtaLoginMethod } from "../shared";
-import { IPtaUser } from "./PtaUser";
+import { IPtaUser } from "./IPtaUser";
 
 export enum AuthStatus {
     WAITING = "WAITING",

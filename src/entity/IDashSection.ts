@@ -1,4 +1,4 @@
-
+// https://pintia.cn/api/content/dashboard
 export interface IDashSection {
     id: string;
     title: string;

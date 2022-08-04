@@ -1,4 +1,4 @@
-import { IProblemSubmissionResult } from "../entity/ProblemSubmissionResult";
+import { IProblemSubmissionResult } from "../entity/IProblemSubmissionResult";
 import { ptaChannel } from "../ptaChannel";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import { PtaWebview } from "./PtaWebview";

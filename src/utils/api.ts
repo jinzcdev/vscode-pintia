@@ -1,33 +1,33 @@
-import { IProblem } from "../entity/Problem";
-import { IProblemInfo } from "../entity/ProblemInfo";
-import { IProblemSet } from "../entity/ProblemSet";
-import { IProblemSetExam } from "../entity/ProblemSetExam";
-import { IProblemSubmission } from "../entity/ProblemSubmission";
-import { IProblemCode } from "../entity/ProblemSubmissionCode";
-import { IProblemSubmissionResult } from "../entity/ProblemSubmissionResult";
-import { IProblemSummary } from "../entity/ProblemSummary";
+import { IProblem } from "../entity/IProblem";
+import { IProblemInfo } from "../entity/IProblemInfo";
+import { IProblemSet } from "../entity/IProblemSet";
+import { IProblemSetExam } from "../entity/IProblemSetExam";
+import { IProblemSubmission } from "../entity/IProblemSubmission";
+import { IProblemSubmissionResult } from "../entity/IProblemSubmissionResult";
+import { IProblemSummary } from "../entity/IProblemSummary";
+import { IProblemCode } from "../entity/problemSubmissionCode";
 import { cacheFilePath, ProblemType } from "../shared";
 import { httpGet, httpPost } from "./httpUtil";
 
 import * as fs from "fs-extra";
 import fetch from "node-fetch";
 import * as path from "path";
-import { ICheckIn, ICheckInStatus } from "../entity/ICheckIn";
+import { ICheckIn, ICheckInStatus } from "../entity/checkin";
 import { IDashSection } from "../entity/IDashSection";
 import { IExamProblemStatus } from "../entity/IExamProblemStatus";
-import { IPtaUser } from "../entity/PtaUser";
+import { IPtaUser } from "../entity/IPtaUser";
 import { IWechatAuth, IWechatAuthState, IWechatUserInfo, IWechatUserState } from "../entity/userLoginSession";
 import { ptaChannel } from "../ptaChannel";
 
 class PtaAPI {
 
-    private readonly baseUrl: string = "https://pintia.cn/api/";
     private readonly problemUrl: string = "https://pintia.cn/api/problem-sets/";
     private readonly examUrl: string = "https://pintia.cn/api/exams/";
     private readonly submissionUrl: string = "https://pintia.cn/api/submissions/";
     private readonly wechatAuthUrl: string = "https://passport.pintia.cn/api/oauth/wechat/official-account/auth-url/";
     private readonly wechatAuthState: string = "https://passport.pintia.cn/api/oauth/wechat/official-account/state/";
     private readonly wechatAuthUser: string = "https://passport.pintia.cn/api/oauth/wechat/state/";
+    private readonly dashboardUrl: string = "https://pintia.cn/api/content/dashboard";
 
 
     public async getDashSections(): Promise<IDashSection[]> {
@@ -37,7 +37,7 @@ class PtaAPI {
             return await fs.readJSON(filePath);
         }
 
-        const sections: IDashSection[] = await httpGet("https://pintia.cn/api/content/dashboard")
+        const sections: IDashSection[] = await httpGet(this.dashboardUrl)
             .then(json => json["content"])
             .then(content => JSON.parse(content).sections);
         await fs.createFile(filePath);
@@ -59,7 +59,7 @@ class PtaAPI {
             return await fs.readJSON(filePath);
         }
 
-        const data: IProblemSet[] = await httpGet(this.problemUrl + "always-available").then(json => json["problemSets"]);
+        const data: IProblemSet[] = await httpGet(`${this.problemUrl}/always-available`).then(json => json["problemSets"]);
         const problemSet: IProblemSet[] = [];
         for (const item of data) {
             const summaries: IProblemSummary = await this.getProblemSummary(item.id);  // id: ProblemSetID
@@ -104,7 +104,7 @@ class PtaAPI {
      * @returns 
      */
     public async getProblemSummary(psID: string): Promise<IProblemSummary> {
-        return await httpGet(this.problemUrl + `${psID}/problem-summaries`)
+        return await httpGet(`${this.problemUrl}/${psID}/problem-summaries`)
             .then(json => json["summaries"]);
     }
 
@@ -141,10 +141,9 @@ class PtaAPI {
 
         let problemList: Array<IProblemInfo> = [];
         for (let page = 0; page < pageNum; page++) {
-            const data = await httpGet(this.problemUrl + `${psID}/problem-list?problem_type=${problemType}&page=${page}&limit=${limit}`)
+            const data = await httpGet(`${this.problemUrl}/${psID}/problem-list?problem_type=${problemType}&page=${page}&limit=${limit}`)
                 .then(json => json["problemSetProblems"]);
             data.forEach((e: IProblemInfo) => problemList.push(e));
-            // problemList = problemList.concat(await this.getProblemInfoListByPage(psID, problemType, page, limit));
         }
 
         await fs.createFile(filePath);
@@ -176,7 +175,7 @@ class PtaAPI {
             return await fs.readJSON(filePath);
         }
 
-        const data: IProblem = await httpGet(this.problemUrl + `${psID}/problems/${pID}`, cookie)
+        const data: IProblem = await httpGet(`${this.problemUrl}/${psID}/problems/${pID}`, cookie)
             .then(json => json["problemSetProblem"]);
 
         await fs.createFile(filePath);
@@ -197,12 +196,11 @@ class PtaAPI {
      * @returns 
      */
     public async getProblemSetExam(psID: string, cookie: string): Promise<IProblemSetExam> {
-        // throw new Error("Getting exam need cookie.");
-        const exam = await httpGet(this.problemUrl + `${psID}/exams`, cookie).then(json => json["exam"]);
+        const exam = await httpGet(`${this.problemUrl}/${psID}/exams`, cookie).then(json => json["exam"]);
         if (!exam) {
-            await httpPost(this.problemUrl + `${psID}/exams`, cookie);
+            await httpPost(`${this.problemUrl}/${psID}/exams`, cookie);
         }
-        return await httpGet(this.problemUrl + `${psID}/exams`, cookie).then(json => json["exam"]);
+        return await httpGet(`${this.problemUrl}/${psID}/exams`, cookie).then(json => json["exam"]);
     }
 
     public async getProblemSet(psID: string): Promise<IProblemSet> {
@@ -211,7 +209,7 @@ class PtaAPI {
             ptaChannel.appendLine(`[INFO] Read the information of problem set from the "${filePath}"`);
             return await fs.readJSON(filePath);
         }
-        const problemSet = await httpGet(this.problemUrl + `${psID}/exams`).then(json => json["problemSet"]);
+        const problemSet = await httpGet(`${this.problemUrl}/${psID}/exams`).then(json => json["problemSet"]);
         await fs.createFile(filePath);
         await fs.writeJson(filePath, problemSet);
         return problemSet;
@@ -247,11 +245,11 @@ class PtaAPI {
      * @returns 
      */
     public async getProblemSubmissionResult(submissionID: string, cookie: string): Promise<IProblemSubmissionResult> {
-        return await httpGet(`https://pintia.cn/api/submissions/${submissionID}`, cookie);
+        return await httpGet(`${this.submissionUrl}/${submissionID}`, cookie);
     }
 
     public async getProblemTestResult(submissionID: string, cookie: string): Promise<IProblemSubmissionResult> {
-        return await httpGet(`https://pintia.cn/api/submissions/${submissionID}?custom_test_data_submission=true`, cookie);
+        return await httpGet(`${this.submissionUrl}/${submissionID}?custom_test_data_submission=true`, cookie);
     }
 
     // https://passport.pintia.cn/api/oauth/wechat/official-account/auth-url

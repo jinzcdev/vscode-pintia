@@ -1,3 +1,4 @@
+// https://pintia.cn/api/u/current
 export interface IPtaUser {
     id: string;
     email: string;

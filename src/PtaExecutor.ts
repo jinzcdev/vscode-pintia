@@ -1,7 +1,7 @@
 
 import { Disposable } from "vscode";
-import { IProblemSubmission } from "./entity/ProblemSubmission";
-import { IProblemSubmissionResult } from "./entity/ProblemSubmissionResult";
+import { IProblemSubmission } from "./entity/IProblemSubmission";
+import { IProblemSubmissionResult } from "./entity/IProblemSubmissionResult";
 import { ptaApi } from "./utils/api";
 import * as fs from "fs-extra";
 import { cacheFilePath, CallBack, configPath, ProblemType, PtaLoginMethod } from "./shared";
@@ -10,7 +10,7 @@ import { IUserSession, IWechatAuth, AuthStatus, IWechatUserState, IWechatUserInf
 import { ptaLoginProvider } from "./webview/ptaLoginProvider";
 import { EventEmitter } from "events";
 import { ptaManager } from "./PtaManager";
-import { IProblemSubmissionDetail } from "./entity/ProblemSubmissionCode";
+import { IProblemSubmissionDetail } from "./entity/problemSubmissionCode";
 import * as vscode from "vscode";
 import { ptaChannel } from "./ptaChannel";
 import { DialogType, promptForOpenOutputChannel } from "./utils/uiUtils";

@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { ICheckIn } from "../entity/ICheckIn";
+import { ICheckIn } from "../entity/checkin";
 import { IUserSession } from "../entity/userLoginSession";
 import { ptaChannel } from "../ptaChannel";
 import { ptaManager } from "../PtaManager";

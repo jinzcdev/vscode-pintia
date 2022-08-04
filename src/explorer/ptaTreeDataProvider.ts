@@ -6,7 +6,7 @@ import { defaultPtaNode, IPtaNodeValue, ProblemSubmissionState, ProblemType, Pta
 import { ptaManager } from "../PtaManager";
 import { explorerNodeManager } from "./explorerNodeManager";
 import { ptaConfig } from "../ptaConfig";
-import { IProblemSummary } from "../entity/ProblemSummary";
+import { IProblemSummary } from "../entity/IProblemSummary";
 
 
 export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vscode.Disposable {

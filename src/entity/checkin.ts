@@ -1,4 +1,4 @@
-
+// https://pintia.cn/api/users/checkin
 export interface ICheckIn {
     rewards: {
         DAILY_CHECK_IN: {

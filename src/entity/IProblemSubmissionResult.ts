@@ -1,5 +1,4 @@
-import { IProblemSubmissionDetail } from "./ProblemSubmissionCode";
-
+import { IProblemSubmissionDetail } from "./problemSubmissionCode";
 
 export interface IProblemSubmissionResult {
     queued: number;

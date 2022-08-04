@@ -1,9 +1,9 @@
-import { IProblemSummary } from "./entity/ProblemSummary";
+import { IProblemSummary } from "./entity/IProblemSummary";
 
 import * as os from "os";
 import * as path from "path";
 import * as vscode from "vscode";
-import { IProblemInfo } from "./entity/ProblemInfo";
+import { IProblemInfo } from "./entity/IProblemInfo";
 
 export const configPath: string = path.join(os.homedir(), ".pintia");
 export const cacheFilePath: string = path.join(configPath, "cache");

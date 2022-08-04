@@ -6,7 +6,7 @@ import { IUserSession } from "./entity/userLoginSession";
 import { ptaApi } from "./utils/api";
 import * as fs from "fs-extra";
 import * as path from "path";
-import { IPtaUser } from "./entity/PtaUser";
+import { IPtaUser } from "./entity/IPtaUser";
 import { ptaChannel } from "./ptaChannel";
 import { DialogType, promptForOpenOutputChannel } from "./utils/uiUtils";
 

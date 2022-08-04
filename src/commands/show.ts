@@ -8,7 +8,7 @@ import { ptaChannel } from "../ptaChannel";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import { ptaConfig } from "../ptaConfig";
 import { ptaApi } from "../utils/api";
-import { IProblem } from "../entity/Problem";
+import { IProblem } from "../entity/IProblem";
 import { ptaManager } from "../PtaManager";
 
 /*

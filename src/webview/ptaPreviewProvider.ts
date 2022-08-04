@@ -1,7 +1,7 @@
 
 import * as vscode from "vscode";
-import { IProblem } from '../entity/Problem';
-import { IProblemInfo } from '../entity/ProblemInfo';
+import { IProblem } from '../entity/IProblem';
+import { IProblemInfo } from '../entity/IProblemInfo';
 import { PtaNode } from '../explorer/PtaNode';
 import { ptaConfig } from '../ptaConfig';
 import { IPtaCode, langCompilerMapping } from '../shared';

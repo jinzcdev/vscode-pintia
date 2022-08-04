@@ -1,7 +1,7 @@
 import { PtaWebview } from "./PtaWebview";
-import { IProblemSubmissionResult } from "../entity/ProblemSubmissionResult";
+import { IProblemSubmissionResult } from "../entity/IProblemSubmissionResult";
 import { ProblemType, solutionStatusMapping, ptaCompiler } from "../shared";
-import { IProblemSubmissionDetail } from "../entity/ProblemSubmissionCode";
+import { IProblemSubmissionDetail } from "../entity/problemSubmissionCode";
 
 class PtaSubmissionProvider extends PtaWebview {
 

@@ -1,4 +1,4 @@
-// https://pintia.cn/api/problem-sets/{problemSetID}/problems/{problemID}
+// https://pintia.cn/api/problem-sets/${problemSetID}/problems/{problemID}
 export interface IProblem {
     id: string;
     label: string;

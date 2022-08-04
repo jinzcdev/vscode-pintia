@@ -2,8 +2,8 @@
 import * as fs from "fs-extra";
 import * as vscode from "vscode";
 
-import { IProblem } from "../entity/Problem";
-import { IProblemSubmissionResult } from "../entity/ProblemSubmissionResult";
+import { IProblem } from "../entity/IProblem";
+import { IProblemSubmissionResult } from "../entity/IProblemSubmissionResult";
 import { ptaTreeDataProvider } from "../explorer/ptaTreeDataProvider";
 import { ptaChannel } from "../ptaChannel";
 import { ptaConfig } from "../ptaConfig";

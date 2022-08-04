@@ -1,5 +1,5 @@
 // https://pintia.cn/api/problem-sets/{problemSet}/exams
-import { IProblemSummary } from "./ProblemSummary";
+import { IProblemSummary } from "./IProblemSummary";
 
 export interface IProblemSet {
     id: string;
