@@ -4,6 +4,7 @@ import { IProblem } from '../entity/IProblem';
 import { IProblemInfo } from '../entity/IProblemInfo';
 import { PtaNode } from '../explorer/PtaNode';
 import { ptaConfig } from '../ptaConfig';
+import { ptaManager } from "../PtaManager";
 import { IPtaCode, langCompilerMapping } from '../shared';
 import { ptaApi } from '../utils/api';
 import { markdownEngine } from './markdownEngine';
@@ -13,7 +14,7 @@ class PtaPreviewProvider extends PtaWebview {
 
     private ptaCode?: IPtaCode;
     public async showPreview(node: PtaNode) {
-        const problem: IProblem = await ptaApi.getProblem(node.psID, node.pID);
+        const problem: IProblem = await ptaApi.getProblem(node.psID, node.pID, ptaManager.getUserSession()?.cookie);
         const problemInfo: IProblemInfo = node.value.problemInfo!;
         const compiler: string = langCompilerMapping.get(ptaConfig.getDefaultLanguage()) ?? "GXX";
         this.ptaCode = { psID: problem.problemSetId, psName: node.value.problemSet, pID: problem.id, problemType: node.value.problemType, compiler: compiler, title: problem.label + " " + problem.title };
@@ -24,7 +25,10 @@ class PtaPreviewProvider extends PtaWebview {
                 title: problem.title,
                 author: problem.author,
                 organization: problem.authorOrganization.name,
-                content: problem.content
+                content: problem.content,
+                lastSubmissionId: problem.lastSubmissionId,
+                lastSubmittedCompiler: (problem.lastSubmissionDetail?.programmingSubmissionDetail ?? problem.lastSubmissionDetail?.codeCompletionSubmissionDetail)?.compiler ?? problem.compiler,
+                lastProgram: problem.lastSubmissionId !== "0" ? (problem.lastSubmissionDetail?.programmingSubmissionDetail ?? problem.lastSubmissionDetail?.codeCompletionSubmissionDetail)?.program : ""
             })),
             style: this.getStyle()
         }
@@ -187,6 +191,8 @@ class PtaPreviewProvider extends PtaWebview {
             </div>
 
             ${markdownEngine.render(this.fotmatMarkdown(data.content)).replace(/<pre>/g, "<pre onclick='copyCode(this)'>")}
+
+            ${data.lastSubmissionId !== "0" ? markdownEngine.render([`### Last Submission (${data.lastSubmittedCompiler})`, "```", data.lastProgram, "```"].join("\n")) : ""}
 
             <button id="solve">Code Now</button>
 
