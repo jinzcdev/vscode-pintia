@@ -101,6 +101,12 @@ class PtaPreviewProvider extends PtaWebview {
                     color: inherit;
                 }
 
+                p img {
+                    display: block;
+                    width: 500px;
+                    max-width: 80%;
+                }
+
                 ul, ol { font-size: 15px; }
                 
                 pre {
