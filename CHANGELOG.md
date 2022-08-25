@@ -39,3 +39,13 @@
 
 - Optimize the size of the package
 - Fix the issue where the message "Waiting for login" is still displayed when login is cancelled.
+
+## [0.1.3] - 2022/08/26
+
+### Added
+
+- Show the last submitted code in the preview of problems
+
+### Fixed
+
+- Fix that images not showing
