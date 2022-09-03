@@ -42,7 +42,7 @@
 
 ---
 
-### 1.2 预览一个问题
+### 1.2 预览题目
 
 <p align="center">
   <img src="https://gitee.com/jinzcdev/vscode-pintia/raw/main/docs/imgs/preview.png" alt="预览问题" />
@@ -53,9 +53,9 @@
 
   > :star: **注意：**
   >
-  > - 您可以通过修改配置项 `pintia.workspaceFolder` 来指定存储题目文件的工作区路径。默认值为**\$HOME/.pintia/codes**
+  > - 您可以通过修改配置项 `pintia.workspaceFolder` 来指定存储题目文件的工作区路径。默认值为 **\$HOME/.pintia/codes**
   >
-  > - 您可以通过 `Pintia: Change Default Language` 命令来改变默认语言，使用`Ctrl+P` (in Windows) 或 `Command+P` (in Mac)打开命令面板
+  > - 您可以通过 `Pintia: Change Default Language` 命令来更换默认语言
 
 
 ---
