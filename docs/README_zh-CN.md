@@ -88,6 +88,20 @@
 
 ---
 
+### 1.5 代码片段
+
+你可以在代码编辑器中输入以下前缀来快速生成相应的代码块，如下所示。
+
+| 前缀 | 说明 |
+| --- | --- |
+| ptacode | 把你的自定义测试样例放在 `@pintia code=start/end` 中，当你点击 `Submit` 按钮时，插件会自动识别它 |
+| ptatest | 将你的自定义测试样例放在 `@pintia test=start/end` 中，当你点击 `Test` 按钮时，插件会自动识别它 |
+| ptacpp_stdc++ | 获取头文件为 `bits/stdc++.h` 的 cpp 模板 |
+| ptacpp_iostream | 获取带有 `iostream` 头文件的 cpp 模板 |
+| ptaclang | 获取带有头文件 `stdio.h` 的 clang 模板 |
+
+---
+
 ## 2. 插件使用
 
 使用 `Ctrl+Shift+P` (in Windows) 或 `Command+Shift+P` (in Mac)打开命令面板并输入 `pintia` 可快速使用插件的相关命令。

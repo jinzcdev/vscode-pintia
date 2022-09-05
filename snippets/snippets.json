@@ -8,13 +8,48 @@
         ],
         "description": "Put your custom test samples in `@pintia test=start/end` and the extension will automatically recognize it when you click the `Test` button."
     },
-    "$schema": {
+    "CodeArea to Submit": {
         "prefix": "ptacode",
         "body": [
             "$LINE_COMMENT @pintia code=start",
             "${1: Put your code here}",
             "$LINE_COMMENT @pintia code=end"
         ],
-        "description": "Put your custom test samples in `@pintia test=start/end` and the extension will automatically recognize it when you click the `Test` button."
+        "description": "Put your custom test samples in `@pintia test=start/end` and the extension will automatically recognize it when you click the `Submit` button."
+    },
+    "CPP Template (bits/stdc++.h)": {
+        "prefix": "ptacpp_stdc++",
+        "body": [
+            "#include <bits/stdc++.h>",
+            "using namespace std;",
+            "int main() {",
+            "\t${1}",
+            "\treturn 0;",
+            "}"
+        ],
+        "description": "Get the template of cpp with header file of `bits/stdc++.h`"
+    },
+    "CPP Template (iostream)": {
+        "prefix": "ptacpp_iostream",
+        "body": [
+            "#include <iostream>",
+            "using namespace std;",
+            "int main() {",
+            "\t${1}",
+            "\treturn 0;",
+            "}"
+        ],
+        "description": "Get the template of cpp with header file of `iostream`"
+    },
+    "Clang Template (stdio)": {
+        "prefix": "ptaclang",
+        "body": [
+            "#include <stdio.h>",
+            "int main() {",
+            "\t${1}",
+            "\treturn 0;",
+            "}"
+        ],
+        "description": "Get the template of clang with header file of `stdio`"
     }
 }

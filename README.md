@@ -86,6 +86,20 @@ And then click `Test custom sample` to quickly test your code.
 
 ---
 
+### 1.5 Snippets
+
+You can enter the following prefixs in code editor to generate the corresponding code blocks quickly, as follows:
+
+| Prefix | Description |
+| --- | --- |
+| ptacode | Put your custom test samples in `@pintia code=start/end` and the extension will automatically recognize it when you click the `Submit` button. |
+| ptatest | Put your custom test samples in `@pintia test=start/end` and the extension will automatically recognize it when you click the `Test` button. |
+| ptacpp_stdc++ | Get the template of cpp with header file of `bits/stdc++.h` |
+| ptacpp_iostream | Get the template of cpp with header file of `iostream` |
+| ptaclang | Get the template of clang with header file of `stdio.h` |
+
+---
+
 ## 2. Usage
 
 Use `Ctrl+Shift+P` (in Windows) or `Command+Shift+P` (in Mac) to open the command panel and enter `pintia` for quick access to the `Pintia Extension`'s related commands.
