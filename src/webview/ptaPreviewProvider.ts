@@ -196,7 +196,7 @@ class PtaPreviewProvider extends PtaWebview {
                 <hr class="banner-line"></hr>
             </div>
 
-            ${markdownEngine.render(this.fotmatMarkdown(data.content)).replace(/<pre>/g, "<pre onclick='copyCode(this)'>")}
+            ${markdownEngine.render(this.fotmatMarkdown(data.content))}
 
             ${data.lastSubmissionId !== "0" ? markdownEngine.render([`### Last Submission (${data.lastSubmittedCompiler})`, "```", data.lastProgram, "```"].join("\n")) : ""}
 
@@ -211,15 +211,18 @@ class PtaPreviewProvider extends PtaWebview {
                         value: 'pintia.codeProblem'
                     });
                 };
-
-                function copyCode(event) {
-                    var content = event.innerText;
-                    navigator.clipboard.writeText(content).then(() => {
-                        vscode.postMessage({
-                            type: 'text',
-                            value: 'Successfully copied to the clipboard!'
+                
+                var lst_pre = document.getElementsByTagName("pre");
+                for (const pre of lst_pre) {
+                    pre.onclick = (event) => {
+                        var content = pre.innerText;
+                        navigator.clipboard.writeText(content).then(() => {
+                            vscode.postMessage({
+                                type: 'text',
+                                value: 'Successfully copied to the clipboard!'
+                            });
                         });
-                    });
+                    }
                 }
             </script>
         `;
