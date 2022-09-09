@@ -19,7 +19,10 @@
 
 - English Document | [中文文档](https://github.com/jinzcdev/vscode-pintia/blob/main/docs/README_zh-CN.md)
 
-:exclamation: If you are in China, you can visit [Gitee](https://gitee.com/jinzcdev/vscode-pintia). :exclamation:
+‼️ If you are in China, you can visit [Gitee](https://gitee.com/jinzcdev/vscode-pintia). ‼️
+
+⬇️ Install Pintia from [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=jinzcdev.vscode-pintia) or [VS Code](https://code.visualstudio.com/).
+
 
 ## 0. Requirements
 

@@ -17,7 +17,9 @@
 
 - [English Document](https://github.com/jinzcdev/vscode-pintia/blob/main/README.md) | 中文文档
 
-:exclamation: 如果您在中国, 可访问 [Gitee](https://gitee.com/jinzcdev/vscode-pintia). :exclamation:
+‼️ 如果您在中国, 可访问 [Gitee](https://gitee.com/jinzcdev/vscode-pintia). ‼️
+
+⬇️ 安装 Pintia:  [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=jinzcdev.vscode-pintia) or [VS Code](https://code.visualstudio.com/)
 
 ## 0. 运行条件
 

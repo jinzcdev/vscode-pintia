@@ -49,3 +49,14 @@
 ### Fixed
 
 - Fix that images not showing
+
+## [0.1.4] - 2022/09/09 
+ 
+### Added
+ 
+- Add [snippets](https://github.com/jinzcdev/vscode-pintia#15-snippets) of C/CPP template
+ 
+### Changed
+ 
+- Fix the last submitted code can't be copied
+- Change the icon of Pintia
