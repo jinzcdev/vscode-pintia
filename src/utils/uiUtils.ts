@@ -1,5 +1,6 @@
 
 import * as vscode from "vscode";
+import * as os from "os";
 import { ptaChannel } from "../ptaChannel";
 
 export namespace DialogOptions {
@@ -104,7 +105,7 @@ function getBelongingWorkspaceFolderUri(fsPath: string | undefined): vscode.Uri 
 }
 
 export async function showDirectorySelectDialog(fsPath?: string): Promise<vscode.Uri[] | undefined> {
-    const defaultUri: vscode.Uri | undefined = getBelongingWorkspaceFolderUri(fsPath);
+    const defaultUri: vscode.Uri = getBelongingWorkspaceFolderUri(fsPath) ?? vscode.Uri.parse(os.homedir());
     const options: vscode.OpenDialogOptions = {
         defaultUri,
         canSelectFiles: false,

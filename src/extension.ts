@@ -6,6 +6,7 @@ import * as language from "./commands/language";
 import * as show from "./commands/show";
 import * as submit from "./commands/submit";
 import * as user from "./commands/user";
+import * as workspace from "./commands/workspace";
 import { PtaNode } from './explorer/PtaNode';
 import { ptaTreeDataProvider } from './explorer/ptaTreeDataProvider';
 import { ptaChannel } from './ptaChannel';
@@ -52,6 +53,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand("pintia.submitSolution", async (ptaCode: IPtaCode) => submit.submitSolution(ptaCode)),
 		vscode.commands.registerCommand("pintia.testSolution", async (ptaCode: IPtaCode) => submit.testSolution(ptaCode)),
 		vscode.commands.registerCommand("pintia.changeDefaultLanguage", () => language.changeDefaultLanguage()),
+		vscode.commands.registerCommand("pintia.changeWorkspaceFolder", () => workspace.changeWorkspaceFolder()),
 		vscode.window.createTreeView("pintiaExplorer", { treeDataProvider: ptaTreeDataProvider, showCollapseAll: true }),
 
 	);

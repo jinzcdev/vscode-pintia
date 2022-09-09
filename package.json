@@ -35,6 +35,7 @@
         "onCommand:pintia.refreshExplorer",
         "onCommand:pintia.checkIn",
         "onCommand:pintia.changeDefaultLanguage",
+        "onCommand:pintia.changeWorkspaceFolder",
         "onCommand:pintia.reportIssue",
         "onView:pintiaExplorer"
     ],
@@ -113,6 +114,11 @@
             {
                 "command": "pintia.changeDefaultLanguage",
                 "title": "Change Default Language",
+                "category": "Pintia"
+            },
+            {
+                "command": "pintia.changeWorkspaceFolder",
+                "title": "Change Workspace Folder",
                 "category": "Pintia"
             },
             {

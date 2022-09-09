@@ -1,4 +1,4 @@
-// Copyright (c) jdneo. All rights reserved.
+// Copyright (c) jinzcdev. All rights reserved.
 // Licensed under the MIT license.
 
 import * as fs from "fs-extra";
@@ -7,13 +7,14 @@ import * as path from "path";
 import * as vscode from "vscode";
 import { ptaConfig } from "../ptaConfig";
 import { IQuickPickItem } from "../shared";
+import { showDirectorySelectDialog } from "./uiUtils";
 
 export async function selectWorkspaceFolder(): Promise<string> {
     let workspaceFolderSetting: string = ptaConfig.getWorkspaceFolder();
     if (workspaceFolderSetting.trim() === "") {
         workspaceFolderSetting = await determinePintiaFolder();
         if (workspaceFolderSetting === "") {
-            return workspaceFolderSetting;
+            return "";
         }
     }
     let needAsk: boolean = true;
@@ -106,7 +107,7 @@ async function determinePintiaFolder(): Promise<string> {
     if (!choice) {
         result = "";
     } else if (choice.value === ":browse") {
-        const directory: vscode.Uri[] | undefined = await showDirectorySelectDialog();
+        const directory: vscode.Uri[] | undefined = await showDirectorySelectDialog(os.homedir());
         if (!directory || directory.length < 1) {
             result = "";
         } else {
@@ -119,19 +120,6 @@ async function determinePintiaFolder(): Promise<string> {
     ptaConfig.update("workspaceFolder", result);
 
     return result;
-}
-
-export async function showDirectorySelectDialog(fsPath?: string): Promise<vscode.Uri[] | undefined> {
-    // const defaultUri: vscode.Uri | undefined = getBelongingWorkspaceFolderUri(fsPath);
-    const defaultUri: vscode.Uri | undefined = vscode.Uri.parse(os.homedir());
-    const options: vscode.OpenDialogOptions = {
-        defaultUri,
-        canSelectFiles: false,
-        canSelectFolders: true,
-        canSelectMany: false,
-        openLabel: "Select",
-    };
-    return await vscode.window.showOpenDialog(options);
 }
 
 enum OpenOption {
