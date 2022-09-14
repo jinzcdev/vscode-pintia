@@ -120,18 +120,18 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
             return "";
         }
         if (element.type === PtaNodeType.ProblemSet && element.locked) {
-            return this.context.asAbsolutePath(path.join("resources", "lock.png"));
+            return this.context.asAbsolutePath(path.join("resources", "imgs", "lock.png"));
         }
         if (element.type !== PtaNodeType.Problem) {
             return "";
         }
         switch (element.state) {
             case ProblemSubmissionState.PROBLEM_ACCEPTED:
-                return this.context.asAbsolutePath(path.join("resources", "check.png"));
+                return this.context.asAbsolutePath(path.join("resources", "imgs", "check.png"));
             case ProblemSubmissionState.PROBLEM_WRONG_ANSWER:
-                return this.context.asAbsolutePath(path.join("resources", "x.png"));
+                return this.context.asAbsolutePath(path.join("resources", "imgs", "x.png"));
             case ProblemSubmissionState.PROBLEM_NO_ANSWER:
-                return this.context.asAbsolutePath(path.join("resources", "blank.png"));
+                return this.context.asAbsolutePath(path.join("resources", "imgs", "blank.png"));
             default:
                 return "";
         }

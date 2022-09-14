@@ -3,7 +3,7 @@
 > Solve PTA problems in VS Code
 
 <p align="center">
-  <img style="width: 50%; max-width: 60%;" src="https://gitee.com/jinzcdev/vscode-pintia/raw/main/resources/pintia_logo.png" alt="">
+  <img style="width: 50%; max-width: 60%;" src="https://gitee.com/jinzcdev/vscode-pintia/raw/main/resources/imgs/pintia_logo.png" alt="">
 </p>
 
 

@@ -3,7 +3,7 @@
 > 在 VS Code 中练习Pintia公共题集
 
 <p align="center">
-  <img style="width: 50%; max-width: 60%;" src="https://gitee.com/jinzcdev/vscode-pintia/raw/main/resources/pintia_logo.png" alt="">
+  <img style="width: 50%; max-width: 60%;" src="https://gitee.com/jinzcdev/vscode-pintia/raw/main/resources/imgs/pintia_logo.png" alt="">
 </p>
 
 <p align="center">

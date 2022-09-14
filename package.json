@@ -6,7 +6,7 @@
     "author": "Zhichao Jin",
     "publisher": "jinzcdev",
     "license": "MIT",
-    "icon": "resources/pta_logo.png",
+    "icon": "resources/imgs/pta_logo.png",
     "engines": {
         "vscode": "^1.66.0"
     },
@@ -46,7 +46,7 @@
                 {
                     "id": "pintia",
                     "title": "PTA",
-                    "icon": "resources/pta_logo.svg"
+                    "icon": "resources/imgs/pta_logo.svg"
                 }
             ]
         },
@@ -313,10 +313,10 @@
     },
     "dependencies": {
         "fs-extra": "^10.1.0",
-        "katex": "^0.16.0",
+        "highlight.js": "^11.6.0",
         "markdown-it": "^12.2.3",
+        "markdown-it-katex": "2.0.2",
         "markdown-it-replace-link": "1.1.0",
-        "markdown-it-texmath": "^1.0.0",
         "node-fetch": "^2.6.7",
         "qrcode": "^1.5.0"
     }
