@@ -1,11 +1,18 @@
 
-const tm = require('markdown-it-texmath');
-export const markdownEngine = require('markdown-it')({ html: true })
-    .use(tm, {
-        engine: require('katex'),
-        delimiters: 'dollars',
-        katexOptions: { macros: { "\\RR": "\\mathbb{R}" } }
-    })
+const hljs = require('highlight.js');
+
+export const markdownEngine = require('markdown-it')({
+    html: true,
+    linkify: true,
+    highlight: function (str: string, lang: string) {
+        if (lang && hljs.getLanguage(lang)) {
+            try {
+                return hljs.highlight(str, { language: lang }).value;
+            } catch (__) { }
+        }
+        return str;
+    }
+})
     .use(require('markdown-it-replace-link'), {
         replaceLink: function (link: string, env: any) {
             if (link.includes("http")) {

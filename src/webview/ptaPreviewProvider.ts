@@ -5,7 +5,7 @@ import { IProblemInfo } from '../entity/IProblemInfo';
 import { PtaNode } from '../explorer/PtaNode';
 import { ptaConfig } from '../ptaConfig';
 import { ptaManager } from "../PtaManager";
-import { IPtaCode, langCompilerMapping } from '../shared';
+import { compilerLangMapping, IPtaCode, langCompilerMapping } from '../shared';
 import { ptaApi } from '../utils/api';
 import { markdownEngine } from './markdownEngine';
 import { PtaWebview } from './PtaWebview';
@@ -17,6 +17,8 @@ class PtaPreviewProvider extends PtaWebview {
         const problem: IProblem = await ptaApi.getProblem(node.psID, node.pID, ptaManager.getUserSession()?.cookie);
         const problemInfo: IProblemInfo = node.value.problemInfo!;
         const compiler: string = langCompilerMapping.get(ptaConfig.getDefaultLanguage()) ?? "GXX";
+        const lastSubmittedCompiler: string = (problem.lastSubmissionDetail?.programmingSubmissionDetail ?? problem.lastSubmissionDetail?.codeCompletionSubmissionDetail)?.compiler ?? problem.compiler;
+        const lastSubmittedLang: string = this.getLastSubmittedLang(lastSubmittedCompiler);
         this.ptaCode = { psID: problem.problemSetId, psName: node.value.problemSet, pID: problem.id, problemType: node.value.problemType, compiler: compiler, title: problem.label + " " + problem.title };
         this.data = {
             title: problem.label,
@@ -27,7 +29,7 @@ class PtaPreviewProvider extends PtaWebview {
                 organization: problem.authorOrganization.name,
                 content: problem.content,
                 lastSubmissionId: problem.lastSubmissionId,
-                lastSubmittedCompiler: (problem.lastSubmissionDetail?.programmingSubmissionDetail ?? problem.lastSubmissionDetail?.codeCompletionSubmissionDetail)?.compiler ?? problem.compiler,
+                lastSubmittedLang: lastSubmittedLang,
                 lastProgram: problem.lastSubmissionId !== "0" ? (problem.lastSubmissionDetail?.programmingSubmissionDetail ?? problem.lastSubmissionDetail?.codeCompletionSubmissionDetail)?.program : ""
             })),
             style: this.getStyle()
@@ -35,32 +37,63 @@ class PtaPreviewProvider extends PtaWebview {
         this.show();
     }
 
-    private fotmatMarkdown(str: string): string {
-        return str.replace(/\$\$/g, "$")
-            .replace(/\$\\/g, "$")
-            .replace("### 输入样", "\n\n<hr style='margin: 10px 0 0;'>\n\n### 输入样")
-            .replace("### Sample In", "\n\n<hr style='margin: 10px 0 0;'>\n\n### Sample In");
+    private formatMarkdown(str: string): string {
+        const katex = require("katex");
+        function convertTexMath(match: string) {
+            return katex.renderToString(match.substring(2, match.length - 2), {
+                throwOnError: false
+            });
+        }
+        return str
+            .replace(/\${2}(.+?)\${2}/g, convertTexMath)
+            .replace("### 输入样", "\n\n-----\n\n### 输入样")
+            .replace("### Sample In", "\n\n------\n\n### Sample In");
+    }
+
+    private getLastSubmittedLang(compiler: string): string {
+        const lang: string = compilerLangMapping.get(compiler)?.trim() ?? "C++";
+        const pos: number = lang.indexOf("(");
+        if (pos !== -1) {
+            return lang.substring(0, pos - 1);
+        }
+        return lang;
     }
 
 
     protected getStyle(data?: any): string {
         return `
-     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
-
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/styles/atom-one-light.min.css">
             <style>
-                :root {
+                .vscode-dark {
                     /* default .vscode-dark */
                     --pre-bg-color: rgba(10, 10, 10, 0.4);
                     --pre-bg-color-hover: rgba(10, 10, 10, 0.5);
                     --pre-bg-color-active: rgba(10, 10, 10, 0.4);
-                    --border-color: rgba(255, 255, 255, 0.18);
+                    --pre-border-color: hsla(0, 0%, 0%, 0.06);
                 }
 
                 .vscode-light {
                     --pre-bg-color: rgba(231, 231, 231, 0.4);
+                    --pre-border-color: rgba(10, 10, 10, 0.05);
                     --pre-bg-color-hover: rgba(231, 231, 231, 0.7);
                     --pre-bg-color-active: rgba(231, 231, 231, 0.4);
                 }
+
+                .vscode-high-contrast {
+                    --pre-bg-color: rgba(255, 255, 255, 0);
+                    --pre-border-color: rgb(255, 255, 255);
+                    --pre-bg-color-hover: rgba(255, 255, 255, 0.2);
+                    --pre-bg-color-active: rgba(255, 255, 255, 0.1);
+                }
+                
+                .vscode-high-contrast-light {
+                    --pre-bg-color: rgba(255, 255, 255, 0);
+                    --pre-border-color: rgb(0, 0, 0);
+                    --pre-bg-color-hover: rgba(10, 10, 10, 0.05);
+                    --pre-bg-color-active: rgba(10, 10, 10, 0.02);
+                }
+                
 
                 html {
                     line-height: 1.5;
@@ -118,7 +151,7 @@ class PtaPreviewProvider extends PtaWebview {
                     
                     padding: 0.375rem 0.75rem;
                     background: hsl(211, 20%, 97%);
-                    border: 1px solid hsla(0, 0%, 0%, 0.06);
+                    border: 1px solid var(--pre-border-color);
                     border-radius: 0.1875rem;
                 }
 
@@ -159,7 +192,7 @@ class PtaPreviewProvider extends PtaWebview {
                     border: 0;
                     margin: 1rem 0;
                     padding: 0.2rem 1rem;
-                    color: white;
+                    color: var(--vscode-button-foreground);
                     background-color: var(--vscode-button-background);
                 }
                 #solve:hover {
@@ -196,9 +229,9 @@ class PtaPreviewProvider extends PtaWebview {
                 <hr class="banner-line"></hr>
             </div>
 
-            ${markdownEngine.render(this.fotmatMarkdown(data.content))}
+            ${markdownEngine.render(this.formatMarkdown(data.content))}
 
-            ${data.lastSubmissionId !== "0" ? markdownEngine.render([`### Last Submission (${data.lastSubmittedCompiler})`, "```", data.lastProgram, "```"].join("\n")) : ""}
+            ${data.lastSubmissionId !== "0" ? markdownEngine.render([`-----`, `### Last Submission (${data.lastSubmittedLang})`, "```" + data.lastSubmittedLang, data.lastProgram, "```"].join("\n")) : ""}
 
             <button id="solve">Code Now</button>
 
