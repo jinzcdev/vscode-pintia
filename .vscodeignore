@@ -17,3 +17,4 @@ package-lock.json
 docs
 .github
 resources/pta_template
+tmp/
