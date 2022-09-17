@@ -2,12 +2,6 @@
 
 [中文文档](https://github.com/jinzcdev/vscode-pintia/blob/main/docs/CHANGELOG_zh-CN.md)
 
-## [Unreleased]
-
-- Sign in to Pintia with PTA Account
-- Support for `MultipleFile` of problem types
-- Editor shortcuts `Description`
-
 ## [0.1.0] - 2022/07/27
 
 ### Added
@@ -60,3 +54,16 @@
  
 - Fix the last submitted code can't be copied
 - Change the icon of Pintia
+
+
+## [0.2.0] - 2022/09/17
+
+### Added
+ 
+- Highlight the code of preview
+- Add the command `Pintia: Change Workspace Folder`
+ 
+### Changed
+ 
+- Fix the error of parsing markdown
+- Improve the style under the theme of **Light/Dark High Contrast**
