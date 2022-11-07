@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 
 class PtaChannel implements vscode.Disposable {
-    private readonly channel: vscode.OutputChannel = vscode.window.createOutputChannel("Pinta");
+    private readonly channel: vscode.OutputChannel = vscode.window.createOutputChannel("PTA (Pintia)");
 
     public appendLine(message: string): void {
         this.channel.appendLine(message);
