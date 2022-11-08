@@ -1,6 +1,6 @@
 # Pintia
 
-> 在 VS Code 中练习Pintia公共题集
+> 在 VS Code 中练习 Pintia 公共题集
 
 <p align="center">
   <img style="width: 50%; max-width: 60%;" src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/pintia_logo.png" alt="">
@@ -136,4 +136,4 @@
 
 ## 6. 鸣谢
 
-- Pintia Extension 的功能设计参考了[LeetCode](https://marketplace.visualstudio.com/items?itemName=LeetCode.vscode-leetcode)。
+- Pintia Extension 的功能设计参考了 [LeetCode](https://marketplace.visualstudio.com/items?itemName=LeetCode.vscode-leetcode)。
