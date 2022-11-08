@@ -1,69 +1,80 @@
-# Change Log
+# 更新日志
 
-[中文文档](https://github.com/jinzcdev/vscode-pintia/blob/main/docs/CHANGELOG_zh-CN.md)
+[English Docs](https://github.com/jinzcdev/vscode-pintia/blob/main/docs/CHANGELOG_en-US.md)
 
-## [0.1.0] - 2022/07/27
-
-### Added
-
-- Sign in/out to Pintia(PTA) with WeChat QRCode
-- Show public problems in explorer
-- Preview the problem in the VS Code
-- Submit/Test solutions to Pintia
-- Add multiple custom test samples in editor
-- Check in the education supermarket of Pintia
-
-## [0.1.1] - 2022/07/28
-
-### Changed
-
-- Fix the issue that user's session cannot be saved (i.e., you had to log in again when opening VS Code)
-
-### Removed
-
-- Remove the tip for users to cancel signin
-
-## [0.1.2] - 2022/07/29
-
-### Added
-
-- Add `CHANGELOG_zh-CN.md`
-
-### Changed
-
-- Optimize the size of the package
-- Fix the issue where the message "Waiting for login" is still displayed when login is cancelled.
-
-## [0.1.3] - 2022/08/26
-
-### Added
-
-- Show the last submitted code in the preview of problems
-
-### Fixed
-
-- Fix that images not showing
-
-## [0.1.4] - 2022/09/09 
- 
-### Added
- 
-- Add [snippets](https://github.com/jinzcdev/vscode-pintia#15-snippets) of C/CPP template
- 
-### Changed
- 
-- Fix the last submitted code can't be copied
-- Change the icon of Pintia
-
+---
 
 ## [0.2.0] - 2022/09/17
 
-### Added
+### 新增
  
-- Highlight the code of preview
-- Add the command `Pintia: Change Workspace Folder`
+- 高亮预览的代码
+- 添加修改当前工作区的命令 `Pintia: Change Workspace Folder`
  
-### Changed
+### 更新
  
-- Fix the error of parsing markdown
-- Improve the style under the theme of **Light/Dark High Contrast**
+- 修复 Markdown 解析错误
+- 修复高对比度主题下页面样式
+
+---
+
+## [0.1.4] - 2022/09/09
+
+### 新增
+
+- 增加 C/CPP 代码模板的 [Snippets](https://github.com/jinzcdev/vscode-pintia#15-snippets)
+
+### 更新
+
+- 修复最后一次提交的代码不能被复制的问题
+- 更改插件图标
+
+---
+
+## [0.1.3] - 2022/08/26
+
+### 新增
+
+- 在题目的预览中显示最后一次提交的代码
+
+### 更新
+
+- 修复题目预览中的图片不显示问题
+
+---
+
+## [0.1.2] - 2022/07/29
+
+### 新增
+
+- 增加 `CHANGELOG_zh-CN.md` 中文文档
+
+### 更新
+
+- 优化插件包的大小
+- 修复用户取消登录时，仍然提示“等待登录”
+
+---
+
+## [0.1.1] - 2022/07/28
+
+### 更新
+
+- 修复了用户Session不能被保存的问题（即再次打开 VS Code 时需要重新登录）
+
+### 移除
+
+- 移除用户取消登录后的提示
+
+---
+
+## [0.1.0] - 2022/07/27
+
+### 新增
+
+- 使用微信 QRCode 登录/退出 Pintia（PTA）。
+- 在 Explorer 中显示 **公共题集**
+- 在 VS Code 中预览题目
+- 向 Pintia 提交/测试你的 Solution
+- 在编辑器中添加 **多个自定义测试样例**
+- 自动签到 Pintia 的教育超市
