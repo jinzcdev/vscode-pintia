@@ -4,28 +4,35 @@
 
 ---
 
+## [0.2.1] - 2022/11/29
+
+### Changed
+
+- Fix the name error of 'Output' view (Pinta -> PTA (Pintia))
+- Change the default language of the `README` to Chinese
+
 ## [0.2.0] - 2022/09/17
 
 ### Added
- 
+
 - Highlight the code of preview
 - Add the command `Pintia: Change Workspace Folder`
- 
+
 ### Changed
- 
+
 - Fix the error of parsing markdown
 - Improve the style under the theme of **Light/Dark High Contrast**
 
 ---
 
-## [0.1.4] - 2022/09/09 
- 
+## [0.1.4] - 2022/09/09
+
 ### Added
- 
+
 - Add [snippets](https://github.com/jinzcdev/vscode-pintia#15-snippets) of C/CPP template
- 
+
 ### Changed
- 
+
 - Fix the last submitted code can't be copied
 - Change the icon of Pintia
 

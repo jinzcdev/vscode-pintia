@@ -2,7 +2,7 @@
     "name": "vscode-pintia",
     "displayName": "Pintia",
     "description": "Solve PTA problems in VS Code",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "author": "Zhichao Jin",
     "publisher": "jinzcdev",
     "license": "MIT",
