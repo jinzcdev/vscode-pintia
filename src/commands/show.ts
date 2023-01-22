@@ -3,13 +3,16 @@ import * as path from "path";
 import * as vscode from "vscode";
 import * as fs from "fs-extra";
 import { selectWorkspaceFolder } from "../utils/workspaceUtils";
-import { commentFormatMapping, compilerLangMapping, IPtaCode, IQuickPickItem, langCompilerMapping, ptaCompiler } from "../shared";
+import { commentFormatMapping, compilerLangMapping, configPath, IPtaCode, IQuickPickItem, langCompilerMapping, problemTypeNameMapping, ptaCompiler } from "../shared";
 import { ptaChannel } from "../ptaChannel";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import { ptaConfig } from "../ptaConfig";
 import { ptaApi } from "../utils/api";
 import { IProblem } from "../entity/IProblem";
 import { ptaManager } from "../PtaManager";
+import { IUserSession } from "../entity/userLoginSession";
+import { IProblemSearchItem } from "../entity/IProblemSearchItem";
+import { ptaPreviewProvider } from "../webview/ptaPreviewProvider";
 
 /*
 async function fetchProblemLanguage(): Promise<string | undefined> {
@@ -108,4 +111,53 @@ export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
         ptaChannel.appendLine(error.toString());
         await promptForOpenOutputChannel("Coding the problem failed. Please open the output channel for details.", DialogType.error);
     }
+}
+
+export async function searchProblem(): Promise<void> {
+    const userSession: IUserSession | undefined = ptaManager.getUserSession();
+    if (!userSession) {
+        vscode.window.showInformationMessage("Login session has expired!");
+        return;
+    }
+    const items = await parseProblemsToPicks(fetchProblemIndex());
+    const choice: IQuickPickItem<IProblemSearchItem> | undefined = await vscode.window.showQuickPick(
+        items,
+        {
+            matchOnDetail: true,
+            placeHolder: `Select one problem (total: ${items.length})`,
+        },
+    );
+    if (!choice) {
+        return;
+    }
+    await ptaPreviewProvider.showPreview(choice.value.psID, choice.value.pID);
+}
+
+async function fetchProblemIndex(): Promise<Array<IProblemSearchItem>> {
+    const problemSets = await fs.readJSON(path.join(configPath, "searchIndex.json"));
+    const problems: Array<IProblemSearchItem> = [];
+    const ignoreZOJ: boolean = ptaConfig.getSearchIndexIgnoreZOJ();
+    for (const ps in problemSets) {
+        if (ignoreZOJ && ps.trim() === "ZOJ Problem Set") {
+            continue;
+        }
+        for (let problem of problemSets[ps]) {
+            problem["psName"] = ps;
+            problems.push(problem);
+        }
+    }
+    return problems;
+}
+
+async function parseProblemsToPicks(p: Promise<IProblemSearchItem[]>): Promise<Array<IQuickPickItem<IProblemSearchItem>>> {
+    let cnt = 0;
+    return new Promise(async (resolve: (res: Array<IQuickPickItem<IProblemSearchItem>>) => void): Promise<void> => {
+        const picks: Array<IQuickPickItem<IProblemSearchItem>> = (await p).map((problem: IProblemSearchItem) => Object.assign({}, {
+            label: `[${++cnt}] ${problem.label} ${problem.title}`,
+            description: "",
+            detail: `Score: ${problem.score}, Type: ${problemTypeNameMapping.get(problem.type)}, PS: ${problem.psName}`,
+            value: problem,
+        }));
+        resolve(picks);
+    });
 }

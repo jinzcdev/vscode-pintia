@@ -85,6 +85,22 @@ class PtaConfig {
     public setPageSize(pageSize: number) {
         this.update("page.pageSize", pageSize);
     }
+
+    public getSearchIndexIgnoreZOJ(): boolean {
+        return this.getConfiguration().get<boolean>("searchIndex.ignoreZOJ", true);
+    }
+
+    public setSearchIndexIgnoreZOJ(ignoredZOJ: boolean) {
+        this.update("searchIndex.ignoreZOJ", ignoredZOJ);
+    }
+
+    public getSearchIndexAutoRefresh(): boolean {
+        return this.getConfiguration().get<boolean>("searchIndex.autoRefresh", false);
+    }
+
+    public setSearchIndexAutoRefresh(autoRefresh: boolean) {
+        this.update("searchIndex.autoRefresh", autoRefresh);
+    }
 }
 
 export const ptaConfig: PtaConfig = new PtaConfig();

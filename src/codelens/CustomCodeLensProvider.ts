@@ -49,7 +49,7 @@ export class CustomCodeLensProvider implements vscode.CodeLensProvider {
         const range: vscode.Range = new vscode.Range(codeLensLine, 0, codeLensLine, 0);
         const codeLens: vscode.CodeLens[] = [];
 
-        if (shortcuts.indexOf("submit") >= 0) {
+        if (shortcuts.indexOf("Submit") >= 0) {
             codeLens.push(new vscode.CodeLens(range, {
                 title: "Submit",
                 command: "pintia.submitSolution",
@@ -57,7 +57,7 @@ export class CustomCodeLensProvider implements vscode.CodeLensProvider {
             }));
         }
 
-        if (shortcuts.indexOf("test") >= 0) {
+        if (shortcuts.indexOf("Test") >= 0) {
             codeLens.push(new vscode.CodeLens(range, {
                 title: "Test",
                 command: "pintia.testSolution",
@@ -75,6 +75,25 @@ export class CustomCodeLensProvider implements vscode.CodeLensProvider {
             }
             ));
         }
+        if (shortcuts.indexOf("Preview") >= 0) {
+            // add the button of problem preview
+            let codeTitleIndex: number = document.lineCount - 1;
+            for (let i: number = 0; i < document.lineCount; i++) {
+                const lineContent: string = document.lineAt(i).text;
+                if (lineContent.indexOf("@pintia psid") >= 0) {
+                    codeTitleIndex = i;
+                    break;
+                }
+            }
+
+            codeLens.push(new vscode.CodeLens(
+                range, {
+                title: "Preview",
+                command: "pintia.previewProblem",
+                arguments: [ptaCode.psID, ptaCode.pID]
+            }));
+        }
+
         return codeLens;
     }
 

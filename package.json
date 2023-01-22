@@ -37,6 +37,8 @@
         "onCommand:pintia.changeDefaultLanguage",
         "onCommand:pintia.changeWorkspaceFolder",
         "onCommand:pintia.reportIssue",
+        "onCommand:pintia.searchProblem",
+        "onCommand:pintia.refreshProblemSearchIndex",
         "onView:pintiaExplorer"
     ],
     "main": "./out/extension",
@@ -71,14 +73,19 @@
                     "group": "navigation@1"
                 },
                 {
-                    "command": "pintia.refreshExplorer",
+                    "command": "pintia.searchProblem",
                     "when": "view == pintiaExplorer",
                     "group": "navigation@2"
                 },
                 {
-                    "command": "pintia.reportIssue",
+                    "command": "pintia.refreshExplorer",
                     "when": "view == pintiaExplorer",
                     "group": "navigation@3"
+                },
+                {
+                    "command": "pintia.reportIssue",
+                    "when": "view == pintiaExplorer",
+                    "group": "navigation@4"
                 }
             ]
         },
@@ -131,6 +138,17 @@
                 "title": "Report Issue",
                 "category": "Pintia",
                 "icon": "$(comment)"
+            },
+            {
+                "command": "pintia.searchProblem",
+                "title": "Search Problem",
+                "category": "Pintia",
+                "icon": "$(search)"
+            },
+            {
+                "command": "pintia.refreshProblemSearchIndex",
+                "title": "Refresh Problem Search Index",
+                "category": "Pintia"
             }
         ],
         "configuration": {
@@ -168,13 +186,13 @@
                     "type": "boolean",
                     "default": true,
                     "scope": "application",
-                    "description": "Specify whether the Pintia status bar will be shown or not."
+                    "description": "Specify whether the Pintia status bar is displayed."
                 },
                 "pintia.autoCheckIn": {
                     "type": "boolean",
                     "default": false,
                     "scope": "application",
-                    "description": "Specify whether to check in Pintia's education supermarket or not when the Pintia Extension is activated."
+                    "description": "Specify whether to automatically check in Pintia's education supermarket when the Pintia Extension is activated."
                 },
                 "pintia.defaultLanguage": {
                     "type": "string",
@@ -224,22 +242,37 @@
                 "pintia.editor.shortcuts": {
                     "type": "array",
                     "default": [
-                        "submit",
-                        "test"
+                        "Submit",
+                        "Test",
+                        "Preview"
                     ],
                     "scope": "application",
                     "items": {
                         "type": "string",
                         "enum": [
-                            "submit",
-                            "test"
+                            "Submit",
+                            "Test",
+                            "Preview"
                         ],
                         "enumDescriptions": [
                             "Submit your answer to pintia.",
-                            "Test your answer with customized test cases."
+                            "Test your answer with customized test cases.",
+                            "Preview the problem in the webview."
                         ]
                     },
                     "description": "Customize the shortcuts in editors."
+                },
+                "pintia.searchIndex.ignoreZOJ": {
+                    "type": "boolean",
+                    "default": true,
+                    "scope": "application",
+                    "description": "Specify whether to ignore the problem set `ZOJ Problem Set` in problem search index."
+                },
+                "pintia.searchIndex.autoRefresh": {
+                    "type": "boolean",
+                    "default": false,
+                    "scope": "application",
+                    "description": "Specify whether to automatically refresh problem search index when the Pintia Extension is activated. The update frequency of the problem bank is very low, so it is not recommended to automatically refresh the problem bank, which is time-consuming."
                 }
             }
         },
