@@ -4,7 +4,7 @@ import { IProblemSubmission } from "./entity/IProblemSubmission";
 import { IProblemSubmissionResult } from "./entity/IProblemSubmissionResult";
 import { ptaApi } from "./utils/api";
 import * as fs from "fs-extra";
-import { cacheFilePath, CallBack, configPath, ProblemType, PtaLoginMethod } from "./shared";
+import { cacheDirPath, CallBack, configPath, ProblemType, PtaLoginMethod } from "./shared";
 import * as path from "path";
 import { IUserSession, IWechatAuth, AuthStatus, IWechatUserState, IWechatUserInfo } from "./entity/userLoginSession";
 import { ptaLoginProvider } from "./webview/ptaLoginProvider";
@@ -56,7 +56,8 @@ class PtaExecutor extends EventEmitter implements Disposable {
                     let data: IProblemSubmissionResult;
                     let interval = setInterval(async () => {
                         data = await ptaApi.getProblemSubmissionResult(submission.submissionId, cookie);
-                        if (data.queued === -1 && data.submission.status !== "WAITING") {
+                        if (data.queued === -1 && data.submission.status !== "WAITING"
+                            && data.submission.status !== "JUDGING") {
                             resolve();
                             clearInterval(interval);
                             callback("SUCCESS", data);
@@ -120,7 +121,8 @@ class PtaExecutor extends EventEmitter implements Disposable {
                     let data: IProblemSubmissionResult, cnt: number = 0;
                     let interval = setInterval(async () => {
                         data = await ptaApi.getProblemTestResult(submission.submissionId, cookie);
-                        if (data.queued === -1 && data.submission.status !== "WAITING") {
+                        if (data.queued === -1 && data.submission.status !== "WAITING"
+                            && data.submission.status !== "JUDGING") {
                             resolve();
                             clearInterval(interval);
                             callback("SUCCESS", data);
@@ -203,9 +205,9 @@ class PtaExecutor extends EventEmitter implements Disposable {
     }
 
     public async clearCache(): Promise<void> {
-        if (await fs.pathExists(cacheFilePath)) {
-            await fs.remove(cacheFilePath);
-            ptaChannel.appendLine(`[INFO] Clear the cache from the "${cacheFilePath}"`);
+        if (await fs.pathExists(cacheDirPath)) {
+            await fs.remove(cacheDirPath);
+            ptaChannel.appendLine(`[INFO] Clear the cache from the "${cacheDirPath}"`);
         }
     }
 

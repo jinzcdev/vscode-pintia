@@ -6,7 +6,7 @@ import * as vscode from "vscode";
 import { IProblemInfo } from "./entity/IProblemInfo";
 
 export const configPath: string = path.join(os.homedir(), ".pintia");
-export const cacheFilePath: string = path.join(configPath, "cache");
+export const cacheDirPath: string = path.join(configPath, "cache");
 
 
 export enum UserStatus {

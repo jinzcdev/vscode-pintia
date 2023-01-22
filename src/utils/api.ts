@@ -6,7 +6,7 @@ import { IProblemSubmission } from "../entity/IProblemSubmission";
 import { IProblemSubmissionResult } from "../entity/IProblemSubmissionResult";
 import { IProblemSummary } from "../entity/IProblemSummary";
 import { IProblemCode } from "../entity/problemSubmissionCode";
-import { cacheFilePath, ProblemType } from "../shared";
+import { cacheDirPath, ProblemType } from "../shared";
 import { httpGet, httpPost } from "./httpUtil";
 
 import * as fs from "fs-extra";
@@ -31,7 +31,7 @@ class PtaAPI {
 
 
     public async getDashSections(): Promise<IDashSection[]> {
-        const filePath = path.join(cacheFilePath, "dashboard.json");
+        const filePath = path.join(cacheDirPath, "dashboard.json");
         if (await fs.pathExists(filePath)) {
             ptaChannel.appendLine(`[INFO] Read the cache of dashboard from the "${filePath}"`);
             return await fs.readJSON(filePath);
@@ -41,7 +41,7 @@ class PtaAPI {
             .then(json => json["content"])
             .then(content => JSON.parse(content).sections);
         await fs.createFile(filePath);
-        await fs.writeJSON(filePath, sections);
+        await fs.writeJson(filePath, sections);
         return sections;
     }
 
@@ -53,7 +53,7 @@ class PtaAPI {
      * @returns 
      */
     public async getAllProblemSets(cookie?: string): Promise<IProblemSet[]> {
-        const filePath = path.join(cacheFilePath, "problemSets.json");
+        const filePath = path.join(cacheDirPath, "problemSets.json");
         if (await fs.pathExists(filePath)) {
             ptaChannel.appendLine(`[INFO] Read the cache of problem sets from the "${filePath}"`);
             return await fs.readJSON(filePath);
@@ -130,7 +130,7 @@ class PtaAPI {
     }
 
     public async getAllProblemInfoList(psID: string, problemType: ProblemType): Promise<IProblemInfo[]> {
-        const filePath = path.join(cacheFilePath, psID, problemType + ".json");
+        const filePath = path.join(cacheDirPath, psID, problemType + ".json");
         if (await fs.pathExists(filePath)) {
             ptaChannel.appendLine(`[INFO] Read the problem list from the "${filePath}"`);
             return await fs.readJSON(filePath);
@@ -151,6 +151,37 @@ class PtaAPI {
         return problemList;
     }
 
+    public async getProblemInfoByID(psID: string, pID: string, problemType?: ProblemType): Promise<IProblemInfo> {
+        if (!problemType) {
+            const problem: IProblem = await this.getProblem(psID, pID);
+            problemType = problem.type as ProblemType;
+        }
+        const filePath = path.join(cacheDirPath, psID, problemType + ".json");
+        if (await fs.pathExists(filePath)) {
+            ptaChannel.appendLine(`[INFO] Read the problem list from the "${filePath}"`);
+            const problemInfoList: Array<IProblemInfo> = await fs.readJSON(filePath);
+            for (const item of problemInfoList) {
+                if (item["id"] === pID) {
+                    return item;
+                }
+            }
+        }
+
+        const total = await this.getProblemNum(psID, problemType), limit = 200;
+        const pageNum: number = Math.ceil(total / limit);
+
+        for (let page = 0; page < pageNum; page++) {
+            const data: Array<IProblemInfo> = await httpGet(`${this.problemUrl}/${psID}/problem-list?problem_type=${problemType}&page=${page}&limit=${limit}`)
+                .then(json => json["problemSetProblems"]);
+            for (const item of data) {
+                if (item["id"] === pID) {
+                    return item;
+                }
+            }
+        }
+        return Promise.reject();
+    }
+
     private async getProblemNum(psID: string, problemType: ProblemType): Promise<number> {
         return await this.getProblemSummary(psID)
             .then(json => json[problemType])
@@ -167,7 +198,7 @@ class PtaAPI {
      * @returns 
      */
     public async getProblem(psID: string, pID: string, cookie?: string): Promise<IProblem> {
-        const filePath = path.join(cacheFilePath, psID, pID + ".json");
+        const filePath = path.join(cacheDirPath, psID, pID + ".json");
         // That cookie is not undefined denotes requirement for submission result, therefore, 
         // the problem need to be updated.
         if (!cookie && await fs.pathExists(filePath)) {
@@ -203,8 +234,13 @@ class PtaAPI {
         return await httpGet(`${this.problemUrl}/${psID}/exams`, cookie).then(json => json["exam"]);
     }
 
+    public async getProblemSetName(psID: string): Promise<string> {
+        const problemSet = await httpGet(`${this.problemUrl}/${psID}/exams`).then(json => json["problemSet"]);
+        return problemSet["name"];
+    }
+
     public async getProblemSet(psID: string): Promise<IProblemSet> {
-        const filePath = path.join(cacheFilePath, psID + ".json");
+        const filePath = path.join(cacheDirPath, psID + ".json");
         if (await fs.pathExists(filePath)) {
             ptaChannel.appendLine(`[INFO] Read the information of problem set from the "${filePath}"`);
             return await fs.readJSON(filePath);
@@ -310,6 +346,49 @@ class PtaAPI {
     public async getCheckInStatus(cookie: string): Promise<ICheckInStatus> {
         return await httpGet("https://pintia.cn/api/users/rewards/DAILY_CHECK_IN", cookie);
     }
+
+    public async getProblemSearchIndex(problemSetIDs: string[]): Promise<any> {
+        let allProblems: any = {};
+        try {
+            for (const psID of problemSetIDs) {
+                const problemList: Array<any> = [];
+                const psName: string = await this.getProblemSetName(psID);
+                const summaries: IProblemSummary = await this.getProblemSummary(psID);
+                const problemTypes = Object.keys(summaries);
+                let data: IProblemInfo[] = [];
+                for (const problemType of problemTypes) {
+                    const totalProblems: number = summaries[problemType as keyof IProblemSummary]?.total ?? 0;
+                    const pages: number = Math.ceil(totalProblems / 200);
+                    for (let i = 0; i < pages; i++) {
+                        const problemInfo = await this.getProblemInfoListByPage(psID, problemType as ProblemType, i, 200);
+                        data = data.concat(problemInfo);
+                        await delay(400);
+                    }
+                }
+                for (const item of data) {
+                    problemList.push({
+                        "psID": psID,
+                        "pID": item["id"],
+                        "title": item["title"],
+                        "label": item["label"],
+                        "score": item["score"],
+                        "type": item["type"]
+                    });
+                }
+                allProblems = Object.assign(allProblems, {
+                    [psName]: problemList
+                })
+            }
+            return allProblems;
+        } catch (error: any) {
+            ptaChannel.appendLine(`[ERROR]: ${error.toString()}. The delay is too short.`);
+        }
+        return {};
+    }
+}
+
+function delay(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export const ptaApi = new PtaAPI();

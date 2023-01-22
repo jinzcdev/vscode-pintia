@@ -110,8 +110,16 @@ class PtaManager extends EventEmitter {
                 const loginSession: IUserSession = await fs.readJSON(filePath);
                 const user: IPtaUser | undefined = await ptaApi.getCurrentUser(loginSession.cookie);
                 if (user) {
+                    loginSession.user = user.nickname;
+                    loginSession.email = user.email;
+
                     this.userSession = loginSession;
                     this.userStatus = UserStatus.SignedIn;
+
+                    fs.writeJson(filePath, loginSession).catch(async reason => {
+                        ptaChannel.appendLine(`[ERROR]: ${reason.toString()}`);
+                        await promptForOpenOutputChannel("Update user profile failed. Please open the output channel for details.", DialogType.error);
+                    });
                 } else {
                     this.userSession = undefined;
                     this.userStatus = UserStatus.SignedOut;
