@@ -106,7 +106,7 @@ class PtaManager extends EventEmitter {
         const filePath = path.join(configPath, "user.json");
         try {
             if (await fs.pathExists(filePath)) {
-                ptaChannel.appendLine(`[INFO] Read the usersession from the "${filePath}"`);
+                ptaChannel.appendLine(`[INFO] Read the user session from the "${filePath}"`);
                 const loginSession: IUserSession = await fs.readJSON(filePath);
                 const user: IPtaUser | undefined = await ptaApi.getCurrentUser(loginSession.cookie);
                 if (user) {

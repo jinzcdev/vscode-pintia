@@ -2,10 +2,9 @@
 import * as vscode from "vscode";
 import { IProblem } from '../entity/IProblem';
 import { IProblemInfo } from '../entity/IProblemInfo';
-import { PtaNode } from '../explorer/PtaNode';
 import { ptaConfig } from '../ptaConfig';
 import { ptaManager } from "../PtaManager";
-import { compilerLangMapping, IPtaCode, langCompilerMapping } from '../shared';
+import { compilerLangMapping, IPtaCode, langCompilerMapping, ProblemType } from '../shared';
 import { ptaApi } from '../utils/api';
 import { markdownEngine } from './markdownEngine';
 import { PtaWebview } from './PtaWebview';
@@ -13,13 +12,14 @@ import { PtaWebview } from './PtaWebview';
 class PtaPreviewProvider extends PtaWebview {
 
     private ptaCode?: IPtaCode;
-    public async showPreview(node: PtaNode) {
-        const problem: IProblem = await ptaApi.getProblem(node.psID, node.pID, ptaManager.getUserSession()?.cookie);
-        const problemInfo: IProblemInfo = node.value.problemInfo!;
+    public async showPreview(psID: string, pID: string) {
+        const problem: IProblem = await ptaApi.getProblem(psID, pID, ptaManager.getUserSession()?.cookie);
+        const problemInfo: IProblemInfo = await ptaApi.getProblemInfoByID(psID, pID, problem.type as ProblemType);
+        const problemSetName: string = await ptaApi.getProblemSetName(psID);
         const compiler: string = langCompilerMapping.get(ptaConfig.getDefaultLanguage()) ?? "GXX";
         const lastSubmittedCompiler: string = (problem.lastSubmissionDetail?.programmingSubmissionDetail ?? problem.lastSubmissionDetail?.codeCompletionSubmissionDetail)?.compiler ?? problem.compiler;
         const lastSubmittedLang: string = this.getLastSubmittedLang(lastSubmittedCompiler);
-        this.ptaCode = { psID: problem.problemSetId, psName: node.value.problemSet, pID: problem.id, problemType: node.value.problemType, compiler: compiler, title: problem.label + " " + problem.title };
+        this.ptaCode = { psID: problem.problemSetId, psName: problemSetName, pID: problem.id, problemType: problem.type as ProblemType, compiler: compiler, title: problem.label + " " + problem.title };
         this.data = {
             title: problem.label,
             content: this.getContent(Object.assign({}, problemInfo, {

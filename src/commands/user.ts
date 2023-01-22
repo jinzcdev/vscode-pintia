@@ -6,6 +6,7 @@ import { ptaManager } from "../PtaManager";
 import { IQuickPickItem } from "../shared";
 import { ptaApi } from "../utils/api";
 import { DialogType, openUrl, promptForOpenOutputChannel } from "../utils/uiUtils";
+import { ptaConfig } from "../ptaConfig";
 
 
 export async function showUserManager(): Promise<void> {
@@ -69,6 +70,17 @@ export async function checkInPTA(): Promise<void> {
         ptaChannel.appendLine(error.toString());
         promptForOpenOutputChannel("Failed to check in. Please open the output channel for details.", DialogType.error);
     }
+}
+
+export async function autoCheckInPTA(): Promise<void> {
+    if (!ptaConfig.getAutoCheckIn()) {
+        return;
+    }
+    checkedInStatus().then(checked => {
+        if (!checked) {
+            checkInPTA();
+        }
+    });
 }
 
 export async function checkedInStatus(): Promise<boolean> {
