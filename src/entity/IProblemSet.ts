@@ -20,7 +20,13 @@ export interface IProblemSet {
     duration: number;
     problemSetConfig: {
         compilers: string[]; // all compilers to be allowed to use in this problem set
-        multipleChoiceMoreThanOneAnswerProblemScoringMethod: string;
+        multipleChoiceMoreThanOneAnswerProblemScoringMethod?: string;
+        randomGenerationProblemSetConfig?: {
+            enabled: boolean;
+            shuffledAnswers: boolean;
+            shuffledProblems: boolean;
+            randomComposition: boolean;
+        };
         scoringRule: string;
         hideScoreboard: boolean;
         hidingTime: number;
@@ -39,6 +45,11 @@ export interface IProblemSet {
         blindJudgeSubjective: boolean;
         autoSave: boolean;
         forbidPasting: boolean;
+        allowAddCollection: boolean;
+        allowFilterUserGroup: boolean;
+        enableGradeService: boolean;
+        enableXcpcContestService: boolean;
+        collectionDerivedProblemSetId: string;
     };
     ownerOrganizationId: string;
     stage: string;

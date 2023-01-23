@@ -6,7 +6,7 @@ import { IProblemSubmission } from "../entity/IProblemSubmission";
 import { IProblemSubmissionResult } from "../entity/IProblemSubmissionResult";
 import { IProblemSummary } from "../entity/IProblemSummary";
 import { IProblemCode } from "../entity/problemSubmissionCode";
-import { cacheDirPath, ProblemType } from "../shared";
+import { cacheDirPath, ProblemType, ptaCache } from "../shared";
 import { httpGet, httpPost } from "./httpUtil";
 
 import * as fs from "fs-extra";
@@ -21,7 +21,7 @@ import { ptaChannel } from "../ptaChannel";
 
 class PtaAPI {
 
-    private readonly problemUrl: string = "https://pintia.cn/api/problem-sets/";
+    private readonly problemUrl: string = "https://pintia.cn/api/problem-sets";
     private readonly examUrl: string = "https://pintia.cn/api/exams/";
     private readonly submissionUrl: string = "https://pintia.cn/api/submissions/";
     private readonly wechatAuthUrl: string = "https://passport.pintia.cn/api/oauth/wechat/official-account/auth-url/";
@@ -235,7 +235,20 @@ class PtaAPI {
     }
 
     public async getProblemSetName(psID: string): Promise<string> {
-        const problemSet = await httpGet(`${this.problemUrl}/${psID}/exams`).then(json => json["problemSet"]);
+        let psID2name: Map<string, string> = ptaCache.get("psID2name");
+        if (!psID2name) {
+            psID2name = new Map<string, string>();
+            const problemSets: IProblemSet[] = await this.getAllProblemSets();
+            for (const item of problemSets) {
+                psID2name.set(item.id, item.name);
+            }
+            ptaCache.put<Map<string, string>>("psID2name", psID2name);
+        }
+        const psName = psID2name.get(psID);
+        if (psName) {
+            return psName;
+        }
+        const problemSet = await httpGet(`${this.problemUrl}/${psID}/exams`).then(json => json["problemSet"] ?? "undefined");
         return problemSet["name"];
     }
 

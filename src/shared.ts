@@ -8,6 +8,7 @@ import { IProblemInfo } from "./entity/IProblemInfo";
 export const configPath: string = path.join(os.homedir(), ".pintia");
 export const cacheDirPath: string = path.join(configPath, "cache");
 
+export import ptaCache = require('memory-cache');
 
 export enum UserStatus {
     SignedIn = 1,
