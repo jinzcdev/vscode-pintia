@@ -2,9 +2,9 @@
     "Custom Test Sample": {
         "prefix": "ptatest",
         "body": [
-            "$LINE_COMMENT @pintia test=start",
+            "$BLOCK_COMMENT_START @pintia test=start",
             "${1:Put your custom test sample here}",
-            "$LINE_COMMENT @pintia test=end"
+            "@pintia test=end $BLOCK_COMMENT_END"
         ],
         "description": "Put your custom test samples in `@pintia test=start/end` and the extension will automatically recognize it when you click the `Test` button."
     },
@@ -51,5 +51,37 @@
             "}"
         ],
         "description": "Get the template of clang with header file of `stdio`"
+    },
+    "Java Template (BufferReader)": {
+        "prefix": "ptajava_buffer",
+        "body": [
+            "import java.io.BufferedReader;",
+            "import java.io.IOException;",
+            "import java.io.InputStreamReader;",
+            "",
+            "public class Main {",
+            "\tpublic static void main(String[] args) throws IOException {",
+            "\t\tBufferedReader in = new BufferedReader(new InputStreamReader(System.in));",
+            "\t\t${1}",
+            "\t\tin.close();",
+            "\t}",
+            "}"
+        ],
+        "description": "Get the template of java with BufferReader"
+    },
+    "Java Template (Scanner)": {
+        "prefix": "ptajava_scanner",
+        "body": [
+            "import java.util.Scanner;",
+            "",
+            "public class Main {",
+            "\tpublic static void main(String[] args) {",
+            "\t\tScanner in = new Scanner(System.in);",
+            "\t\t${1}",
+            "\t\tin.close();",
+            "\t}",
+            "}"
+        ],
+        "description": "Get the template of java with Scanner"
     }
 }
