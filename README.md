@@ -47,7 +47,7 @@
 ### 1.2 预览题目
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/preview.png" alt="预览问题" />
+  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/preview.jpg" alt="预览问题" />
 </p>
 
 
@@ -65,7 +65,7 @@
 ### 1.3 编辑器快捷键
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/shortcuts.png" alt="编辑器快捷键" />
+  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/shortcuts.jpg" alt="编辑器快捷键" />
 </p>
 
 
@@ -73,13 +73,14 @@
 
   - `Submit`：向 Pintia 提交你的答案
   - `Test`：用 **自定义的测试样例** 或 **默认样例** 测试你的答案
+  - `Preview`: 在源文件中打开习题预览
 
 ---
 
 ### 1.4 自定义测试样例
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/snippets.png" alt="自定义测试样例" />
+  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/snippets.jpg" alt="自定义测试样例" />
 </p>
 
 
@@ -90,7 +91,17 @@
 
 ---
 
-### 1.5 代码片段
+### 1.5 搜索题目
+
+点击 Pintia 视图顶部的 `搜索` 图标，或者打开 命令面板，使用 `Pintia: Search Problem` 快捷命令。
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/search.png" alt="搜索题目" />
+</p>
+
+---
+
+### 1.6 代码片段
 
 你可以在代码编辑器中输入以下前缀来快速生成相应的代码块，如下所示。
 
@@ -101,6 +112,8 @@
 | ptacpp_stdc++ | 获取头文件为 `bits/stdc++.h` 的 cpp 模板 |
 | ptacpp_iostream | 获取带有 `iostream` 头文件的 cpp 模板 |
 | ptaclang | 获取带有头文件 `stdio.h` 的 clang 模板 |
+| ptajava_buffer | 获取带有 `BufferReader` 的 java 模板 |
+| ptajava_scanner | 获取带有 `Scanner` 的 java 模板 |
 
 ---
 
@@ -120,9 +133,11 @@
 | `pintia.defaultLanguage`  | 指定用于解题的默认语言。支持的语言有`C (gcc)`, `C++ (g++)`, `C (clang)`, `C++ (clang++)`, `Java (javac)`, `Python (python2)`, `Python (python3)`, `Ruby (ruby)`, `Bash (bash)`, `Plaintext (cat)`, `CommonLisp (sbcl)`, `Pascal (fpc)`, `Go (go)`, `Haskell (ghc)`, `Lua (lua)`, `Lua (luajit)`, `C# (mcs)`, `JavaScript (node)`, `OCaml (ocamlc)`, `PHP (php)`, `Perl (perl)`, `AWK (awk)`, `D (dmd)`, `Racket (racket)`, `Vala (valac)`, `Visual Basic (vbnc)`, `Kotlin (kotlinc)`, `Swift (swiftc)`, `Objective-C (gcc)`, `Fortran95 (gfortran)`, `Octave (octave-cli)`, `R (R)`, `ASM (nasm. sh)`, `Rust (rustc)`, `Scala (scalac)`, `Python (pypy3)`, `SQL (SQL)` | `C++ (g++)` |
 | `pintia.workspaceFolder`  | 指定工作区文件夹的路径，以存储代码文件                   | `""`             |
 | `pintia.enableStatusBar`  | 指定是否显示 Pintia 状态栏                                   | `true`           |
-| `pintia.editor.shortcuts` | 指定编辑器中的自定义快捷方式。目前仅支持 `submit`, `test` | `["submit"，"test"]` |
+| `pintia.editor.shortcuts` | 指定编辑器中的自定义快捷方式。目前仅支持 `Submit`, `Test`, `Preview` | `["Submit"，"Test", "Preview"]` |
 | `pintia.paging.pageSize`  | 当问题集过大时，是否对问题列表进行分页。当pageSize为0表示不分页 | `100`            |
 | `pintia.autoCheckIn`      | 指定当 Pintia 插件被激活时，是否自动签到 Pintia 的教育商店 | `false`          |
+| `pintia.searchIndex.ignoreZOJ` | 指定搜索题目时，是否忽略 `ZOJ Problem Set` | `true`          |
+| `pintia.searchIndex.autoRefresh` | 指定是否在插件被激活时，自动刷新题目搜索索引 | `false`          |
 
 ## 4. 需要帮助？
 

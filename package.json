@@ -1,7 +1,7 @@
 {
     "name": "vscode-pintia",
     "displayName": "Pintia",
-    "description": "Solve PTA problems in VS Code",
+    "description": "%description%",
     "version": "0.2.1",
     "author": "Zhichao Jin",
     "publisher": "jinzcdev",
@@ -39,6 +39,7 @@
         "onCommand:pintia.reportIssue",
         "onCommand:pintia.searchProblem",
         "onCommand:pintia.refreshProblemSearchIndex",
+        "onCommand:pintia.openExtensionRepo",
         "onView:pintiaExplorer"
     ],
     "main": "./out/extension",
@@ -56,7 +57,7 @@
             "pintia": [
                 {
                     "id": "pintiaExplorer",
-                    "name": "Problems"
+                    "name": "%contributes.views.pintia.pintiaExplorer%"
                 }
             ]
         },
@@ -92,62 +93,62 @@
         "commands": [
             {
                 "command": "pintia.openPintiaHome",
-                "title": "Open PTA Home",
+                "title": "%contributes.commands.pintia.openPintiaHome%",
                 "category": "Pintia",
                 "icon": "$(globe)"
             },
             {
                 "command": "pintia.clearCache",
-                "title": "Clear Cache",
+                "title": "%contributes.commands.pintia.clearCache%",
                 "category": "Pintia"
             },
             {
                 "command": "pintia.signIn",
-                "title": "Sign In",
+                "title": "%contributes.commands.pintia.signIn%",
                 "category": "Pintia",
                 "icon": "$(sign-in)"
             },
             {
                 "command": "pintia.signOut",
-                "title": "Sign Out",
+                "title": "%contributes.commands.pintia.signOut%",
                 "category": "Pintia"
             },
             {
                 "command": "pintia.refreshExplorer",
-                "title": "Refresh",
+                "title": "%contributes.commands.pintia.refreshExplorer%",
                 "category": "Pintia",
                 "icon": "$(refresh)"
             },
             {
                 "command": "pintia.changeDefaultLanguage",
-                "title": "Change Default Language",
+                "title": "%contributes.commands.pintia.changeDefaultLanguage%",
                 "category": "Pintia"
             },
             {
                 "command": "pintia.changeWorkspaceFolder",
-                "title": "Change Workspace Folder",
+                "title": "%contributes.commands.pintia.changeWorkspaceFolder%",
                 "category": "Pintia"
             },
             {
                 "command": "pintia.checkIn",
-                "title": "Check In PTA",
+                "title": "%contributes.commands.pintia.checkIn%",
                 "category": "Pintia"
             },
             {
                 "command": "pintia.reportIssue",
-                "title": "Report Issue",
+                "title": "%contributes.commands.pintia.reportIssue%",
                 "category": "Pintia",
                 "icon": "$(comment)"
             },
             {
                 "command": "pintia.searchProblem",
-                "title": "Search Problem",
+                "title": "%contributes.commands.pintia.searchProblem%",
                 "category": "Pintia",
                 "icon": "$(search)"
             },
             {
                 "command": "pintia.refreshProblemSearchIndex",
-                "title": "Refresh Problem Search Index",
+                "title": "%contributes.commands.pintia.refreshProblemSearchIndex%",
                 "category": "Pintia"
             }
         ],
@@ -157,7 +158,7 @@
                 "pintia.workspaceFolder": {
                     "type": "string",
                     "scope": "application",
-                    "description": "The path of the workspace folder to store the problem files.",
+                    "description": "%configuration.pintia.workspaceFolder%",
                     "default": ""
                 },
                 "pintia.paging.pageSize": {
@@ -174,25 +175,25 @@
                         200
                     ],
                     "scope": "application",
-                    "description": "Whether to page the problem list when the problem set is too large. It is not paged when pageSize is 0."
+                    "description": "%configuration.pintia.paging.pageSize%"
                 },
                 "pintia.showLocked": {
                     "type": "boolean",
                     "default": true,
                     "scope": "application",
-                    "description": "Show locked problems."
+                    "description": "%configuration.pintia.showLocked%"
                 },
                 "pintia.enableStatusBar": {
                     "type": "boolean",
                     "default": true,
                     "scope": "application",
-                    "description": "Specify whether the Pintia status bar is displayed."
+                    "description": "%configuration.pintia.enableStatusBar%"
                 },
                 "pintia.autoCheckIn": {
                     "type": "boolean",
                     "default": false,
                     "scope": "application",
-                    "description": "Specify whether to automatically check in Pintia's education supermarket when the Pintia Extension is activated."
+                    "description": "%configuration.pintia.autoCheckIn%"
                 },
                 "pintia.defaultLanguage": {
                     "type": "string",
@@ -237,7 +238,7 @@
                         "SQL (SQL)"
                     ],
                     "scope": "application",
-                    "description": "Default language for solving the problems."
+                    "description": "%configuration.pintia.defaultLanguage%"
                 },
                 "pintia.editor.shortcuts": {
                     "type": "array",
@@ -255,24 +256,24 @@
                             "Preview"
                         ],
                         "enumDescriptions": [
-                            "Submit your answer to pintia.",
-                            "Test your answer with customized test cases.",
-                            "Preview the problem in the webview."
+                            "%configuration.pintia.editor.shortcuts.submit%",
+                            "%configuration.pintia.editor.shortcuts.test%",
+                            "%configuration.pintia.editor.shortcuts.preview%"
                         ]
                     },
-                    "description": "Customize the shortcuts in editors."
+                    "description": "%configuration.pintia.editor.shortcuts%"
                 },
                 "pintia.searchIndex.ignoreZOJ": {
                     "type": "boolean",
                     "default": true,
                     "scope": "application",
-                    "description": "Specify whether to ignore the problem set `ZOJ Problem Set` in problem search index."
+                    "markdownDescription": "%configuration.pintia.searchIndex.ignoreZOJ%"
                 },
                 "pintia.searchIndex.autoRefresh": {
                     "type": "boolean",
                     "default": false,
                     "scope": "application",
-                    "description": "Specify whether to automatically refresh problem search index when the Pintia Extension is activated. The update frequency of the problem bank is very low, so it is not recommended to automatically refresh the problem bank, which is time-consuming."
+                    "description": "%configuration.pintia.searchIndex.autoRefresh%"
                 }
             }
         },
@@ -317,6 +318,94 @@
                 "language": "groovy",
                 "path": "./snippets/snippets.json"
             }
+        ],
+        "walkthroughs": [
+            {
+                "id": "pintia",
+                "title": "%walkthroughs.title%",
+                "description": "%walkthroughs.description%",
+                "steps": [
+                    {
+                        "id": "overview",
+                        "title": "%walkthroughs.overview.title%",
+                        "description": "%walkthroughs.overview.description%",
+                        "media": {
+                            "markdown": "%walkthroughs.overview.media.markdown%"
+                        },
+                        "completionEvents": [
+                            "onCommand:pintia.openExtensionRepo"
+                        ]
+                    },
+                    {
+                        "id": "signIn",
+                        "title": "%walkthroughs.signIn.title%",
+                        "description": "%walkthroughs.signIn.description%",
+                        "media": {
+                            "image": "docs/imgs/signin-whole.jpg",
+                            "altText": "%walkthroughs.signIn.media.altText%"
+                        },
+                        "completionEvents": [
+                            "onCommand:pintia.signIn"
+                        ]
+                    },
+                    {
+                        "id": "previewProblem",
+                        "title": "%walkthroughs.previewProblem.title%",
+                        "description": "%walkthroughs.previewProblem.description%",
+                        "media": {
+                            "image": "docs/imgs/preview.jpg",
+                            "altText": "%walkthroughs.previewProblem.media.altText%"
+                        }
+                    },
+                    {
+                        "id": "submitTestSolution",
+                        "title": "%walkthroughs.submitTestSolution.title%",
+                        "description": "%walkthroughs.submitTestSolution.description%",
+                        "media": {
+                            "image": "docs/imgs/submit-test-solution.gif",
+                            "altText": "%walkthroughs.submitTestSolution.media.altText%"
+                        }
+                    },
+                    {
+                        "id": "searchProblem",
+                        "title": "%walkthroughs.searchProblem.title%",
+                        "description": "%walkthroughs.searchProblem.description%",
+                        "media": {
+                            "image": "docs/imgs/search-whole.png",
+                            "altText": "%walkthroughs.searchProblem.media.altText%"
+                        },
+                        "completionEvents": [
+                            "onCommand:pintia.searchProblem"
+                        ]
+                    },
+                    {
+                        "id": "testCustomSolution",
+                        "title": "%walkthroughs.testCustomSolution.title%",
+                        "description": "%walkthroughs.testCustomSolution.description%",
+                        "media": {
+                            "image": "docs/imgs/test-custom-sample.gif",
+                            "altText": "%walkthroughs.testCustomSolution.media.altText%"
+                        }
+                    },
+                    {
+                        "id": "addTemplates",
+                        "title": "%walkthroughs.addTemplates.title%",
+                        "description": "%walkthroughs.addTemplates.description%",
+                        "media": {
+                            "image": "docs/imgs/snippets.jpg",
+                            "altText": "%walkthroughs.addTemplates.media.altText%"
+                        }
+                    },
+                    {
+                        "id": "commandPalette",
+                        "title": "%walkthroughs.commandPalette.title%",
+                        "description": "%walkthroughs.commandPalette.description%",
+                        "media": {
+                            "markdown": "%walkthroughs.commandPalette.media.markdown%"
+                        }
+                    }
+                ]
+            }
         ]
     },
     "scripts": {
@@ -331,6 +420,7 @@
         "@types/fs-extra": "^9.0.13",
         "@types/glob": "^7.1.3",
         "@types/markdown-it": "^12.2.3",
+        "@types/memory-cache": "^0.2.0",
         "@types/mocha": "^8.0.4",
         "@types/node": "^14.18.21",
         "@types/node-fetch": "^2.6.2",
@@ -351,6 +441,7 @@
         "katex": "^0.16.2",
         "markdown-it": "^12.2.3",
         "markdown-it-replace-link": "1.1.0",
+        "memory-cache": "^0.2.0",
         "node-fetch": "^2.6.7",
         "qrcode": "^1.5.0"
     }

@@ -49,7 +49,7 @@
 ### 1.2 Preview a Problem
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/preview.png" alt="Preview Problem" />
+  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/preview.jpg" alt="Preview Problem" />
 </p>
 
 
@@ -64,7 +64,7 @@
 ### 1.3 Editor Shortcuts
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/shortcuts.png" alt="Editor Shortcuts" />
+  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/shortcuts.jpg" alt="Editor Shortcuts" />
 </p>
 
 
@@ -72,13 +72,14 @@
 
   - `Submit`: Submit your answer to Pintia.
   - `Test`: Test your answer with customized test cases or default ones.
+  - `Preview`: Open the problem preview in source files.
 
 ---
 
 ### 1.4 Custom Test Samples
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/snippets.png" alt="Custom Test Samples" />
+  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/snippets.jpg" alt="Custom Test Samples" />
 </p>
 
 
@@ -86,6 +87,16 @@
 - Also, you can put your custom test samples between `@pintia test=start` and `@pintia test=end` (enter `ptatest` to quickly add them).
 And then click `Test custom sample` to quickly test your code.
 > :star: **Note:** Only the code wrapped between `@pintia code=start` and `@pintia code=end` will be submitted to Pintia judge when you try to submit your codes by clicking `submit` or `test`.
+
+---
+
+### 1.6 Search for Problems
+
+Click the `Search` icon at the top of the `Pintia` view or open the `Command Palette` to use shortcut command `Pintia: Search Problem`.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/search.png" alt="SearchProblem" />
+</p>
 
 ---
 
@@ -100,6 +111,8 @@ You can enter the following prefixs in code editor to generate the corresponding
 | ptacpp_stdc++ | Get the template of cpp with header file of `bits/stdc++.h` |
 | ptacpp_iostream | Get the template of cpp with header file of `iostream` |
 | ptaclang | Get the template of clang with header file of `stdio.h` |
+| ptajava_buffer | Get the template of java with `BufferReader` |
+| ptajava_scanner | Get the template of java with `Scanner` |
 
 ---
 
