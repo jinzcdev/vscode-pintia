@@ -26,8 +26,9 @@ class PtaPreviewProvider extends PtaWebview {
                 label: problem.label,
                 title: problem.title,
                 author: problem.author,
-                organization: problem.authorOrganization.name,
                 content: problem.content,
+                problemSetName: problemSetName,
+                organization: problem.authorOrganization.name,
                 lastSubmissionId: problem.lastSubmissionId,
                 lastSubmittedLang: lastSubmittedLang,
                 lastProgram: problem.lastSubmissionId !== "0" ? (problem.lastSubmissionDetail?.programmingSubmissionDetail ?? problem.lastSubmissionDetail?.codeCompletionSubmissionDetail)?.program : ""
@@ -217,10 +218,11 @@ class PtaPreviewProvider extends PtaWebview {
     }
 
     protected getContent(data?: any): string {
+        const keyword: string = data.title.replace(' ', '+');
         return `
             <div class="banner" >
                 <div class="banner-header">
-                    ${markdownEngine.render(`# [${data.title}](https://pintia.cn/problem-sets/${data.problemSetId}/problems/${data.id})`)}
+                    ${markdownEngine.render(`# [${data.title}](https://pintia.cn/problem-sets/${data.problemSetId}/exam/problems/${data.id})`)}
                 </div>
                 <div class="ques-info">
                     <div class="detail">分数 ${data.score} &nbsp; 提交人数 ${data.submitCount} &nbsp; 通过人数 ${data.acceptCount} &nbsp; 通过率 ${data.submitCount === 0 ? 0 : (data.acceptCount / data.submitCount * 100).toFixed(2)}%</div>
@@ -231,7 +233,20 @@ class PtaPreviewProvider extends PtaWebview {
 
             ${markdownEngine.render(this.formatMarkdown(data.content))}
 
-            ${data.lastSubmissionId !== "0" ? markdownEngine.render([`-----`, `### Last Submission (${data.lastSubmittedLang})`, "```" + data.lastSubmittedLang, data.lastProgram, "```"].join("\n")) : ""}
+
+            ${markdownEngine.render([
+            "-----",
+            `[Google](https://www.google.com/search?q=${keyword})`,
+            " | ",
+            `[Baidu](https://www.baidu.com/s?wd=${keyword})`,
+            " | ",
+            `[Bing](https://cn.bing.com/search?q=${keyword})`,
+            " | ",
+            `[Solution](https://github.com/jinzcdev/PTA/tree/main/${this.formatProblemSetName(data.problemSetName)})`
+        ].join("\n"))}
+
+            <br>
+            ${data.lastSubmissionId !== "0" ? markdownEngine.render([`### Last Submission (${data.lastSubmittedLang})`, "```" + data.lastSubmittedLang, data.lastProgram, "```"].join("\n")) : ""}
 
             <button id="solve">Code Now</button>
 
@@ -271,6 +286,20 @@ class PtaPreviewProvider extends PtaWebview {
                 break;
             default:
         }
+    }
+
+    protected formatProblemSetName(name: string): string {
+        name = name.replace(/（/g, "(").replace(/）/g, ")")
+        name = name.replace(/[ 《》—-、]/g, "_")
+        while (name.length > 0 && name[0] === '_') name = name.substring(1);
+        while (name.length > 0 && name[name.length - 1] === '_') name = name.substring(0, name.length - 1);
+        let s = "";
+        for (let i = 0; i < name.length; i++) {
+            if (name[i] != '_' || (i != name.length - 1 && name[i + 1] != '_')) {
+                s += name[i];
+            }
+        }
+        return s;
     }
 }
 
