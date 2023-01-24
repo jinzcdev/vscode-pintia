@@ -218,7 +218,7 @@ class PtaPreviewProvider extends PtaWebview {
     }
 
     protected getContent(data?: any): string {
-        const keyword: string = data.title.replace(' ', '+');
+        const keyword: string = `${data.label} ${data.title}`.replace(/ /g, '+');
         return `
             <div class="banner" >
                 <div class="banner-header">
@@ -289,8 +289,9 @@ class PtaPreviewProvider extends PtaWebview {
     }
 
     protected formatProblemSetName(name: string): string {
-        name = name.replace(/（/g, "(").replace(/）/g, ")")
-        name = name.replace(/[ 《》—-、]/g, "_")
+        name = name.replace(/（/g, "(")
+            .replace(/）/g, ")")
+            .replace(/[ 《》—、-]/g, "_")
         while (name.length > 0 && name[0] === '_') name = name.substring(1);
         while (name.length > 0 && name[name.length - 1] === '_') name = name.substring(0, name.length - 1);
         let s = "";
