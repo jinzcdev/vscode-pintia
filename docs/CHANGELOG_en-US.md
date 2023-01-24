@@ -4,6 +4,24 @@
 
 ---
 
+## [0.3.0] - 2023/01/24
+
+### Added
+
+- Add the Walkthroughs to instruct how to use this extension. Type `Get Started: Open Walkthroughs...` in the Command Palette
+- Add problem search and its corresponding command `Pintia: Search Problem`
+- Automatically switch between English and Chinese according to the language of VS Code
+- Add `Preview` shortcut command in the code editor to re-preview a problem
+- Common templates for Java (BufferReader, Scanner)
+- Add search engine and `Solution` link for quick search in problem preview
+
+### Change
+
+- Fix bug when submitting tests
+- Change `Line Comment` to `Block Comment`, when adding custom test samples
+
+---
+
 ## [0.2.1] - 2022/11/29
 
 ### Changed

@@ -13,8 +13,6 @@ vsc-extension-quickstart.md
 
 test/**
 package-lock.json
-**/*.gif
-docs
 .github
 resources/pta_template
 tmp/
