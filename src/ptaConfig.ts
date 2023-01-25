@@ -101,6 +101,14 @@ class PtaConfig {
     public setSearchIndexAutoRefresh(autoRefresh: boolean) {
         this.update("searchIndex.autoRefresh", autoRefresh);
     }
+
+    public getAutoCreateProblemSetFolder(): boolean {
+        return this.getConfiguration().get<boolean>("autoCreateProblemSetFolder", true);
+    }
+
+    public setAutoCreateProblemSetFolder(autoCreatePbsFolder: boolean) {
+        this.update("autoCreateProblemSetFolder", autoCreatePbsFolder);
+    }
 }
 
 export const ptaConfig: PtaConfig = new PtaConfig();

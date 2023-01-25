@@ -24,6 +24,7 @@
     "configuration.pintia.editor.shortcuts.preview": "Preview the problem in the webview.",
     "configuration.pintia.searchIndex.ignoreZOJ": "Specify whether to ignore the problem set ***ZOJ Problem Set*** in problem search index.",
     "configuration.pintia.searchIndex.autoRefresh": "Specify whether to automatically refresh problem search index when the Pintia Extension is activated. It is not recommended to set it due to the low-frequency update and time-consuming.",
+    "configuration.pintia.autoCreateProblemSetFolder": "Specify whether to automatically create a problem set folder and place source code files in this directory when coding a problem.",
     "walkthroughs.title": "Get Started with Pintia (PTA)",
     "walkthroughs.description": "Practice the problems in Pintia (PTA) in VS Code!",
     "walkthroughs.overview.title": "Overview",

@@ -14,33 +14,6 @@ import { IUserSession } from "../entity/userLoginSession";
 import { IProblemSearchItem } from "../entity/IProblemSearchItem";
 import { ptaPreviewProvider } from "../webview/ptaPreviewProvider";
 
-/*
-async function fetchProblemLanguage(): Promise<string | undefined> {
-    const leetCodeConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("pintia");
-    let defaultLanguage: string | undefined = leetCodeConfig.get<string>("defaultLanguage");
-    if (defaultLanguage && languages.indexOf(defaultLanguage) < 0) {
-        defaultLanguage = undefined;
-    }
-    const language: string | undefined = defaultLanguage || await vscode.window.showQuickPick(languages, { placeHolder: "Select the language you want to use", ignoreFocusOut: true });
-    // fire-and-forget default language query
-    (async (): Promise<void> => {
-        if (language && !defaultLanguage && leetCodeConfig.get<boolean>("hint.setDefaultLanguage")) {
-            const choice: vscode.MessageItem | undefined = await vscode.window.showInformationMessage(
-                `Would you like to set '${language}' as your default language?`,
-                DialogOptions.yes,
-                DialogOptions.no,
-                DialogOptions.never,
-            );
-            if (choice === DialogOptions.yes) {
-                leetCodeConfig.update("defaultLanguage", language, true);
-            } else if (choice === DialogOptions.never) {
-                leetCodeConfig.update("hint.setDefaultLanguage", false, true);
-            }
-        }
-    })();
-    return language;
-}
-*/
 
 export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
     try {
@@ -78,7 +51,10 @@ export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
         }
 
         const ext: string = ptaCompiler[defaultCompiler as keyof typeof ptaCompiler].ext;
-        const finalPath: string = path.join(workspaceFolder, `${ptaCode.title!}.${ext}`);
+        let finalPath: string = path.join(workspaceFolder, `${ptaCode.title!}.${ext}`);
+        if (ptaConfig.getAutoCreateProblemSetFolder() && ptaCode.psName) {
+            finalPath = path.join(workspaceFolder, ptaCode.psName, `${ptaCode.title!}.${ext}`);
+        }
 
 
         if (!await fs.pathExists(finalPath)) {

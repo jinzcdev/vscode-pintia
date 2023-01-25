@@ -2,7 +2,7 @@
     "name": "vscode-pintia",
     "displayName": "Pintia",
     "description": "%description%",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "author": "Zhichao Jin",
     "publisher": "jinzcdev",
     "license": "MIT",
@@ -274,6 +274,12 @@
                     "default": false,
                     "scope": "application",
                     "description": "%configuration.pintia.searchIndex.autoRefresh%"
+                },
+                "pintia.autoCreateProblemSetFolder": {
+                    "type": "boolean",
+                    "default": true,
+                    "scope": "application",
+                    "description": "%configuration.pintia.autoCreateProblemSetFolder%"
                 }
             }
         },
