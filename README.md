@@ -138,6 +138,7 @@
 | `pintia.autoCheckIn`      | 指定当 Pintia 插件被激活时，是否自动签到 Pintia 的教育商店 | `false`          |
 | `pintia.searchIndex.ignoreZOJ` | 指定搜索题目时，是否忽略 `ZOJ Problem Set` | `true`          |
 | `pintia.searchIndex.autoRefresh` | 指定是否在插件被激活时，自动刷新题目搜索索引 | `false`          |
+| `pintia.autoCreateProblemSetFolder` | 指定创建题目源文件时是否自动创建其习题集文件夹并将源代码文件放入相应的文件夹中 | `true`          |
 
 ## 4. 需要帮助？
 

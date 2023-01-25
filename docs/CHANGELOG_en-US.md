@@ -4,6 +4,14 @@
 
 ---
 
+## [0.3.1] - 2023/01/25
+
+### Change
+
+- When creating a problem source file, the problem set folder is automatically created in the workspace directory and the corresponding configuration is added to settings
+
+---
+
 ## [0.3.0] - 2023/01/24
 
 ### Added

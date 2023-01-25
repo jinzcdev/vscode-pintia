@@ -135,6 +135,10 @@ Use `Ctrl+Shift+P` (in Windows) or `Command+Shift+P` (in Mac) to open the comman
 | `pintia.editor.shortcuts` | Specify the customized shortcuts in editors. Supported values are: `submit`, `test`. | `["submit", "test"]` |
 | `pintia.paging.pageSize` | Whether to page the problem list when the problem set is too large. It is not paged when pageSize is 0. | `100` |
 | `pintia.autoCheckIn` | Specify whether to check in Pintia's education supermarket or not when the Pintia Extension is activated. | `false` |
+| `pintia.searchIndex.ignoreZOJ` | Specify whether to ignore the problem set *ZOJ Problem Set* in problem search index | `true` |
+| `pintia.searchIndex.autoRefresh` | Specify whether to automatically refresh problem search index when the Pintia Extension is activated | `false` |
+| `pintia.autoCreateProblemSetFolder` | Specify whether to automatically create a problem set folder and place source code files in this directory when coding a problem | `true` |
+
 
 ## 4. Want Help?
 
