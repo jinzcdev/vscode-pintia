@@ -7,7 +7,7 @@ import { IProblemSubmissionResult } from "../entity/IProblemSubmissionResult";
 import { IProblemSummary } from "../entity/IProblemSummary";
 import { IProblemCode } from "../entity/problemSubmissionCode";
 import { cacheDirPath, ProblemType, ptaCache } from "../shared";
-import { httpGet, httpPost } from "./httpUtil";
+import { httpGet, httpPost } from "./httpUtils";
 
 import * as fs from "fs-extra";
 import fetch from "node-fetch";

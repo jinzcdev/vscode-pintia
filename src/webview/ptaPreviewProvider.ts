@@ -219,6 +219,7 @@ class PtaPreviewProvider extends PtaWebview {
 
     protected getContent(data?: any): string {
         const keyword: string = `${data.label} ${data.title}`.replace(/ /g, '+');
+        const noteBlock = this.parseNoteBlock(data.lastProgram, "@pintia note=start", "@pintia note=end");
         return `
             <div class="banner" >
                 <div class="banner-header">
@@ -235,17 +236,21 @@ class PtaPreviewProvider extends PtaWebview {
 
 
             ${markdownEngine.render([
-            "-----",
-            `[Google](https://www.google.com/search?q=${keyword})`,
-            " | ",
-            `[Baidu](https://www.baidu.com/s?wd=${keyword})`,
-            " | ",
-            `[Bing](https://cn.bing.com/search?q=${keyword})`,
-            " | ",
-            `[Solution](https://github.com/jinzcdev/PTA/tree/main/${this.formatProblemSetName(data.problemSetName)})`
-        ].join("\n"))}
+                "-----",
+                `[Google](https://www.google.com/search?q=${keyword})`,
+                " | ",
+                `[Baidu](https://www.baidu.com/s?wd=${keyword})`,
+                " | ",
+                `[Bing](https://cn.bing.com/search?q=${keyword})`,
+                " | ",
+                `[Solution](https://github.com/jinzcdev/PTA/tree/main/${this.formatProblemSetName(data.problemSetName)})`
+            ].join("\n"))}
 
-            <br>
+            ${noteBlock ? markdownEngine.render([
+                "### Notebook",
+                noteBlock
+            ].join("\n")) : ""}
+
             ${data.lastSubmissionId !== "0" ? markdownEngine.render([`### Last Submission (${data.lastSubmittedLang})`, "```" + data.lastSubmittedLang, data.lastProgram, "```"].join("\n")) : ""}
 
             <button id="solve">Code Now</button>
@@ -288,7 +293,7 @@ class PtaPreviewProvider extends PtaWebview {
         }
     }
 
-    protected formatProblemSetName(name: string): string {
+    private formatProblemSetName(name: string): string {
         name = name.replace(/（/g, "(")
             .replace(/）/g, ")")
             .replace(/[ 《》—、-]/g, "_")
@@ -301,6 +306,23 @@ class PtaPreviewProvider extends PtaWebview {
             }
         }
         return s;
+    }
+
+    private parseNoteBlock(data: string, start: string, end: string): string {
+        let note: string = "";
+        const lines: string[] = data.split('\n');
+        let startLine: number = -1;
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i].indexOf(start) != -1) {
+                startLine = i + 1;
+            } else if (lines[i].indexOf(end) != -1 && startLine != -1 && startLine < i) {
+                const code: string = lines.slice(startLine, i).join("\n");
+                if (!code.trim().length) continue;
+                note = lines.slice(startLine, i).join("\n");
+                break;
+            }
+        }
+        return note;
     }
 }
 

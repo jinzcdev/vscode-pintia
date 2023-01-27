@@ -17,6 +17,15 @@
         ],
         "description": "Put your custom test samples in `@pintia code=start/end` and the extension will automatically recognize it when you click the `Submit` button."
     },
+    "PTA Note Block": {
+        "prefix": "ptanote",
+        "body": [
+            "$BLOCK_COMMENT_START @pintia note=start",
+            "${1:Put your notes here}",
+            "@pintia note=end $BLOCK_COMMENT_END"
+        ],
+        "description": "Put your custom test samples in `@pintia test=start/end` and the extension will automatically recognize it when you click the `Test` button."
+    },
     "CPP Template (bits/stdc++.h)": {
         "prefix": "ptacpp_stdc++",
         "body": [

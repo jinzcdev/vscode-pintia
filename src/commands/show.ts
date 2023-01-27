@@ -80,7 +80,7 @@ export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
             const lastSubmittedCompiler: string = (problem.lastSubmissionDetail?.programmingSubmissionDetail ?? problem.lastSubmissionDetail?.codeCompletionSubmissionDetail)?.compiler ?? problemCompiler;
             const lastProgram: string | undefined = (problem.lastSubmissionId !== "0" && defaultCompiler === lastSubmittedCompiler)
                 ? (problem.lastSubmissionDetail?.programmingSubmissionDetail ?? problem.lastSubmissionDetail?.codeCompletionSubmissionDetail)?.program : "";
-            await fs.writeFile(finalPath, comment.join('\n') + `\n\n${format.single}@pintia code=start\n\n${lastProgram ?? ""}\n\n${format.single}@pintia code=end`);
+            await fs.writeFile(finalPath, comment.join('\n') + `\n${format.single}@pintia code=start\n\n${lastProgram ?? ""}\n${format.single}@pintia code=end`);
         }
         await vscode.window.showTextDocument(vscode.Uri.file(finalPath), { preview: false, viewColumn: vscode.ViewColumn.Two });
     } catch (error: any) {
