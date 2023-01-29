@@ -22,11 +22,11 @@ import { ptaChannel } from "../ptaChannel";
 class PtaAPI {
 
     private readonly problemUrl: string = "https://pintia.cn/api/problem-sets";
-    private readonly examUrl: string = "https://pintia.cn/api/exams/";
-    private readonly submissionUrl: string = "https://pintia.cn/api/submissions/";
-    private readonly wechatAuthUrl: string = "https://passport.pintia.cn/api/oauth/wechat/official-account/auth-url/";
-    private readonly wechatAuthState: string = "https://passport.pintia.cn/api/oauth/wechat/official-account/state/";
-    private readonly wechatAuthUser: string = "https://passport.pintia.cn/api/oauth/wechat/state/";
+    private readonly examUrl: string = "https://pintia.cn/api/exams";
+    private readonly submissionUrl: string = "https://pintia.cn/api/submissions";
+    private readonly wechatAuthUrl: string = "https://passport.pintia.cn/api/oauth/wechat/official-account/auth-url";
+    private readonly wechatAuthState: string = "https://passport.pintia.cn/api/oauth/wechat/official-account/state";
+    private readonly wechatAuthUser: string = "https://passport.pintia.cn/api/oauth/wechat/state";
     private readonly dashboardUrl: string = "https://pintia.cn/api/content/dashboard";
 
 
@@ -280,7 +280,7 @@ class PtaAPI {
      * @returns 
      */
     public async submitSolution(examID: string, cookie: string, body: IProblemCode): Promise<IProblemSubmission> {
-        return await httpPost(this.examUrl + `${examID}/submissions`, cookie, body);
+        return await httpPost(this.examUrl + `/${examID}/submissions`, cookie, body);
     }
 
     /**
@@ -308,12 +308,12 @@ class PtaAPI {
 
     // https://passport.pintia.cn/api/oauth/wechat/official-account/state/{state}
     public async getWechatAuthState(state: string): Promise<IWechatAuthState> {
-        return await httpGet(this.wechatAuthState + state);
+        return await httpGet(`${this.wechatAuthState}/${state}`);
     }
 
     // https://passport.pintia.cn/api/oauth/wechat/state/{state}/user
     public async getWechatAuthUser(state: string): Promise<IWechatUserState> {
-        return await httpGet(this.wechatAuthUser + `${state}/user`).then(json => json['user'])
+        return await httpGet(`${this.wechatAuthUser}/${state}/user`).then(json => json['user'])
     }
 
     // https://passport.pintia.cn/api/users/sessions/state/${state}/login_users/${userId}

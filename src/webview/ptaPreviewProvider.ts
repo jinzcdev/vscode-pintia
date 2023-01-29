@@ -219,7 +219,10 @@ class PtaPreviewProvider extends PtaWebview {
 
     protected getContent(data?: any): string {
         const keyword: string = `${data.label} ${data.title}`.replace(/ /g, '+');
-        const noteBlock = this.parseNoteBlock(data.lastProgram, "@pintia note=start", "@pintia note=end");
+        let noteBlock = "";
+        if (data.lastSubmissionId !== "0") {
+            noteBlock = this.parseNoteBlock(data.lastProgram, "@pintia note=start", "@pintia note=end");
+        }
         return `
             <div class="banner" >
                 <div class="banner-header">
@@ -309,6 +312,9 @@ class PtaPreviewProvider extends PtaWebview {
     }
 
     private parseNoteBlock(data: string, start: string, end: string): string {
+        if (!data || data.trim().length === 0) {
+            return "";
+        }
         let note: string = "";
         const lines: string[] = data.split('\n');
         let startLine: number = -1;
