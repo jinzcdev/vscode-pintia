@@ -1,7 +1,8 @@
 import { PtaWebview } from "./PtaWebview";
 import { IProblemSubmissionResult } from "../entity/IProblemSubmissionResult";
-import { ProblemType, solutionStatusMapping, ptaCompiler } from "../shared";
+import { ProblemType, solutionStatusMapping, ptaCompiler, compilerLangMapping } from "../shared";
 import { IProblemSubmissionDetail } from "../entity/problemSubmissionCode";
+import { markdownEngine } from "./markdownEngine";
 
 class PtaSubmissionProvider extends PtaWebview {
 
@@ -12,9 +13,21 @@ class PtaSubmissionProvider extends PtaWebview {
             judgeResponseContent.codeCompletionJudgeResponseContent;
         const testcaseJudgeResults = codeJudgeResponseContent!.testcaseJudgeResults;
 
+        const hints = result.submission.hints;
+        let isHint: boolean = hints.length > 0;
+        if (isHint) {
+            let allEmpty: boolean = true;
+            for (const k of Object.keys(hints)) {
+                if (hints[k].trim().length !== 0) {
+                    allEmpty = false;
+                    break;
+                }
+            }
+            isHint = !allEmpty;
+        }
         this.data = {
             title: "Submission",
-            style: this.getStyle({ isHint: Object.keys(result.submission.hints).length > 0 }),
+            style: this.getStyle({ isHint: isHint }),
             content: this.getContent({
                 submitAt: result.submission.submitAt,
                 status: judgeResponseContent.status,
@@ -37,6 +50,7 @@ class PtaSubmissionProvider extends PtaWebview {
 
     protected getStyle(data?: any): string {
         return `
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/styles/atom-one-light.min.css">
             <style>
                 :root {
                     --border-color: rgba(121, 121, 121, 0.12);
@@ -49,7 +63,7 @@ class PtaSubmissionProvider extends PtaWebview {
                 html {
                     font-family: 'Harmony', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
                     width: 90%;
-                    margin: 0 auto;
+                    margin: 0 auto 35px;
                 }
 
                 h2 {
@@ -78,12 +92,11 @@ class PtaSubmissionProvider extends PtaWebview {
 
                 ${data.isHint ? "" : " .visible { display: none; } "}
 
-                .code-preview {
-                    width: 100%;
+                .code-block {
                     border: 0.5px solid var(--border-color);
                     margin-top: 15px;
                     padding: 12px;
-                    font-size: 16px;
+                    font-size: 14px;
                 }
 
                 pre, code {
@@ -92,10 +105,25 @@ class PtaSubmissionProvider extends PtaWebview {
                 }
 
                 code {
-                    color: var(--vscode-editor-color)
-                    max-height: 250px;
+                    font-family: var(--vscode-editor-font-family);
+                    color: var(--vscode-editor-color);
                     overflow: scroll;
                     display: block;
+                }
+
+                .build-output code {
+                    max-height: 265px;
+                }
+
+                .code-preview code {
+                    line-height: 1.357em;
+                    border-radius: 0.1875rem;
+                    color: var(--vscode-editor-foreground);
+                    margin: 0 0.125rem;
+                    /* white-space: pre-wrap; */
+                    /* add scroll */
+                    display: block;
+                    overflow: scroll;
                 }
 
             </style>`;
@@ -137,7 +165,7 @@ class PtaSubmissionProvider extends PtaWebview {
                         ${solutionStatusMapping.get(data.status)}
                         <td>${data.score}</td>
                         <td>${data.problemType === "PROGRAMMING" ? "编程题" : "函数题"}</td>
-                        <td>${compiler.language}(${compiler.displayName})</td>
+                        <td>${compiler.language} (${compiler.displayName})</td>
                         <td>${(data.time * 1000).toFixed()}ms</td>
                         <td></td>
                     </tr>
@@ -165,8 +193,13 @@ class PtaSubmissionProvider extends PtaWebview {
         </div>
 
         <h2>编译器输出</h2>
-        <div class="code-preview">
+        <div class="code-block build-output">
             <pre><code>${data.compilationOutput}</code></pre>
+        </div>
+
+        <h2>代码</h2>
+        <div class="code-block code-preview">
+            ${markdownEngine.render(["```" + compiler.language, data.program, "```"].join("\n"))}
         </div>
         `
     }

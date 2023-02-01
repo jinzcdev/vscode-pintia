@@ -218,7 +218,8 @@ export const compilerLangMapping: Map<string, string> = new Map([
     ["RUST", "Rust (rustc)"],
     ["SCALA", "Scala (scalac)"],
     ["PYPY3", "Python (pypy3)"],
-    ["SQL", "SQL (SQL)"]
+    ["SQL", "SQL (SQL)"],
+    ["VERILOG", "Verilog"]
 ]);
 
 export const commentFormatMapping: Map<string, { single: string, start: string, middle: string, end: string }> = new Map([
@@ -242,6 +243,7 @@ export enum DescriptionConfiguration {
     None = "None",
 }
 
+// https://static.pintia.cn/exam-app/de820dad2723a0dce4e1.chunk.js
 export const ptaCompiler = {
     NO_COMPILER: {
         name: "NO_COMPILER",
@@ -318,7 +320,7 @@ export const ptaCompiler = {
         name: "PYTHON3",
         ordinal: 7,
         mime: "text/x-python",
-        ext: "3.py",
+        ext: "py",
         language: "Python",
         displayName: "python3",
         version: "3.7.11",
@@ -627,6 +629,13 @@ export const ptaCompiler = {
         ext: "sql",
         language: "SQL",
         displayName: "SQL",
+        version: ""
+    },
+    VERILOG: {
+        name: "VERILOG",
+        ext: "v",
+        language: "verilog",
+        displayName: "VERILOG",
         version: ""
     }
 }

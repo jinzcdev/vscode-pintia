@@ -1,38 +1,30 @@
 
 import * as vscode from "vscode";
-import { IProblem } from '../entity/IProblem';
-import { IProblemInfo } from '../entity/IProblemInfo';
 import { ptaConfig } from '../ptaConfig';
-import { ptaManager } from "../PtaManager";
-import { compilerLangMapping, IPtaCode, langCompilerMapping, ProblemType } from '../shared';
-import { ptaApi } from '../utils/api';
+import { IPtaCode, langCompilerMapping, ProblemType } from '../shared';
 import { markdownEngine } from './markdownEngine';
 import { PtaWebview } from './PtaWebview';
+import { ProblemView } from "./views/ProblemView";
 
 class PtaPreviewProvider extends PtaWebview {
 
     private ptaCode?: IPtaCode;
     public async showPreview(psID: string, pID: string) {
-        const problem: IProblem = await ptaApi.getProblem(psID, pID, ptaManager.getUserSession()?.cookie);
-        const problemInfo: IProblemInfo = await ptaApi.getProblemInfoByID(psID, pID, problem.type as ProblemType);
-        const problemSetName: string = await ptaApi.getProblemSetName(psID);
+        const problem = new ProblemView(psID, pID);
+        await problem.fetch();
+
         const compiler: string = langCompilerMapping.get(ptaConfig.getDefaultLanguage()) ?? "GXX";
-        const lastSubmittedCompiler: string = (problem.lastSubmissionDetail?.programmingSubmissionDetail ?? problem.lastSubmissionDetail?.codeCompletionSubmissionDetail)?.compiler ?? problem.compiler;
-        const lastSubmittedLang: string = this.getLastSubmittedLang(lastSubmittedCompiler);
-        this.ptaCode = { psID: problem.problemSetId, psName: problemSetName, pID: problem.id, problemType: problem.type as ProblemType, compiler: compiler, title: problem.label + " " + problem.title };
+        this.ptaCode = {
+            pID: problem.id,
+            psID: problem.problemSetId,
+            psName: problem.problemSetName,
+            problemType: problem.type as ProblemType,
+            compiler: compiler,
+            title: problem.label + " " + problem.title
+        };
         this.data = {
             title: problem.label,
-            content: this.getContent(Object.assign({}, problemInfo, {
-                label: problem.label,
-                title: problem.title,
-                author: problem.author,
-                content: problem.content,
-                problemSetName: problemSetName,
-                organization: problem.authorOrganization.name,
-                lastSubmissionId: problem.lastSubmissionId,
-                lastSubmittedLang: lastSubmittedLang,
-                lastProgram: problem.lastSubmissionId !== "0" ? (problem.lastSubmissionDetail?.programmingSubmissionDetail ?? problem.lastSubmissionDetail?.codeCompletionSubmissionDetail)?.program : ""
-            })),
+            content: this.getContent(problem),
             style: this.getStyle()
         }
         this.show();
@@ -49,15 +41,6 @@ class PtaPreviewProvider extends PtaWebview {
             .replace(/\${2}(.+?)\${2}/g, convertTexMath)
             .replace("### 输入样", "\n\n-----\n\n### 输入样")
             .replace("### Sample In", "\n\n------\n\n### Sample In");
-    }
-
-    private getLastSubmittedLang(compiler: string): string {
-        const lang: string = compilerLangMapping.get(compiler)?.trim() ?? "C++";
-        const pos: number = lang.indexOf("(");
-        if (pos !== -1) {
-            return lang.substring(0, pos - 1);
-        }
-        return lang;
     }
 
 
@@ -217,7 +200,7 @@ class PtaPreviewProvider extends PtaWebview {
         </style>`
     }
 
-    protected getContent(data?: any): string {
+    protected getContent(data: ProblemView): string {
         const keyword: string = `${data.label} ${data.title}`.replace(/ /g, '+');
         let noteBlock = "";
         if (data.lastSubmissionId !== "0") {
@@ -254,7 +237,13 @@ class PtaPreviewProvider extends PtaWebview {
                 noteBlock
             ].join("\n")) : ""}
 
-            ${data.lastSubmissionId !== "0" ? markdownEngine.render([`### Last Submission (${data.lastSubmittedLang})`, "```" + data.lastSubmittedLang, data.lastProgram, "```"].join("\n")) : ""}
+            ${(data.lastSubmissionId !== "0" && data.lastProgram.trim().length) ?
+                markdownEngine.render([
+                    `### Last Submission ${data.lastSubmittedLang.trim().length ? "(" + data.lastSubmittedLang + ")" : ""}`,
+                    "```" + data.lastSubmittedLang,
+                    data.lastProgram,
+                    "```"
+                ].join("\n")) : ""}
 
             <button id="solve">Code Now</button>
 

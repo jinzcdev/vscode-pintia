@@ -46,6 +46,11 @@ export interface IProblem {
             compiler: string;
             program: string;
         };
+        multipleFileSubmissionDetail?: {
+            answerZip: string;
+            fileContents: any;
+            files: any;
+        }
         problemId: string;
     },
 }

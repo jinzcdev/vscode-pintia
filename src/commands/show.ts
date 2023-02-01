@@ -3,7 +3,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import * as fs from "fs-extra";
 import { selectWorkspaceFolder } from "../utils/workspaceUtils";
-import { commentFormatMapping, compilerLangMapping, configPath, IPtaCode, IQuickPickItem, langCompilerMapping, problemTypeNameMapping, ptaCompiler } from "../shared";
+import { commentFormatMapping, compilerLangMapping, configPath, IPtaCode, IQuickPickItem, langCompilerMapping, ProblemType, problemTypeNameMapping, ptaCompiler } from "../shared";
 import { ptaChannel } from "../ptaChannel";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import { ptaConfig } from "../ptaConfig";
@@ -25,7 +25,10 @@ export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
         const defaultLanguage: string = ptaConfig.getDefaultLanguage();
         let defaultCompiler: string = langCompilerMapping.get(defaultLanguage) ?? "GXX";
 
-        const problemCompiler: string = await ptaApi.getProblem(ptaCode.psID, ptaCode.pID).then(e => e.compiler);
+        let problemCompiler: string = await ptaApi.getProblem(ptaCode.psID, ptaCode.pID).then(e => e.compiler);
+        if (ptaCode.problemType === ProblemType.MULTIPLE_FILE) {
+            problemCompiler = "VERILOG";
+        }
         const availableCompilers: string[] = await ptaApi.getProblemSetCompilers(ptaCode.psID);
         // const availableLangs: string[] = availableCompilers.map<string>((value, _) => { return compilerLangMapping.get(value) ?? "" });
 
@@ -66,7 +69,7 @@ export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
                 `@pintia psid=${ptaCode.psID} pid=${ptaCode.pID} compiler=${defaultCompiler}`,
                 `ProblemSet: ${ptaCode.psName ?? "None"}`,
                 `Title: ${ptaCode.title!}`,
-                `https://pintia.cn/problem-sets/${ptaCode.psID}/problems/${ptaCode.pID}`
+                `https://pintia.cn/problem-sets/${ptaCode.psID}/exam/problems/${ptaCode.pID}`
             ];
 
             const format = commentFormatMapping.get(compilerLangMapping.get(defaultCompiler) ?? "") ?? commentFormatMapping.get("C++ (g++)")!;
@@ -80,7 +83,7 @@ export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
             const lastSubmittedCompiler: string = (problem.lastSubmissionDetail?.programmingSubmissionDetail ?? problem.lastSubmissionDetail?.codeCompletionSubmissionDetail)?.compiler ?? problemCompiler;
             const lastProgram: string | undefined = (problem.lastSubmissionId !== "0" && defaultCompiler === lastSubmittedCompiler)
                 ? (problem.lastSubmissionDetail?.programmingSubmissionDetail ?? problem.lastSubmissionDetail?.codeCompletionSubmissionDetail)?.program : "";
-            await fs.writeFile(finalPath, comment.join('\n') + `\n${format.single}@pintia code=start\n\n${lastProgram ?? ""}\n${format.single}@pintia code=end`);
+            await fs.writeFile(finalPath, comment.join('\n') + `\n${format.single}@pintia code=start\n${lastProgram ?? ""}\n${format.single}@pintia code=end`);
         }
         await vscode.window.showTextDocument(vscode.Uri.file(finalPath), { preview: false, viewColumn: vscode.ViewColumn.Two });
     } catch (error: any) {
