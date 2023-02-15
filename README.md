@@ -20,7 +20,7 @@
 
 ‼️ 如果您在中国, 可访问 [Gitee](https://gitee.com/jinzcdev/vscode-pintia). ‼️
 
-⬇️ 安装 Pintia:  [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=jinzcdev.vscode-pintia) or [VS Code](https://code.visualstudio.com/)
+⬇️ 安装 Pintia:  [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=jinzcdev.vscode-pintia), [VS Code](https://code.visualstudio.com/) or [Install from VSIX](https://github.com/jinzcdev/vscode-pintia/releases/latest)
 
 ## 0. 运行条件
 
