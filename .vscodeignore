@@ -16,3 +16,4 @@ package-lock.json
 .github
 resources/pta_template
 tmp/
+*.vsix

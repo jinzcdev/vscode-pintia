@@ -166,6 +166,12 @@ class PtaPreviewProvider extends PtaWebview {
                     content: "Click to Copy";
                     z-index: 2;
                 }
+
+                .pta-note {
+                    border: 1px solid var(--vscode-editor-foreground);
+                    border-radius: 5px;
+                    padding: 4px 16px;
+                }
             </style>
             
             <style>
@@ -202,10 +208,6 @@ class PtaPreviewProvider extends PtaWebview {
 
     protected getContent(data: ProblemView): string {
         const keyword: string = `${data.label} ${data.title}`.replace(/ /g, '+');
-        let noteBlock = "";
-        if (data.lastSubmissionId !== "0") {
-            noteBlock = this.parseNoteBlock(data.lastProgram, "@pintia note=start", "@pintia note=end");
-        }
         return `
             <div class="banner" >
                 <div class="banner-header">
@@ -222,20 +224,22 @@ class PtaPreviewProvider extends PtaWebview {
 
 
             ${markdownEngine.render([
-                "-----",
-                `[Google](https://www.google.com/search?q=${keyword})`,
-                " | ",
-                `[Baidu](https://www.baidu.com/s?wd=${keyword})`,
-                " | ",
-                `[Bing](https://cn.bing.com/search?q=${keyword})`,
-                " | ",
-                `[Solution](https://github.com/jinzcdev/PTA/tree/main/${this.formatProblemSetName(data.problemSetName)})`
-            ].join("\n"))}
+            "-----",
+            `[Google](https://www.google.com/search?q=${keyword})`,
+            " | ",
+            `[Baidu](https://www.baidu.com/s?wd=${keyword})`,
+            " | ",
+            `[Bing](https://cn.bing.com/search?q=${keyword})`,
+            " | ",
+            `[Solution](https://github.com/jinzcdev/PTA/tree/main/${this.formatProblemSetName(data.problemSetName)})`
+        ].join("\n"))}
 
-            ${noteBlock ? markdownEngine.render([
-                "### Notebook",
-                noteBlock
-            ].join("\n")) : ""}
+            ${data.problemNote ? `
+                <h3>Problem Note</h3>
+                <div class="pta-note">
+                    ${markdownEngine.render(data.problemNote)}
+                </div>
+            ` : ""}
 
             ${(data.lastSubmissionId !== "0" && data.lastProgram.trim().length) ?
                 markdownEngine.render([
@@ -289,36 +293,11 @@ class PtaPreviewProvider extends PtaWebview {
         name = name.replace(/（/g, "(")
             .replace(/）/g, ")")
             .replace(/[ 《》—、-]/g, "_")
-        while (name.length > 0 && name[0] === '_') name = name.substring(1);
-        while (name.length > 0 && name[name.length - 1] === '_') name = name.substring(0, name.length - 1);
-        let s = "";
-        for (let i = 0; i < name.length; i++) {
-            if (name[i] != '_' || (i != name.length - 1 && name[i + 1] != '_')) {
-                s += name[i];
-            }
-        }
-        return s;
+            .replace(/^_+|_+$/g, "")
+            .replace(/_+/g, "_");
+        return name;
     }
 
-    private parseNoteBlock(data: string, start: string, end: string): string {
-        if (!data || data.trim().length === 0) {
-            return "";
-        }
-        let note: string = "";
-        const lines: string[] = data.split('\n');
-        let startLine: number = -1;
-        for (let i = 0; i < lines.length; i++) {
-            if (lines[i].indexOf(start) != -1) {
-                startLine = i + 1;
-            } else if (lines[i].indexOf(end) != -1 && startLine != -1 && startLine < i) {
-                const code: string = lines.slice(startLine, i).join("\n");
-                if (!code.trim().length) continue;
-                note = lines.slice(startLine, i).join("\n");
-                break;
-            }
-        }
-        return note;
-    }
 }
 
 export const ptaPreviewProvider: PtaPreviewProvider = new PtaPreviewProvider();

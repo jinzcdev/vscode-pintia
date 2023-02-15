@@ -23,6 +23,7 @@ export class ProblemView {
     public score: number = 0;
     public submitCount: number = 0;
     public acceptCount: number = 0;
+    public problemNote: string = "";
 
     private problem!: IProblem;
 
@@ -53,6 +54,7 @@ export class ProblemView {
         this.submitCount = problemInfo.submitCount;
         this.lastSubmittedLang = this.getLastSubmittedLang();
         this.lastProgram = this.getLastSubmittedProgram();
+        [this.problemNote, this.lastProgram] = this.parseProblemNote(this.lastProgram, "@pintia note=start", "@pintia note=end");
     }
 
     private getLastSubmittedLang(): string {
@@ -87,6 +89,31 @@ export class ProblemView {
         return (this.problem.lastSubmissionDetail?.programmingSubmissionDetail
             ?? this.problem.lastSubmissionDetail?.codeCompletionSubmissionDetail)?.program
             ?? "";
+    }
+
+    private parseProblemNote(data: string, start: string, end: string): [string, string] {
+        if (!data || data.trim().length === 0) {
+            return ["", ""];
+        }
+        let note: string = "";
+        const lines: string[] = data.split('\n');
+        let startLine: number = -1, endLine: number = -1;
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i].indexOf(start) != -1) {
+                startLine = i + 1;
+            } else if (lines[i].indexOf(end) != -1 && startLine != -1 && startLine < i) {
+                const code: string = lines.slice(startLine, i).join("\n");
+                if (!code.trim().length) continue;
+                note = lines.slice(startLine, i).join("\n");
+                endLine = i - 1;
+                break;
+            }
+        }
+        if (startLine == -1 || endLine == -1) {
+            return ["", data];
+        }
+        let newData = lines.filter((line, index) => index < startLine - 1 || index > endLine + 1).join("\n");
+        return [note, newData.replace(/^\s+|\s+$/g, "").replace(/```/g, "\\```")];
     }
 
 }
