@@ -32,7 +32,7 @@
 ### 1.1 登录/登出
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/signin.png" alt="Sign in" />
+  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/signin.png" alt="登录" />
 </p>
 
 
@@ -101,7 +101,19 @@
 
 ---
 
-### 1.6 代码片段
+### 1.6 笔记功能
+
+你可以在代码编辑区键入 `ptanote` 生成笔记块，在其中输入你的笔记，下次预览题目时，笔记会以 Markdown 的形式解析并预览。
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/note.png" alt="笔记" />
+</p>
+
+> :star: **Note:** 笔记是随着代码一起提交到 拼题A 的，并不存在本地。提交代码后，重新点击编辑器的 `Preview`，或者下次预览本题时，会显示你的笔记。
+
+---
+
+### 1.7 代码片段
 
 你可以在代码编辑器中输入以下前缀来快速生成相应的代码块，如下所示。
 
@@ -114,6 +126,7 @@
 | ptaclang | 获取带有头文件 `stdio.h` 的 clang 模板 |
 | ptajava_buffer | 获取带有 `BufferReader` 的 java 模板 |
 | ptajava_scanner | 获取带有 `Scanner` 的 java 模板 |
+| ptanote | 生成 `@pintia note=start/end` 笔记块 |
 
 ---
 

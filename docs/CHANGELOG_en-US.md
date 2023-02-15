@@ -4,6 +4,14 @@
 
 ---
 
+## [0.4.0] - 2023/02/15
+
+### Added
+
+- Add **notebook** feature. Now, you can type `ptanote` in the code editor to generate a **note block**, where you can enter your notes, and the next time you preview the problem, the notes will be parsed and previewed in Markdown
+
+---
+
 ## [0.3.1] - 2023/01/25
 
 ### Change

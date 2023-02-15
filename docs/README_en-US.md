@@ -90,7 +90,7 @@ And then click `Test custom sample` to quickly test your code.
 
 ---
 
-### 1.6 Search for Problems
+### 1.5 Search for Problems
 
 Click the `Search` icon at the top of the `Pintia` view or open the `Command Palette` to use shortcut command `Pintia: Search Problem`.
 
@@ -100,7 +100,18 @@ Click the `Search` icon at the top of the `Pintia` view or open the `Command Pal
 
 ---
 
-### 1.5 Snippets
+### 1.6 Notebook
+
+you can type `ptanote` in the code editor to generate a **note block**, where you can enter your notes, and the next time you preview the problem, the notes will be parsed and previewed in Markdown.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/jinzcdev/vscode-pintia/main/docs/imgs/note.png" alt="Note" />
+</p>
+
+> :star: **Note:** Your notes are submitted to PTA along with the code, not stored locally. After submitting the code, re-click `Preview` in the editor, or the next time you preview problems, your notes will be displayed on the preview page of the problem.
+
+---
+### 1.7 Snippets
 
 You can enter the following prefixs in code editor to generate the corresponding code blocks quickly, as follows:
 
@@ -113,6 +124,7 @@ You can enter the following prefixs in code editor to generate the corresponding
 | ptaclang | Get the template of clang with header file of `stdio.h` |
 | ptajava_buffer | Get the template of java with `BufferReader` |
 | ptajava_scanner | Get the template of java with `Scanner` |
+| ptanote | Generate `@pintia note=start/end` block |
 
 ---
 
