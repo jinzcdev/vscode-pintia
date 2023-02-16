@@ -290,9 +290,8 @@ class PtaPreviewProvider extends PtaWebview {
     }
 
     private formatProblemSetName(name: string): string {
-        name = name.replace(/（/g, "(")
-            .replace(/）/g, ")")
-            .replace(/[ 《》—、-]/g, "_")
+        name = name.replace(/\uFF08|\uFF09/g, match => match === '\uFF08' ? "(" : ")") // "（）" -> "\uFF08\uFF09"
+            .replace(/[\u3000-\u303F\s\-\uFF1A\u300A\u300B\u2014\u3001]/g, "_") // "《》—、：" -> "\uFF1A\u300A\u300B\u2014\u3001"
             .replace(/^_+|_+$/g, "")
             .replace(/_+/g, "_");
         return name;
