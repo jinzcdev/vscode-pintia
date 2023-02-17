@@ -10,17 +10,17 @@ import { IQuickPickItem } from "../shared";
 import { showDirectorySelectDialog } from "./uiUtils";
 
 export async function selectWorkspaceFolder(): Promise<string> {
-    let workspaceFolderSetting: string = ptaConfig.getWorkspaceFolder();
-    if (workspaceFolderSetting.trim() === "") {
-        workspaceFolderSetting = await determinePintiaFolder();
-        if (workspaceFolderSetting === "") {
+    let workspaceFolder: string = ptaConfig.getWorkspaceFolder();
+    if (workspaceFolder.trim() === "") {
+        workspaceFolder = await determinePintiaFolder();
+        if (workspaceFolder === "") {
             return "";
         }
     }
     let needAsk: boolean = true;
-    await fs.ensureDir(workspaceFolderSetting);
+    await fs.ensureDir(workspaceFolder);
     for (const folder of vscode.workspace.workspaceFolders || []) {
-        if (isSubFolder(folder.uri.fsPath, workspaceFolderSetting)) {
+        if (isSubFolder(folder.uri.fsPath, workspaceFolder)) {
             needAsk = false;
         }
     }
@@ -39,22 +39,22 @@ export async function selectWorkspaceFolder(): Promise<string> {
         // Todo: generate file first
         switch (choice) {
             case OpenOption.justOpenFile:
-                return workspaceFolderSetting;
+                return workspaceFolder;
             case OpenOption.openInCurrentWindow:
-                await vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(workspaceFolderSetting), false);
+                await vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(workspaceFolder), false);
                 return "";
             case OpenOption.openInNewWindow:
-                await vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(workspaceFolderSetting), true);
+                await vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(workspaceFolder), true);
                 return "";
             case OpenOption.addToWorkspace:
-                vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders?.length ?? 0, 0, { uri: vscode.Uri.file(workspaceFolderSetting) });
+                vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders?.length ?? 0, 0, { uri: vscode.Uri.file(workspaceFolder) });
                 break;
             default:
                 return "";
         }
     }
     // to do 
-    return workspaceFolderSetting;
+    return workspaceFolder;
 }
 
 
@@ -86,7 +86,7 @@ function isSubFolder(from: string, to: string): boolean {
     return !relative.startsWith("..") && !path.isAbsolute(relative);
 }
 
-async function determinePintiaFolder(): Promise<string> {
+export async function determinePintiaFolder(): Promise<string> {
     let result: string;
     const picks: Array<IQuickPickItem<string>> = [];
     picks.push(

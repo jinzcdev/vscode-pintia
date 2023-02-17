@@ -32,47 +32,6 @@ export async function promptForOpenOutputChannel(message: string, type: DialogTy
     }
 }
 
-/*
-export async function promptForSignIn(): Promise<void> {
-    const choice: vscode.MessageItem | undefined = await vscode.window.showInformationMessage(
-        "Please sign in to LeetCode.",
-        DialogOptions.yes,
-        DialogOptions.no,
-        DialogOptions.singUp,
-    );
-    switch (choice) {
-        case DialogOptions.yes:
-            await vscode.commands.executeCommand("leetcode.signin");
-            break;
-        case DialogOptions.singUp:
-            if (getLeetCodeEndpoint()) {
-                openUrl("https://leetcode.cn");
-            } else {
-                openUrl("https://leetcode.com");
-            }
-            break;
-        default:
-            break;
-    }
-}
-*/
-
-/*
-export async function promptHintMessage(config: string, message: string, choiceConfirm: string, onConfirm: () => Promise<any>): Promise<void> {
-    if (getWorkspaceConfiguration().get<boolean>(config)) {
-        const choiceNoShowAgain: string = "Don't show again";
-        const choice: string | undefined = await vscode.window.showInformationMessage(
-            message, choiceConfirm, choiceNoShowAgain,
-        );
-        if (choice === choiceConfirm) {
-            await onConfirm();
-        } else if (choice === choiceNoShowAgain) {
-            await getWorkspaceConfiguration().update(config, false, true);
-        }
-    }
-}
-*/
-
 export async function openSettingsEditor(query?: string): Promise<void> {
     await vscode.commands.executeCommand("workbench.action.openSettings", query);
 }

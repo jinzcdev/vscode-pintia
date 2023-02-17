@@ -11,6 +11,7 @@
     "contributes.commands.pintia.reportIssue": "问题反馈",
     "contributes.commands.pintia.searchProblem": "搜索题目",
     "contributes.commands.pintia.refreshProblemSearchIndex": "刷新题目搜索索引",
+    "contributes.commands.pintia.openWorkspace": "打开 Pintia 工作区",
     "contributes.views.pintia.pintiaExplorer": "固定题目集",
     "configuration.pintia.workspaceFolder": "工作区文件夹的路径（存储题目源文件）。",
     "configuration.pintia.paging.pageSize": "指定题目集较大时候，是否对题目列表分页。pageSize 为 0 表示不分页。",

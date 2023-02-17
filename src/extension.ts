@@ -55,6 +55,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand("pintia.testSolution", (ptaCode: IPtaCode) => submit.testSolution(ptaCode)),
 		vscode.commands.registerCommand("pintia.changeDefaultLanguage", () => language.changeDefaultLanguage()),
 		vscode.commands.registerCommand("pintia.changeWorkspaceFolder", () => workspace.changeWorkspaceFolder()),
+		vscode.commands.registerCommand("pintia.openWorkspace", () => workspace.openWorkspace()),
 		vscode.window.createTreeView("pintiaExplorer", { treeDataProvider: ptaTreeDataProvider, showCollapseAll: true })
 	);
 

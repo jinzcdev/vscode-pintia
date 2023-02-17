@@ -28,19 +28,7 @@
         "Snippets"
     ],
     "activationEvents": [
-        "onCommand:pintia.openPintiaHome",
-        "onCommand:pintia.clearCache",
-        "onCommand:pintia.signIn",
-        "onCommand:pintia.signOut",
-        "onCommand:pintia.refreshExplorer",
-        "onCommand:pintia.checkIn",
-        "onCommand:pintia.changeDefaultLanguage",
-        "onCommand:pintia.changeWorkspaceFolder",
-        "onCommand:pintia.reportIssue",
-        "onCommand:pintia.searchProblem",
-        "onCommand:pintia.refreshProblemSearchIndex",
-        "onCommand:pintia.openExtensionRepo",
-        "onView:pintiaExplorer"
+        "onCommand:pintia.openExtensionRepo"
     ],
     "main": "./out/extension",
     "contributes": {
@@ -84,9 +72,14 @@
                     "group": "navigation@3"
                 },
                 {
-                    "command": "pintia.reportIssue",
+                    "command": "pintia.openWorkspace",
                     "when": "view == pintiaExplorer",
                     "group": "navigation@4"
+                },
+                {
+                    "command": "pintia.reportIssue",
+                    "when": "view == pintiaExplorer",
+                    "group": "overflow@0"
                 }
             ]
         },
@@ -150,6 +143,12 @@
                 "command": "pintia.refreshProblemSearchIndex",
                 "title": "%contributes.commands.pintia.refreshProblemSearchIndex%",
                 "category": "Pintia"
+            },
+            {
+                "command": "pintia.openWorkspace",
+                "title": "%contributes.commands.pintia.openWorkspace%",
+                "category": "Pintia",
+                "icon": "$(folder)"
             }
         ],
         "configuration": {
