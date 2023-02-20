@@ -94,6 +94,14 @@ class PtaConfig {
         this.update("searchIndex.ignoreZOJ", ignoredZOJ);
     }
 
+    public getSearchIndexIgnoreLockedProblemSets(): boolean {
+        return this.getConfiguration().get<boolean>("searchIndex.ignoreLockedProblemSets", true);
+    }
+
+    public setSearchIndexIgnoreLockedProblemSets(ignoredLocked: boolean) {
+        this.update("searchIndex.ignoreLockedProblemSets", ignoredLocked);
+    }
+    
     public getSearchIndexAutoRefresh(): boolean {
         return this.getConfiguration().get<boolean>("searchIndex.autoRefresh", false);
     }
@@ -109,6 +117,8 @@ class PtaConfig {
     public setAutoCreateProblemSetFolder(autoCreatePbsFolder: boolean) {
         this.update("autoCreateProblemSetFolder", autoCreatePbsFolder);
     }
+
+    
 }
 
 export const ptaConfig: PtaConfig = new PtaConfig();

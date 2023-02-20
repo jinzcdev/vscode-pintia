@@ -56,7 +56,10 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand("pintia.changeDefaultLanguage", () => language.changeDefaultLanguage()),
 		vscode.commands.registerCommand("pintia.changeWorkspaceFolder", () => workspace.changeWorkspaceFolder()),
 		vscode.commands.registerCommand("pintia.openWorkspace", () => workspace.openWorkspace()),
-		vscode.window.createTreeView("pintiaExplorer", { treeDataProvider: ptaTreeDataProvider, showCollapseAll: true })
+		vscode.window.createTreeView("pintiaExplorer", { treeDataProvider: ptaTreeDataProvider, showCollapseAll: true }),
+		vscode.commands.registerCommand("pintia.welcome", () => {
+			vscode.commands.executeCommand(`workbench.action.openWalkthrough`, `jinzcdev.vscode-pintia#pintia`, false);
+		}),
 	);
 
 	await fs.mkdirs(configPath);

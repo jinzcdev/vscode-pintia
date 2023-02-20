@@ -7,6 +7,7 @@ import { IProblemInfo } from "./entity/IProblemInfo";
 
 export const configPath: string = path.join(os.homedir(), ".pintia");
 export const cacheDirPath: string = path.join(configPath, "cache");
+export const ZOJ_PROBLEM_SET_ID: string = "91827364500";
 
 export import ptaCache = require('memory-cache');
 

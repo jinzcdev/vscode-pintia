@@ -73,13 +73,9 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
             ];
         }
         if (!element) {
-            // root directoty
+            // root directory
             return explorerNodeManager.getRootNodes();
-            // return explorerNodeManager.getProblemSetNodes(1);
         }
-        // if (element.type === PtaNodeType.Dashboard) {
-        //     return explorerNodeManager.getProblemSetNodes(element.dashID);
-        // }
 
         const value: IPtaNodeValue = element.value;
         if (element.type === PtaNodeType.ProblemSet) {

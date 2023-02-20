@@ -3,7 +3,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import * as fs from "fs-extra";
 import { selectWorkspaceFolder } from "../utils/workspaceUtils";
-import { commentFormatMapping, compilerLangMapping, configPath, IPtaCode, IQuickPickItem, langCompilerMapping, ProblemType, problemTypeNameMapping, ptaCompiler } from "../shared";
+import { commentFormatMapping, compilerLangMapping, configPath, IPtaCode, IQuickPickItem, langCompilerMapping, ProblemType, problemTypeNameMapping, ptaCompiler, ZOJ_PROBLEM_SET_ID } from "../shared";
 import { ptaChannel } from "../ptaChannel";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import { ptaConfig } from "../ptaConfig";
@@ -113,18 +113,34 @@ export async function searchProblem(): Promise<void> {
 }
 
 async function fetchProblemIndex(): Promise<Array<IProblemSearchItem>> {
-    const problemSets = await fs.readJSON(path.join(configPath, "searchIndex.json"));
     const problems: Array<IProblemSearchItem> = [];
-    const ignoreZOJ: boolean = ptaConfig.getSearchIndexIgnoreZOJ();
-    for (const ps in problemSets) {
-        if (ignoreZOJ && ps.trim() === "ZOJ Problem Set") {
-            continue;
+    try {
+        const searchIndex = await fs.readJSON(path.join(configPath, "searchIndex.json"));
+        ptaChannel.appendLine("[INFO] Fetched the problem search index from the local");
+
+        const ignoredLocked: boolean = ptaConfig.getSearchIndexIgnoreLockedProblemSets();
+        const ignoredZOJ: boolean = ptaConfig.getSearchIndexIgnoreZOJ();
+
+        const Unlocked: Map<string, boolean> = new Map();
+        await ptaApi.getUnlockedProblemSetIDs(ptaManager.getUserSession()?.cookie!)
+            .then(psIDs => psIDs.forEach(psID => Unlocked.set(psID, true)));
+
+        for (const ps in searchIndex) {
+            const [psID, _] = ps.split("|");
+            if ((ignoredZOJ && psID === ZOJ_PROBLEM_SET_ID)
+                || (ignoredLocked && !Unlocked.get(psID))) {
+                continue;
+            }
+            for (let problem of searchIndex[ps]) {
+                problem["psName"] = ps;
+                problems.push(problem);
+            }
         }
-        for (let problem of problemSets[ps]) {
-            problem["psName"] = ps;
-            problems.push(problem);
-        }
+    } catch (e: any) {
+        ptaChannel.appendLine(e.toString());
+        await promptForOpenOutputChannel("Failed to fetch the problem search index. Please open the output channel for details.", DialogType.error);
     }
+
     return problems;
 }
 

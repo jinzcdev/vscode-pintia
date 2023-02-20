@@ -111,13 +111,15 @@ class ExplorerNodeManager implements Disposable {
                 }, async (p: vscode.Progress<{ message?: string; increment?: number }>) => {
                     return new Promise<void>(async (resolve: () => void, reject: (e: Error) => void): Promise<void> => {
 
-                        ptaChannel.appendLine("[INFO] Refetch user's exams");
+                        ptaChannel.appendLine("[INFO] Refetching user's exams");
                         examStatus = await ptaApi.getExamProblemStatus(psID, userSession.cookie);
                         if (examStatus) {
-                            for (const e of examStatus) {
+                            for (const e of examStatus!) {
                                 problemExamMapping.set(e.id, e.problemSubmissionStatus as ProblemSubmissionState);
                             }
                             resolve();
+                        } else {
+                            reject(Error("examStatus is undefined"));
                         }
                     });
                 });

@@ -4,10 +4,12 @@ import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs-extra";
-import { configPath } from "../shared";
+import { configPath, ZOJ_PROBLEM_SET_ID } from "../shared";
 import { ptaChannel } from "../ptaChannel";
 import { ptaApi } from "../utils/api";
 import { ptaConfig } from "../ptaConfig";
+import { ptaManager } from "../PtaManager";
+import { IProblemSet } from "../entity/IProblemSet";
 
 
 export async function clearCache(): Promise<void> {
@@ -43,11 +45,18 @@ export async function refreshProblemSearchIndex(): Promise<void> {
         cancellable: false
     }, async (p: vscode.Progress<{ message?: string; increment?: number }>) => {
         return new Promise<void>(async (resolve: () => void, reject: (e: Error) => void): Promise<void> => {
+            const ignoredLocked: boolean = ptaConfig.getSearchIndexIgnoreLockedProblemSets();
+            const ignoredZOJ: boolean = ptaConfig.getSearchIndexIgnoreZOJ();
             try {
-                let problemSetAllowedIndex: string[] = await ptaApi.getAllProblemSets()
-                    .then(data => data.map(ps => ps.id));
-                if (ptaConfig.getSearchIndexIgnoreZOJ()) {
-                    problemSetAllowedIndex = problemSetAllowedIndex.filter(ps => ps !== "91827364500");
+
+                const problemSets: IProblemSet[] = await ptaApi.getAllProblemSets(ptaManager.getUserSession()?.cookie);
+                const problemSetAllowedIndex: string[] = [];
+                for (const pbs of problemSets) {
+                    if ((ignoredZOJ && pbs.id === ZOJ_PROBLEM_SET_ID)
+                        || (ignoredLocked && (pbs.permission?.permission ?? 0) === 9)) {
+                        continue;
+                    }
+                    problemSetAllowedIndex.push(pbs.id);
                 }
                 const problemIndex = await ptaApi.getProblemSearchIndex(problemSetAllowedIndex);
                 if (Object.keys(problemIndex).length !== 0) {

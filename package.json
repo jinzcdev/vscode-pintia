@@ -149,6 +149,11 @@
                 "title": "%contributes.commands.pintia.openWorkspace%",
                 "category": "Pintia",
                 "icon": "$(folder)"
+            },
+            {
+                "command": "pintia.welcome",
+                "title": "%contributes.commands.pintia.welcome%",
+                "category": "Pintia"
             }
         ],
         "configuration": {
@@ -267,6 +272,12 @@
                     "default": true,
                     "scope": "application",
                     "markdownDescription": "%configuration.pintia.searchIndex.ignoreZOJ%"
+                },
+                "pintia.searchIndex.ignoreLockedProblemSets": {
+                    "type": "boolean",
+                    "default": true,
+                    "scope": "application",
+                    "markdownDescription": "%configuration.pintia.searchIndex.ignoreLockedProblemSets%"
                 },
                 "pintia.searchIndex.autoRefresh": {
                     "type": "boolean",

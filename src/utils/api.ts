@@ -215,8 +215,18 @@ class PtaAPI {
     }
 
     public async getExamProblemStatus(psID: string, cookie: string): Promise<IExamProblemStatus[] | undefined> {
-        await this.getProblemSetExam(psID, cookie);
         return await httpGet(`https://pintia.cn/api/problem-sets/${psID}/exam-problem-status`, cookie).then(json => json["problemStatus"]);
+    }
+
+    public async getUnlockedProblemSetIDs(cookie: string): Promise<string[]> {
+        const problemSets: IProblemSet[] = await ptaApi.getAllProblemSets(cookie);
+        const psIDs: string[] = [];
+        for (const ps of problemSets) {
+            if ((ps.permission?.permission ?? 0) !== 9) {
+                psIDs.push(ps.id);
+            }
+        }
+        return psIDs;
     }
 
     /**
@@ -375,12 +385,11 @@ class PtaAPI {
                     for (let i = 0; i < pages; i++) {
                         const problemInfo = await this.getProblemInfoListByPage(psID, problemType as ProblemType, i, 200);
                         data = data.concat(problemInfo);
-                        await delay(400);
+                        await delay(600);
                     }
                 }
                 for (const item of data) {
                     problemList.push({
-                        "psID": psID,
                         "pID": item["id"],
                         "title": item["title"],
                         "label": item["label"],
@@ -389,7 +398,7 @@ class PtaAPI {
                     });
                 }
                 allProblems = Object.assign(allProblems, {
-                    [psName]: problemList
+                    [`${psID}|${psName}`]: problemList
                 })
             }
             return allProblems;
