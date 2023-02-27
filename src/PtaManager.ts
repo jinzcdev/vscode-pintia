@@ -23,6 +23,16 @@ class PtaManager extends EventEmitter {
     }
 
     public async signIn(): Promise<void> {
+        if (this.userStatus === UserStatus.SignedIn) {
+            const choice: string | undefined = await vscode.window.showQuickPick(
+                ["Yes", "No"],
+                { placeHolder: "You are already logged in. Do you want to log out of the current account?" },
+            );
+            if (!choice || choice === "No") {
+                return;
+            }
+            await this.signOut();
+        }
         const picks: IQuickPickItem<PtaLoginMethod>[] = [];
         picks.push(
             {
