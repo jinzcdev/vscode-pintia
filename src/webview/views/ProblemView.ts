@@ -109,7 +109,7 @@ export class ProblemView {
                 break;
             }
         }
-        if (startLine == -1 || endLine == -1) {
+        if (startLine === -1 || endLine === -1) {
             return ["", data];
         }
         let newData = lines.filter((line, index) => index < startLine - 1 || index > endLine + 1).join("\n");

@@ -95,7 +95,7 @@ export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
 export async function searchProblem(): Promise<void> {
     const userSession: IUserSession | undefined = ptaManager.getUserSession();
     if (!userSession) {
-        vscode.window.showInformationMessage("Login session has expired!");
+        vscode.window.showInformationMessage("User is not logged in or the login session has expired!");
         return;
     }
     const items = await parseProblemsToPicks(fetchProblemIndex());
@@ -126,13 +126,14 @@ async function fetchProblemIndex(): Promise<Array<IProblemSearchItem>> {
             .then(psIDs => psIDs.forEach(psID => Unlocked.set(psID, true)));
 
         for (const ps in searchIndex) {
-            const [psID, _] = ps.split("|");
+            const [psID, psName] = ps.split("|");
             if ((ignoredZOJ && psID === ZOJ_PROBLEM_SET_ID)
                 || (ignoredLocked && !Unlocked.get(psID))) {
                 continue;
             }
             for (let problem of searchIndex[ps]) {
-                problem["psName"] = ps;
+                problem["psName"] = psName;
+                problem["psID"] = psID;
                 problems.push(problem);
             }
         }

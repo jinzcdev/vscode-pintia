@@ -21,54 +21,45 @@ class ExplorerNodeManager implements Disposable {
         const ptaNodeList: PtaNode[] = [];
         const problemSetList: IProblemSet[] = await ptaApi.getAllProblemSets(ptaManager.getUserSession()?.cookie);
         const showLocked: boolean = ptaConfig.getShowLocked();
+        const OTHER_SECTION: string = "Others";
 
-        for (let i = 0; i < sections.length; i++) {
-            const section = sections[i];
-            const displayConfigs = section.displayConfigs.map<string>((value, _) => value.problemSetId);
+        const pbs2dash = new Map<string, string>();
+        const dashes = new Map<string, Array<any>>([[OTHER_SECTION, []]]);
+        for (const section of sections) {
+            section.displayConfigs.forEach(e => pbs2dash.set(e.problemSetId, section.title));
+            dashes.set(section.title, []);
+        }
+        for (const item of problemSetList) {
+            if ((item.permission?.permission ?? 0) === 9 && !showLocked) {
+                continue;
+            }
+            dashes.get(pbs2dash.get(item.id) ?? OTHER_SECTION)?.push(item);
+        }
+        for (const [sectionTitle, pbsList] of dashes) {
+            if (pbsList.length === 0) {
+                continue;
+            }
             ptaNodeList.push(new PtaNode(Object.assign({}, defaultPtaNode, {
-                // label: `${i + 1}. ${section.title}`,
-                label: `—— ${section.title} ——`,
+                label: `—— ${sectionTitle} ——`,
                 type: PtaNodeType.Dashboard,
             })));
-            for (const item of problemSetList) {
-                if ((item.permission?.permission ?? 0) === 9 && !showLocked) {
-                    continue;
-                }
-                if (displayConfigs.indexOf(item.id) !== -1) {
-                    ptaNodeList.push(
-                        new PtaNode(Object.assign({}, defaultPtaNode, {
-                            psID: item.id,
-                            label: item.name,
-                            type: PtaNodeType.ProblemSet,
-                            locked: (item.permission?.permission ?? 0) === 9,
-                            value: {
-                                problemSet: item.name,
-                                summaries: item.summaries
-                            }
-                        }))
-                    );
-                }
-            }
+            pbsList.forEach(item => {
+                ptaNodeList.push(
+                    new PtaNode(Object.assign({}, defaultPtaNode, {
+                        psID: item.id,
+                        label: item.name,
+                        type: PtaNodeType.ProblemSet,
+                        locked: (item.permission?.permission ?? 0) === 9,
+                        value: {
+                            problemSet: item.name,
+                            summaries: item.summaries
+                        }
+                    }))
+                );
+            });
         }
         return ptaNodeList;
     }
-
-    /*
-    public async getRootNodes(): Promise<PtaNode[]> {
-        const sections: IDashSection[] = await ptaApi.getDashSections();
-        const ptaNodeList: PtaNode[] = [];
-        for (let i = 0; i < sections.length; i++) {
-            ptaNodeList.push(
-                new PtaNode(Object.assign({}, defaultPtaNode, {
-                    dashID: i,
-                    label: sections[i].title,
-                    type: PtaNodeType.Dashboard
-                }))
-            );
-        }
-        return ptaNodeList;
-    }
-    */
 
     public async getSubProblemSet(node: PtaNode): Promise<PtaNode[]> {
         // container two kinds of problems (CODE_COMPLETION, PROGRAMMING, MULTIPLE_FILE)
@@ -106,7 +97,7 @@ class ExplorerNodeManager implements Disposable {
             if (userSession) {
                 await vscode.window.withProgress({
                     location: vscode.ProgressLocation.Notification,
-                    title: "Fetching user's exams...",
+                    title: `Fetching user's exams for ${psName}...`,
                     cancellable: false
                 }, async (p: vscode.Progress<{ message?: string; increment?: number }>) => {
                     return new Promise<void>(async (resolve: () => void, reject: (e: Error) => void): Promise<void> => {
@@ -167,7 +158,7 @@ class ExplorerNodeManager implements Disposable {
             nodeList.push(new PtaNode(Object.assign({}, defaultPtaNode, {
                 psID: psID,
                 type: PtaNodeType.ProblemPage,
-                label: `${i * limit + 1}-${i == pageNum - 1 ? total : (i + 1) * limit}`,
+                label: `${i * limit + 1}-${i === pageNum - 1 ? total : (i + 1) * limit}`,
                 value: {
                     total: total,
                     limit: limit,

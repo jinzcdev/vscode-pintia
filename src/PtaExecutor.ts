@@ -22,7 +22,7 @@ class PtaExecutor extends EventEmitter implements Disposable {
     public async submitSolution(psID: string, pID: string, solution: { compiler: string, code: string }, callback: CallBack<IProblemSubmissionResult>): Promise<void> {
         const userSession: IUserSession | undefined = ptaManager.getUserSession();
         if (!userSession) {
-            vscode.window.showInformationMessage("Login session has expired!");
+            vscode.window.showInformationMessage("User is not logged in or the login session has expired!");
             return;
         }
         await vscode.window.withProgress({
@@ -73,6 +73,11 @@ class PtaExecutor extends EventEmitter implements Disposable {
     }
 
     public async testSolution(psID: string, pID: string, solution: { compiler: string, code: string, testInput: string }, callback: CallBack<IProblemSubmissionResult>): Promise<void> {
+        const userSession: IUserSession | undefined = ptaManager.getUserSession();
+        if (!userSession) {
+            vscode.window.showInformationMessage("User is not logged in or the login session has expired!");
+            return;
+        }
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
             title: "Testing the sample...",
@@ -81,16 +86,6 @@ class PtaExecutor extends EventEmitter implements Disposable {
             return new Promise<void>(async (resolve: () => void, reject: (e: Error) => void): Promise<void> => {
 
                 try {
-                    const userSession: IUserSession | undefined = ptaManager.getUserSession();
-                    if (!userSession) {
-                        vscode.window.showInformationMessage("Login session has expired!");
-                        return;
-                    }
-
-                    // if (!langCompilerMapping.has(solution.compiler)) {
-                    //     throw `[ERROR] The language ${solution.compiler} is not supported.`;
-                    // }
-
                     const cookie = userSession.cookie;
                     const detail: IProblemSubmissionDetail = {
                         problemId: "0",
@@ -127,7 +122,7 @@ class PtaExecutor extends EventEmitter implements Disposable {
                             clearInterval(interval);
                             callback("SUCCESS", data);
                         }
-                        if (++cnt == 60) {
+                        if (++cnt === 60) {
                             throw "[ERROR] Submission timeout";
                         }
                     }, 1000);
