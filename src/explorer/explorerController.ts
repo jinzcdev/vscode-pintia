@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { Disposable } from "vscode";
 import { PtaNode } from "./PtaNode";
-import { PtaTreeDataProvider } from "./ptaTreeDataProvider";
+import { PtaTreeDataProvider } from "./PtaTreeDataProvider";
 
 class ExplorerController<T> implements Disposable {
 
