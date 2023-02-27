@@ -4,7 +4,7 @@ import * as vscode from "vscode";
 
 import { IProblem } from "../entity/IProblem";
 import { IProblemSubmissionResult } from "../entity/IProblemSubmissionResult";
-import { ptaTreeDataProvider } from "../explorer/ptaTreeDataProvider";
+import { explorerController } from "../explorer/explorerController";
 import { ptaChannel } from "../ptaChannel";
 import { ptaConfig } from "../ptaConfig";
 import { ptaExecutor } from "../PtaExecutor";
@@ -28,9 +28,8 @@ export async function submitSolution(ptaCode: IPtaCode): Promise<void> {
         await ptaExecutor.submitSolution(ptaCode.psID, ptaCode.pID, solution, (msg: string, data?: IProblemSubmissionResult) => {
             switch (msg) {
                 case "SUCCESS":
-                    // vscode.window.showInformationMessage("Submit the solution successfully");
                     ptaSubmissionProvider.showSubmission(data!);
-                    ptaTreeDataProvider.refresh();
+                    explorerController.refreshTreeData();
                     break;
                 default:
                     vscode.window.showInformationMessage("submission failed!");

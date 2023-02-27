@@ -7,11 +7,11 @@ import * as show from "./commands/show";
 import * as submit from "./commands/submit";
 import * as user from "./commands/user";
 import * as workspace from "./commands/workspace";
-import { ptaTreeDataProvider } from './explorer/ptaTreeDataProvider';
+import { explorerController } from "./explorer/explorerController";
 import { ptaChannel } from './ptaChannel';
 import { ptaExecutor } from './PtaExecutor';
 import { ptaManager } from './PtaManager';
-import { configPath, IPtaCode } from './shared';
+import { configPath, IPtaCode, UserStatus } from './shared';
 import { ptaStatusBarController } from './statusbar/ptaStatusBarController';
 import { ptaLoginProvider } from './webview/ptaLoginProvider';
 import { ptaPreviewProvider } from './webview/ptaPreviewProvider';
@@ -22,11 +22,16 @@ import { ptaTestProvider } from './webview/ptaTestProvider';
 export async function activate(context: vscode.ExtensionContext) {
 
 	ptaManager.on("statusChanged", () => {
-		ptaTreeDataProvider.refresh();
+		const userStatus: UserStatus = ptaManager.getStatus();
+		if (userStatus === UserStatus.SignedIn) {
+			vscode.commands.executeCommand('setContext', 'pintia.showWelcome', false);
+			explorerController.createTreeView(context);
+		} else {
+			explorerController.dispose();
+			vscode.commands.executeCommand('setContext', 'pintia.showWelcome', true);
+		}
 		ptaStatusBarController.updateStatusBar(ptaManager.getUserSession());
 	});
-
-	ptaTreeDataProvider.initialize(context);
 
 	context.subscriptions.push(
 		ptaPreviewProvider,
@@ -37,9 +42,10 @@ export async function activate(context: vscode.ExtensionContext) {
 		codeLensController,
 		ptaExecutor,
 		ptaChannel,
+		explorerController,
 		vscode.commands.registerCommand("pintia.openPintiaHome", () => user.openPintiaHome()),
 		vscode.commands.registerCommand("pintia.openExtensionRepo", () => user.openExtensionRepo()),
-		vscode.commands.registerCommand("pintia.refreshExplorer", () => ptaTreeDataProvider.refresh()),
+		vscode.commands.registerCommand("pintia.refreshExplorer", () => explorerController.refreshTreeData()),
 		vscode.commands.registerCommand("pintia.clearCache", () => cache.clearCache()),
 		vscode.commands.registerCommand("pintia.signIn", () => ptaManager.signIn()),
 		vscode.commands.registerCommand("pintia.signOut", () => ptaManager.signOut()),
@@ -56,7 +62,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand("pintia.changeDefaultLanguage", () => language.changeDefaultLanguage()),
 		vscode.commands.registerCommand("pintia.changeWorkspaceFolder", () => workspace.changeWorkspaceFolder()),
 		vscode.commands.registerCommand("pintia.openWorkspace", () => workspace.openWorkspace()),
-		vscode.window.createTreeView("pintiaExplorer", { treeDataProvider: ptaTreeDataProvider, showCollapseAll: true }),
 		vscode.commands.registerCommand("pintia.welcome", () => {
 			vscode.commands.executeCommand(`workbench.action.openWalkthrough`, `jinzcdev.vscode-pintia#pintia`, false);
 		}),

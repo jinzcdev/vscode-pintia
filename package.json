@@ -49,17 +49,19 @@
                 }
             ]
         },
+        "viewsWelcome": [
+            {
+                "view": "pintiaExplorer",
+                "contents": "%contributes.viewsWelcome.pintiaExplorer%",
+                "when": "pintia.showWelcome"
+            }
+        ],
         "menus": {
             "view/title": [
                 {
                     "command": "pintia.openPintiaHome",
                     "when": "view == pintiaExplorer",
                     "group": "navigation@0"
-                },
-                {
-                    "command": "pintia.signIn",
-                    "when": "view == pintiaExplorer",
-                    "group": "navigation@1"
                 },
                 {
                     "command": "pintia.searchProblem",
@@ -77,9 +79,19 @@
                     "group": "navigation@4"
                 },
                 {
-                    "command": "pintia.reportIssue",
+                    "command": "pintia.signIn",
                     "when": "view == pintiaExplorer",
                     "group": "overflow@0"
+                },
+                {
+                    "command": "pintia.signOut",
+                    "when": "view == pintiaExplorer",
+                    "group": "overflow@1"
+                },
+                {
+                    "command": "pintia.reportIssue",
+                    "when": "view == pintiaExplorer",
+                    "group": "overflow@2"
                 }
             ]
         },
@@ -401,6 +413,15 @@
                         "media": {
                             "image": "docs/imgs/test-custom-sample.gif",
                             "altText": "%walkthroughs.testCustomSolution.media.altText%"
+                        }
+                    },
+                    {
+                        "id": "takeNotes",
+                        "title": "%walkthroughs.takeNotes.title%",
+                        "description": "%walkthroughs.takeNotes.description%",
+                        "media": {
+                            "image": "docs/imgs/note.png",
+                            "altText": "%walkthroughs.takeNotes.media.altText%"
                         }
                     },
                     {

@@ -15,19 +15,16 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
     private configurationChangeListener: vscode.Disposable;
 
     private onDidChangeTreeDataEvent: vscode.EventEmitter<PtaNode | undefined | null> = new vscode.EventEmitter<PtaNode | undefined | null>();
-    // tslint:disable-next-line:member-ordering
+
     public readonly onDidChangeTreeData: vscode.Event<any> = this.onDidChangeTreeDataEvent.event;
 
 
-    public constructor() {
+    public constructor(context: vscode.ExtensionContext) {
         this.configurationChangeListener = vscode.workspace.onDidChangeConfiguration((event: vscode.ConfigurationChangeEvent) => {
             if (event.affectsConfiguration("pintia.paging.pageSize") || event.affectsConfiguration("pintia.showLocked")) {
                 this.onDidChangeTreeDataEvent.fire(null);
             }
         }, this);
-    }
-
-    public initialize(context: vscode.ExtensionContext): void {
         this.context = context;
     }
 
@@ -142,6 +139,3 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
     }
 
 }
-
-
-export const ptaTreeDataProvider: PtaTreeDataProvider = new PtaTreeDataProvider();
