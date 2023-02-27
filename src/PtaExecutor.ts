@@ -20,6 +20,11 @@ import * as cache from "./commands/cache";
 class PtaExecutor extends EventEmitter implements Disposable {
 
     public async submitSolution(psID: string, pID: string, solution: { compiler: string, code: string }, callback: CallBack<IProblemSubmissionResult>): Promise<void> {
+        const userSession: IUserSession | undefined = ptaManager.getUserSession();
+        if (!userSession) {
+            vscode.window.showInformationMessage("Login session has expired!");
+            return;
+        }
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
             title: "Submitting to PTA...",
@@ -27,11 +32,6 @@ class PtaExecutor extends EventEmitter implements Disposable {
         }, async (p: vscode.Progress<{ message?: string; increment?: number }>) => {
             return new Promise<void>(async (resolve: () => void, reject: (e: Error) => void): Promise<void> => {
                 try {
-                    const userSession: IUserSession | undefined = ptaManager.getUserSession();
-                    if (!userSession) {
-                        vscode.window.showInformationMessage("Login session has expired!");
-                        return;
-                    }
                     const cookie = userSession.cookie;
                     const problemType: ProblemType = await ptaApi.getProblem(psID, pID).then(e => e.type) as ProblemType;
 
