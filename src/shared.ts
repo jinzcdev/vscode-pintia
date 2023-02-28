@@ -7,6 +7,7 @@ import { IProblemInfo } from "./entity/IProblemInfo";
 
 export const configPath: string = path.join(os.homedir(), ".pintia");
 export const cacheDirPath: string = path.join(configPath, "cache");
+export const searchIndexPath: string = path.join(configPath, "search_index.json");
 export const favoriteProblemsPath: string = path.join(configPath, "favorites.json");
 export const ZOJ_PROBLEM_SET_ID: string = "91827364500";
 

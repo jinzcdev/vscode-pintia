@@ -4,7 +4,7 @@ import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs-extra";
-import { configPath, ZOJ_PROBLEM_SET_ID } from "../shared";
+import { searchIndexPath, ZOJ_PROBLEM_SET_ID } from "../shared";
 import { ptaChannel } from "../ptaChannel";
 import { ptaApi } from "../utils/api";
 import { ptaConfig } from "../ptaConfig";
@@ -22,9 +22,9 @@ export async function clearCache(): Promise<void> {
 }
 
 export async function createProblemSearchIndex(context: vscode.ExtensionContext) {
-    const indexFileDest = path.join(configPath, "searchIndex.json");
+    const indexFileDest = searchIndexPath;
     if (!await fs.pathExists(indexFileDest)) {
-        const indexFileSrc = context.asAbsolutePath(path.join("resources", "searchIndex.json"));
+        const indexFileSrc = context.asAbsolutePath(path.join("resources", "search_index.json"));
         try {
             await fs.copy(indexFileSrc, indexFileDest);
             ptaChannel.appendLine(`[INFO] Copy the search index to ${indexFileDest}.`);
@@ -60,7 +60,7 @@ export async function refreshProblemSearchIndex(): Promise<void> {
                 }
                 const problemIndex = await ptaApi.getProblemSearchIndex(problemSetAllowedIndex);
                 if (Object.keys(problemIndex).length !== 0) {
-                    await fs.writeJson(path.join(configPath, "searchIndex.json"), problemIndex);
+                    await fs.writeJson(searchIndexPath, problemIndex);
                     ptaChannel.appendLine(`[INFO] Fetch the problem search index successfully.`);
                 } else {
                     await promptForOpenOutputChannel("Failed to fetch problem search index. Please open the output channel for details.", DialogType.error);

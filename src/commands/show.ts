@@ -3,7 +3,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import * as fs from "fs-extra";
 import { selectWorkspaceFolder } from "../utils/workspaceUtils";
-import { commentFormatMapping, compilerLangMapping, configPath, IPtaCode, IQuickPickItem, langCompilerMapping, ProblemType, problemTypeNameMapping, ptaCompiler, ZOJ_PROBLEM_SET_ID } from "../shared";
+import { commentFormatMapping, compilerLangMapping, configPath, IPtaCode, IQuickPickItem, langCompilerMapping, ProblemType, problemTypeNameMapping, ptaCompiler, searchIndexPath, ZOJ_PROBLEM_SET_ID } from "../shared";
 import { ptaChannel } from "../ptaChannel";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import { ptaConfig } from "../ptaConfig";
@@ -115,7 +115,7 @@ export async function searchProblem(): Promise<void> {
 async function fetchProblemIndex(): Promise<Array<IProblemSearchItem>> {
     const problems: Array<IProblemSearchItem> = [];
     try {
-        const searchIndex = await fs.readJSON(path.join(configPath, "searchIndex.json"));
+        const searchIndex = await fs.readJSON(searchIndexPath);
         ptaChannel.appendLine("[INFO] Fetched the problem search index from the local");
 
         const ignoredLocked: boolean = ptaConfig.getSearchIndexIgnoreLockedProblemSets();
