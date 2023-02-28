@@ -6,6 +6,7 @@ import { IProblemInfo } from "../entity/IProblemInfo";
 import { IProblemSet } from "../entity/IProblemSet";
 import { IProblemSummary } from "../entity/IProblemSummary";
 import { IUserSession } from "../entity/userLoginSession";
+import { favoriteProblemsManager } from "../favorites/favoriteProblemsManager";
 import { ptaChannel } from "../ptaChannel";
 import { ptaConfig } from "../ptaConfig";
 import { ptaManager } from "../PtaManager";
@@ -115,7 +116,6 @@ class ExplorerNodeManager implements Disposable {
                     });
                 });
             }
-
             const ptaNodeList: PtaNode[] = [];
             for (let i = 0; i < problemList.length; i++) {
                 const pb: IProblemInfo = problemList[i];
@@ -123,10 +123,12 @@ class ExplorerNodeManager implements Disposable {
                     new PtaNode(Object.assign({}, defaultPtaNode, {
                         pID: pb.id,
                         psID: psID,
+                        title: `${pb.label} ${pb.title}`,
                         label: `[${i + startIndex}] ${pb.label} ${pb.title}`,
                         type: PtaNodeType.Problem,
                         score: pb.score,
                         state: problemExamMapping.get(pb.id) ?? ProblemSubmissionState.PROBLEM_NO_ANSWER,
+                        isFavorite: favoriteProblemsManager.isProblemFavorite(favoriteProblemsManager.getCurrentUserId(), pb.id),
                         value: {
                             problemType: problemType,
                             problemInfo: pb,

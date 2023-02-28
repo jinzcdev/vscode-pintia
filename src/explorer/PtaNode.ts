@@ -17,6 +17,10 @@ export class PtaNode {
         return this.data.psID;
     }
 
+    public get title(): string {
+        return this.data.title;
+    }
+
     public get label(): string {
         return this.data.label;
     }

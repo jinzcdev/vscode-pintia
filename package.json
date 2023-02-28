@@ -27,9 +27,7 @@
         "Other",
         "Snippets"
     ],
-    "activationEvents": [
-        "onCommand:pintia.openExtensionRepo"
-    ],
+    "activationEvents": [],
     "main": "./out/extension",
     "contributes": {
         "viewsContainers": {
@@ -46,6 +44,11 @@
                 {
                     "id": "pintiaExplorer",
                     "name": "%contributes.views.pintia.pintiaExplorer%"
+                },
+                {
+                    "id": "pintiaMyFavorites",
+                    "name": "%contributes.views.pintia.pintiaMyFavorites%",
+                    "visibility": "collapsed"
                 }
             ]
         },
@@ -64,6 +67,11 @@
                     "group": "navigation@0"
                 },
                 {
+                    "command": "pintia.signIn",
+                    "when": "view == pintiaExplorer",
+                    "group": "navigation@1"
+                },
+                {
                     "command": "pintia.searchProblem",
                     "when": "view == pintiaExplorer",
                     "group": "navigation@2"
@@ -79,19 +87,46 @@
                     "group": "navigation@4"
                 },
                 {
-                    "command": "pintia.signIn",
+                    "command": "pintia.signOut",
                     "when": "view == pintiaExplorer",
                     "group": "overflow@0"
                 },
                 {
-                    "command": "pintia.signOut",
+                    "command": "pintia.reportIssue",
                     "when": "view == pintiaExplorer",
                     "group": "overflow@1"
                 },
                 {
-                    "command": "pintia.reportIssue",
+                    "command": "pintia.openExtensionRepo",
                     "when": "view == pintiaExplorer",
                     "group": "overflow@2"
+                }
+            ],
+            "view/item/context": [
+                {
+                    "command": "pintia.addFavorite",
+                    "when": "view == pintiaExplorer && viewItem == problem",
+                    "group": "inline"
+                },
+                {
+                    "command": "pintia.removeFavorite",
+                    "when": "view == pintiaExplorer && viewItem == problem-favorite",
+                    "group": "inline"
+                },
+                {
+                    "command": "pintia.removeFavorite",
+                    "when": "view == pintiaMyFavorites && viewItem == problem-favorite",
+                    "group": "inline"
+                }
+            ],
+            "commandPalette": [
+                {
+                    "command": "pintia.addFavorite",
+                    "when": "never"
+                },
+                {
+                    "command": "pintia.removeFavorite",
+                    "when": "never"
                 }
             ]
         },
@@ -166,6 +201,29 @@
                 "command": "pintia.welcome",
                 "title": "%contributes.commands.pintia.welcome%",
                 "category": "Pintia"
+            },
+            {
+                "command": "pintia.openExtensionRepo",
+                "title": "%contributes.commands.pintia.openExtensionRepo%",
+                "category": "Pintia"
+            },
+            {
+                "command": "pintia.addFavorite",
+                "title": "Add to Favorite List",
+                "category": "Pintia",
+                "icon": {
+                    "light": "resources/imgs/light/like.png",
+                    "dark": "resources/imgs/dark/like.png"
+                }
+            },
+            {
+                "command": "pintia.removeFavorite",
+                "title": "Remove from Favorite List",
+                "category": "Pintia",
+                "icon": {
+                    "light": "resources/imgs/light/dislike.png",
+                    "dark": "resources/imgs/dark/dislike.png"
+                }
             }
         ],
         "configuration": {

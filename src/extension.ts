@@ -7,7 +7,10 @@ import * as show from "./commands/show";
 import * as submit from "./commands/submit";
 import * as user from "./commands/user";
 import * as workspace from "./commands/workspace";
+import * as star from "./commands/star";
 import { explorerController } from "./explorer/explorerController";
+import { PtaNode } from "./explorer/PtaNode";
+import { favoritesTreeDataProvider } from "./favorites/favoritesTreeDataProvider";
 import { ptaChannel } from './ptaChannel';
 import { ptaExecutor } from './PtaExecutor';
 import { ptaManager } from './PtaManager';
@@ -17,6 +20,7 @@ import { ptaLoginProvider } from './webview/ptaLoginProvider';
 import { ptaPreviewProvider } from './webview/ptaPreviewProvider';
 import { ptaSubmissionProvider } from './webview/ptaSubmissionProvider';
 import { ptaTestProvider } from './webview/ptaTestProvider';
+import { favoriteProblemsManager } from "./favorites/favoriteProblemsManager";
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -30,6 +34,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			explorerController.dispose();
 			vscode.commands.executeCommand('setContext', 'pintia.showWelcome', true);
 		}
+		favoritesTreeDataProvider.refresh();
 		ptaStatusBarController.updateStatusBar(ptaManager.getUserSession());
 	});
 
@@ -43,19 +48,21 @@ export async function activate(context: vscode.ExtensionContext) {
 		ptaExecutor,
 		ptaChannel,
 		explorerController,
+		favoriteProblemsManager,
+		vscode.window.createTreeView("pintiaMyFavorites", { treeDataProvider: favoritesTreeDataProvider, showCollapseAll: true }),
 		vscode.commands.registerCommand("pintia.openPintiaHome", () => user.openPintiaHome()),
 		vscode.commands.registerCommand("pintia.openExtensionRepo", () => user.openExtensionRepo()),
 		vscode.commands.registerCommand("pintia.refreshExplorer", () => explorerController.refreshTreeData()),
 		vscode.commands.registerCommand("pintia.clearCache", () => cache.clearCache()),
 		vscode.commands.registerCommand("pintia.signIn", () => ptaManager.signIn()),
 		vscode.commands.registerCommand("pintia.signOut", () => ptaManager.signOut()),
-		vscode.commands.registerCommand("pintia.previewProblem", async (psID: string, pID: string) => await ptaPreviewProvider.showPreview(psID, pID)),
+		vscode.commands.registerCommand("pintia.previewProblem", (psID: string, pID: string) => ptaPreviewProvider.showPreview(psID, pID)),
 		vscode.commands.registerCommand("pintia.manageUser", () => user.showUserManager()),
 		vscode.commands.registerCommand("pintia.checkIn", () => user.checkInPTA()),
 		vscode.commands.registerCommand("pintia.reportIssue", () => user.reportIssue()),
 		vscode.commands.registerCommand("pintia.searchProblem", () => show.searchProblem()),
 		vscode.commands.registerCommand("pintia.refreshProblemSearchIndex", () => cache.refreshProblemSearchIndex()),
-		vscode.commands.registerCommand("pintia.codeProblem", async (ptaCode: IPtaCode) => await show.showCodingEditor(ptaCode)),
+		vscode.commands.registerCommand("pintia.codeProblem", (ptaCode: IPtaCode) => show.showCodingEditor(ptaCode)),
 		vscode.commands.registerCommand("pintia.testCustomSample", (ptaCode: IPtaCode, index: number) => submit.testCustomSample(ptaCode, index)),
 		vscode.commands.registerCommand("pintia.submitSolution", (ptaCode: IPtaCode) => submit.submitSolution(ptaCode)),
 		vscode.commands.registerCommand("pintia.testSolution", (ptaCode: IPtaCode) => submit.testSolution(ptaCode)),
@@ -65,6 +72,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand("pintia.welcome", () => {
 			vscode.commands.executeCommand(`workbench.action.openWalkthrough`, `jinzcdev.vscode-pintia#pintia`, false);
 		}),
+		vscode.commands.registerCommand("pintia.addFavorite", (ptaNode: PtaNode) => star.addFavoriteProblem(ptaNode)),
+		vscode.commands.registerCommand("pintia.removeFavorite", (ptaNode: PtaNode) => star.removeFavoriteProblem(ptaNode))
 	);
 
 	await fs.mkdirs(configPath);

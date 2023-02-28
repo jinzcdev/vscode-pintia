@@ -7,6 +7,7 @@ import { IProblemInfo } from "./entity/IProblemInfo";
 
 export const configPath: string = path.join(os.homedir(), ".pintia");
 export const cacheDirPath: string = path.join(configPath, "cache");
+export const favoriteProblemsPath: string = path.join(configPath, "favorites.json");
 export const ZOJ_PROBLEM_SET_ID: string = "91827364500";
 
 export import ptaCache = require('memory-cache');
@@ -61,6 +62,7 @@ export interface IPtaNode {
     dashID: number;
     pID: string;
     psID: string;
+    title: string;
     label: string;
     type: PtaNodeType;
     score: number;
@@ -86,6 +88,7 @@ export const defaultPtaNode: IPtaNode = {
     dashID: 0,
     pID: "",
     psID: "",
+    title: "",
     label: "",
     type: PtaNodeType.ProblemSet,
     value: {

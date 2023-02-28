@@ -45,6 +45,12 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
                 collapsibleState: vscode.TreeItemCollapsibleState.None
             }
         }
+        let contextValue: string;
+        if (element.type === PtaNodeType.Problem) {
+            contextValue = element.isFavorite ? "problem-favorite" : "problem";
+        } else {
+            contextValue = "folder";
+        }
         return {
             label: element.type === PtaNodeType.Problem ? `${element.label} (${element.score})` : element.label,
             collapsibleState: element.type === PtaNodeType.Problem ?
@@ -54,9 +60,11 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
                 title: "Preview Problem",
                 command: "pintia.previewProblem",
                 arguments: [element.psID, element.pID]
-            } : undefined
+            } : undefined,
+            contextValue: contextValue
         };
     }
+
     getChildren(element?: PtaNode): vscode.ProviderResult<PtaNode[]> {
         const limit: number = ptaConfig.getPageSize();
         const paged: boolean = limit !== 0;

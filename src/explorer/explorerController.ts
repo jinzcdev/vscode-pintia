@@ -20,7 +20,7 @@ class ExplorerController<T> implements Disposable {
         }
     }
 
-    public refreshTreeData() {
+    public async refreshTreeData() {
         this.ptaTreeDataProvider?.refresh();
     }
 
