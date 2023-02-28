@@ -113,7 +113,13 @@
 
 ---
 
-### 1.7 代码片段
+### 1.7 题目收藏
+
+你可以在题目集中点击右侧的按钮收藏题目。该功能不依赖于官方的服务，因此只能将收藏的题目存储在本地。后续会考虑使用其他方式实现数据的同步。
+
+---
+
+### 1.8 代码片段
 
 你可以在代码编辑器中输入以下前缀来快速生成相应的代码块，如下所示。
 
@@ -150,6 +156,7 @@
 | `pintia.paging.pageSize`  | 当问题集过大时，是否对问题列表进行分页。当pageSize为0表示不分页 | `100`            |
 | `pintia.autoCheckIn`      | 指定当 Pintia 插件被激活时，是否自动签到 Pintia 的教育商店 | `false`          |
 | `pintia.searchIndex.ignoreZOJ` | 指定搜索题目时，是否忽略 `ZOJ Problem Set` | `true`          |
+| `pintia.searchIndex.ignoreLockedProblemSets` | 指定搜索题目时，是否忽略未解锁的题集 | `true` |
 | `pintia.searchIndex.autoRefresh` | 指定是否在插件被激活时，自动刷新题目搜索索引 | `false`          |
 | `pintia.autoCreateProblemSetFolder` | 指定创建题目源文件时是否自动创建其习题集文件夹并将源代码文件放入相应的文件夹中 | `true`          |
 

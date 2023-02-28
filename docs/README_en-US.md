@@ -111,7 +111,14 @@ you can type `ptanote` in the code editor to generate a **note block**, where yo
 > :star: **Note:** Your notes are submitted to PTA along with the code, not stored locally. After submitting the code, re-click `Preview` in the editor, or the next time you preview problems, your notes will be displayed on the preview page of the problem.
 
 ---
-### 1.7 Snippets
+
+### 1.7 Collect Problems
+
+You can add the problem to the `My Favorites` list by clicking the button on the right side of the problem. This feature does not depend on the official service, so you can only store the collected topics locally. The synchronization of data will be considered later using other methods.
+
+---
+
+### 1.8 Snippets
 
 You can enter the following prefixs in code editor to generate the corresponding code blocks quickly, as follows:
 
@@ -148,6 +155,7 @@ Use `Ctrl+Shift+P` (in Windows) or `Command+Shift+P` (in Mac) to open the comman
 | `pintia.paging.pageSize` | Whether to page the problem list when the problem set is too large. It is not paged when pageSize is 0. | `100` |
 | `pintia.autoCheckIn` | Specify whether to check in Pintia's education supermarket or not when the Pintia Extension is activated. | `false` |
 | `pintia.searchIndex.ignoreZOJ` | Specify whether to ignore the problem set *ZOJ Problem Set* in problem search index | `true` |
+| `pintia.searchIndex.ignoreLockedProblemSets` | Specify whether to ignore locked problem sets in the problem search index | `true` |
 | `pintia.searchIndex.autoRefresh` | Specify whether to automatically refresh problem search index when the Pintia Extension is activated | `false` |
 | `pintia.autoCreateProblemSetFolder` | Specify whether to automatically create a problem set folder and place source code files in this directory when coding a problem | `true` |
 

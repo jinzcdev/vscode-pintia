@@ -4,6 +4,20 @@
 
 ---
 
+## [0.5.0] - 2023/02/28
+
+### Added
+
+- Added the **My Favorites**. You can click the button on the right side of the problem to add it to your favorites (only stored locally)
+- Added configuration item `pintia.searchIndex.ignoreLockedProblemSets`: whether to filter unlocked problem sets when searching for problems
+
+### Changed
+
+- Show `viewWelcome` component when user is not logged in to guide user to use the plugin
+- When a user is already logged in, clicking Login will bring up a `Confirm` prompt
+
+---
+
 ## [0.4.0] - 2023/02/15
 
 ### Added
@@ -14,7 +28,7 @@
 
 ## [0.3.1] - 2023/01/25
 
-### Change
+### Changed
 
 - When creating a problem source file, the problem set folder is automatically created in the workspace directory and the corresponding configuration is added to settings
 
@@ -31,7 +45,7 @@
 - Common templates for Java (BufferReader, Scanner)
 - Add search engine and `Solution` link for quick search in problem preview
 
-### Change
+### Changed
 
 - Fix bug when submitting tests
 - Change `Line Comment` to `Block Comment`, when adding custom test samples
