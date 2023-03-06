@@ -9,7 +9,7 @@ import * as path from "path";
 import { IUserSession, IWechatAuth, AuthStatus, IWechatUserState, IWechatUserInfo } from "./entity/userLoginSession";
 import { ptaLoginProvider } from "./webview/ptaLoginProvider";
 import { EventEmitter } from "events";
-import { ptaManager } from "./PtaManager";
+import { ptaManager } from "./ptaManager";
 import { IProblemSubmissionDetail } from "./entity/problemSubmissionCode";
 import * as vscode from "vscode";
 import { ptaChannel } from "./ptaChannel";

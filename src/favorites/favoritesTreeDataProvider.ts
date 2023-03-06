@@ -1,6 +1,6 @@
 
 import * as vscode from "vscode";
-import { ptaManager } from "../PtaManager";
+import { ptaManager } from "../ptaManager";
 import { IFavoriteProblem } from "./IFavoriteProblem";
 import { favoriteProblemsManager } from "./favoriteProblemsManager";
 

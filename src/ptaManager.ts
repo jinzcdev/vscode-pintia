@@ -1,7 +1,7 @@
 import { EventEmitter } from "events";
 import * as vscode from "vscode";
 import { configPath, IQuickPickItem, PtaLoginMethod, UserStatus } from "./shared";
-import { ptaExecutor } from "./PtaExecutor";
+import { ptaExecutor } from "./ptaExecutor";
 import { IUserSession } from "./entity/userLoginSession";
 import { ptaApi } from "./utils/api";
 import * as fs from "fs-extra";

@@ -9,7 +9,7 @@ import { IUserSession } from "../entity/userLoginSession";
 import { favoriteProblemsManager } from "../favorites/favoriteProblemsManager";
 import { ptaChannel } from "../ptaChannel";
 import { ptaConfig } from "../ptaConfig";
-import { ptaManager } from "../PtaManager";
+import { ptaManager } from "../ptaManager";
 import { defaultPtaNode, IPtaNodeValue, ProblemSubmissionState, ProblemType, problemTypeNameMapping, PtaNodeType } from "../shared";
 import { ptaApi } from "../utils/api";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";

@@ -1,7 +1,7 @@
 
 import { IProblem } from '../../entity/IProblem';
 import { IProblemInfo } from '../../entity/IProblemInfo';
-import { ptaManager } from "../../PtaManager";
+import { ptaManager } from "../../ptaManager";
 import { compilerLangMapping, ProblemType } from '../../shared';
 import { ptaApi } from '../../utils/api';
 

@@ -1,5 +1,5 @@
 
-import { ptaExecutor } from "../PtaExecutor";
+import { ptaExecutor } from "../ptaExecutor";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import * as vscode from "vscode";
 import * as path from "path";
@@ -8,7 +8,7 @@ import { searchIndexPath, ZOJ_PROBLEM_SET_ID } from "../shared";
 import { ptaChannel } from "../ptaChannel";
 import { ptaApi } from "../utils/api";
 import { ptaConfig } from "../ptaConfig";
-import { ptaManager } from "../PtaManager";
+import { ptaManager } from "../ptaManager";
 import { IProblemSet } from "../entity/IProblemSet";
 
 

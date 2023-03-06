@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import * as path from "path";
 import { PtaNode } from "./PtaNode";
 import { defaultPtaNode, IPtaNodeValue, ProblemSubmissionState, ProblemType, PtaNodeType } from "../shared";
-import { ptaManager } from "../PtaManager";
+import { ptaManager } from "../ptaManager";
 import { explorerNodeManager } from "./explorerNodeManager";
 import { ptaConfig } from "../ptaConfig";
 import { IProblemSummary } from "../entity/IProblemSummary";

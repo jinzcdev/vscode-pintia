@@ -7,7 +7,7 @@ import { IProblemSubmissionResult } from "../entity/IProblemSubmissionResult";
 import { explorerController } from "../explorer/explorerController";
 import { ptaChannel } from "../ptaChannel";
 import { ptaConfig } from "../ptaConfig";
-import { ptaExecutor } from "../PtaExecutor";
+import { ptaExecutor } from "../ptaExecutor";
 import { IPtaCode, IQuickPickItem } from "../shared";
 import { ptaApi } from "../utils/api";
 import { DialogType, promptForOpenOutputChannel, showFileSelectDialog } from "../utils/uiUtils";

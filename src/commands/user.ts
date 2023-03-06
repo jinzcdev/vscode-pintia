@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { ICheckIn } from "../entity/checkin";
 import { IUserSession } from "../entity/userLoginSession";
 import { ptaChannel } from "../ptaChannel";
-import { ptaManager } from "../PtaManager";
+import { ptaManager } from "../ptaManager";
 import { IQuickPickItem } from "../shared";
 import { ptaApi } from "../utils/api";
 import { DialogType, openUrl, promptForOpenOutputChannel } from "../utils/uiUtils";

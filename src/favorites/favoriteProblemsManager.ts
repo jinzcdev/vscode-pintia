@@ -7,7 +7,7 @@ import { ptaChannel } from '../ptaChannel';
 
 import { favoriteProblemsPath } from '../shared';
 import { DialogType, promptForOpenOutputChannel } from '../utils/uiUtils';
-import { ptaManager } from '../PtaManager';
+import { ptaManager } from '../ptaManager';
 
 
 class FavoriteProblemsManager implements Disposable {

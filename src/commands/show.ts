@@ -9,7 +9,7 @@ import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import { ptaConfig } from "../ptaConfig";
 import { ptaApi } from "../utils/api";
 import { IProblem } from "../entity/IProblem";
-import { ptaManager } from "../PtaManager";
+import { ptaManager } from "../ptaManager";
 import { IUserSession } from "../entity/userLoginSession";
 import { IProblemSearchItem } from "../entity/IProblemSearchItem";
 import { ptaPreviewProvider } from "../webview/ptaPreviewProvider";
