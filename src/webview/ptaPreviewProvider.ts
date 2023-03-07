@@ -31,16 +31,13 @@ class PtaPreviewProvider extends PtaWebview {
     }
 
     private formatMarkdown(str: string): string {
-        const katex = require("katex");
-        function convertTexMath(match: string) {
-            return katex.renderToString(match.substring(2, match.length - 2), {
-                throwOnError: false
-            });
-        }
+        const convertTexMath = (match: string) => require("katex").renderToString(
+            match.substring(2, match.length - 2),
+            { throwOnError: false }
+        );
         return str
             .replace(/\${2}(.+?)\${2}/g, convertTexMath)
-            .replace("### 输入样", "\n\n-----\n\n### 输入样")
-            .replace("### Sample In", "\n\n------\n\n### Sample In");
+            .replace(/###\s(\u8F93\u5165\u6837|Sample\sIn)/g, '\n\n------\n\n### $1'); // \u8F93\u5165\u6837 -> 输入样
     }
 
 
