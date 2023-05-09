@@ -18,6 +18,7 @@ import { IExamProblemStatus } from "../entity/IExamProblemStatus";
 import { IPtaUser } from "../entity/IPtaUser";
 import { IWechatAuth, IWechatAuthState, IWechatUserInfo, IWechatUserState } from "../entity/userLoginSession";
 import { ptaChannel } from "../ptaChannel";
+import { ILastSubmission } from "../entity/ILastSubmission";
 
 class PtaAPI {
 
@@ -110,7 +111,7 @@ class PtaAPI {
 
     /**
      * 
-     * https://pintia.cn/api/problem-sets/{psID}/problem-list?problem_type=PROGRAMMING
+     * https://pintia.cn/api/problem-sets/{psID}/exam-problem-list?problem_type=PROGRAMMING
      * 
      * @param psID ProblemSetID
      * @param problemType ProblemType in ('PROGRAMMING', 'CODE_COMPLETION')
@@ -141,7 +142,7 @@ class PtaAPI {
 
         let problemList: Array<IProblemInfo> = [];
         for (let page = 0; page < pageNum; page++) {
-            const data = await httpGet(`${this.problemUrl}/${psID}/problem-list?problem_type=${problemType}&page=${page}&limit=${limit}`)
+            const data = await httpGet(`${this.problemUrl}/${psID}/exam-problem-list?problem_type=${problemType}&page=${page}&limit=${limit}`)
                 .then(json => json["problemSetProblems"]);
             data.forEach((e: IProblemInfo) => problemList.push(e));
         }
@@ -171,7 +172,7 @@ class PtaAPI {
         const pageNum: number = Math.ceil(total / limit);
 
         for (let page = 0; page < pageNum; page++) {
-            const data: Array<IProblemInfo> = await httpGet(`${this.problemUrl}/${psID}/problem-list?problem_type=${problemType}&page=${page}&limit=${limit}`)
+            const data: Array<IProblemInfo> = await httpGet(`${this.problemUrl}/${psID}/exam-problem-list?problem_type=${problemType}&page=${page}&limit=${limit}`)
                 .then(json => json["problemSetProblems"]);
             for (const item of data) {
                 if (item["id"] === pID) {
@@ -206,12 +207,17 @@ class PtaAPI {
             return await fs.readJSON(filePath);
         }
 
-        const data: IProblem = await httpGet(`${this.problemUrl}/${psID}/problems/${pID}`, cookie)
+        const data: IProblem = await httpGet(`${this.problemUrl}/${psID}/exam-problems/${pID}`, cookie)
             .then(json => json["problemSetProblem"]);
 
         await fs.createFile(filePath);
         await fs.writeJson(filePath, data);
         return data;
+    }
+
+    public async getLastSubmissions(psID: string, pID: string, cookie: string): Promise<ILastSubmission | undefined> {
+        return await httpGet(`https://pintia.cn/api/problem-sets/${psID}/last-submissions?&problem_set_problem_id=${pID}`, cookie)
+            .then(json => json["submission"]);
     }
 
     public async getExamProblemStatus(psID: string, cookie: string): Promise<IExamProblemStatus[] | undefined> {
