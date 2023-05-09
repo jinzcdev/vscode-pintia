@@ -4,6 +4,14 @@
 
 ---
 
+## [0.5.2] - 2023/05/09
+
+### Bug
+
+- Fixed the API for getting problem information and the last submission
+
+---
+
 ## [0.5.0] - 2023/02/28
 
 ### Added
