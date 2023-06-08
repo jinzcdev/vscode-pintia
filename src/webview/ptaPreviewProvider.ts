@@ -238,7 +238,7 @@ class PtaPreviewProvider extends PtaWebview {
                 </div>
             ` : ""}
 
-            ${(data.lastSubmissionId !== "0" && data.lastProgram.trim().length) ?
+            ${data.lastProgram.trim().length ?
                 markdownEngine.render([
                     `### Last Submission ${data.lastSubmittedLang.trim().length ? "(" + data.lastSubmittedLang + ")" : ""}`,
                     "```" + data.lastSubmittedLang,

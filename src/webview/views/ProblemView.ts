@@ -52,22 +52,12 @@ export class ProblemView {
 
         this.acceptCount = problemInfo.acceptCount;
         this.submitCount = problemInfo.submitCount;
-        this.lastSubmittedLang = this.getLastSubmittedLang();
-        this.lastProgram = this.getLastSubmittedProgram();
+        [this.lastSubmittedLang, this.lastProgram] = await this.getLastSubmittedProgram();
         [this.problemNote, this.lastProgram] = this.parseProblemNote(this.lastProgram, "@pintia note=start", "@pintia note=end");
     }
 
-    private getLastSubmittedLang(): string {
-        if (!this.lastSubmissionId || this.lastSubmissionId === "0") {
-            return "";
-        }
-        if (this.type === ProblemType.MULTIPLE_FILE) {
-            return "Verilog";
-        }
-        const lastSubmittedCompiler: string = (this.problem.lastSubmissionDetail?.programmingSubmissionDetail
-            ?? this.problem.lastSubmissionDetail?.codeCompletionSubmissionDetail)?.compiler
-            ?? this.problem.compiler;
-        const lang: string = compilerLangMapping.get(lastSubmittedCompiler)?.trim() ?? "";
+    private parseCompiler2Lang(compiler: string): string {
+        const lang: string = compilerLangMapping.get(compiler)?.trim() ?? "";
         const pos: number = lang.indexOf("(");
         if (pos !== -1) {
             return lang.substring(0, pos - 1);
@@ -75,20 +65,18 @@ export class ProblemView {
         return lang;
     }
 
-    private getLastSubmittedProgram(): string {
-        if (!this.lastSubmissionId || this.lastSubmissionId === "0") {
-            return "";
-        }
+    private async getLastSubmittedProgram(): Promise<string[]> {
         if (this.type === ProblemType.MULTIPLE_FILE) {
             const content = this.problem.lastSubmissionDetail?.multipleFileSubmissionDetail?.fileContents;
             if (!content || Object.keys(content).length === 0) {
-                return "";
+                return ["Verilog", ""];
             }
-            return content[Object.keys(content)[0]];
+            return ["Verilog", content[Object.keys(content)[0]]];
         }
-        return (this.problem.lastSubmissionDetail?.programmingSubmissionDetail
-            ?? this.problem.lastSubmissionDetail?.codeCompletionSubmissionDetail)?.program
-            ?? "";
+        const lastSubmissionDetail = (await ptaApi.getLastSubmissions(this.problemSetId, this.id, ptaManager.getUserSession()?.cookie ?? ""))?.submissionDetails[0];
+        const lastSubmittedCompiler: string = (lastSubmissionDetail?.programmingSubmissionDetail ?? lastSubmissionDetail?.codeCompletionSubmissionDetail)?.compiler ?? this.problem.compiler;
+        const lastProgram = lastSubmissionDetail?.programmingSubmissionDetail?.program ?? lastSubmissionDetail?.codeCompletionSubmissionDetail?.program ?? "";
+        return [this.parseCompiler2Lang(lastSubmittedCompiler), lastProgram];
     }
 
     private parseProblemNote(data: string, start: string, end: string): [string, string] {
