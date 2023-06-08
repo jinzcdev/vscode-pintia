@@ -4,6 +4,14 @@
 
 ---
 
+## [0.5.3] - 2023/06/08
+
+### Bug
+
+- Fixed the issue that there is no the last submitted code on the problem view.
+
+---
+
 ## [0.5.2] - 2023/05/09
 
 ### Bug
