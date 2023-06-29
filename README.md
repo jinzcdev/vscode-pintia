@@ -36,7 +36,7 @@
 </p>
 
 
-- 只需在 `Pintia Explorer` 中点击 `Sign in to Pintia` ，即可登录PTA。(目前，只支持**微信二维码**登录）。
+- 只需在 `Pintia Explorer` 中点击 `Sign in PTA` ，即可登录PTA。(目前，只支持**微信二维码**登录）。
 
 - 你也可以使用以下命令来登录/退出。
   - **Pintia: Sign In**

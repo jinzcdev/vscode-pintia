@@ -38,7 +38,7 @@
 </p>
 
 
-- Simply click `Sign in to Pintia` in the `Pintia Explorer` will let you **sign in** with your Pintia account. (Currently, only **WeChat QR** codes are supported for signin)
+- Simply click `Sign in PTA` in the `Pintia Explorer` will let you **sign in** with your Pintia account. (Currently, only **WeChat QR** codes are supported for signin)
 
 - You can also use the following command to sign in/out:
   - **Pintia: Sign in**
