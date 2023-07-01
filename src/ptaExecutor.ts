@@ -6,8 +6,7 @@ import { ptaApi } from "./utils/api";
 import * as fs from "fs-extra";
 import { cacheDirPath, CallBack, configPath, ProblemType, PtaLoginMethod } from "./shared";
 import * as path from "path";
-import { IUserSession, IWechatAuth, AuthStatus, IWechatUserState, IWechatUserInfo } from "./entity/userLoginSession";
-import { ptaLoginProvider } from "./webview/ptaLoginProvider";
+import { IUserSession } from "./entity/userLoginSession";
 import { EventEmitter } from "events";
 import { ptaManager } from "./ptaManager";
 import { IProblemSubmissionDetail } from "./entity/problemSubmissionCode";
@@ -15,6 +14,7 @@ import * as vscode from "vscode";
 import { ptaChannel } from "./ptaChannel";
 import { DialogType, promptForOpenOutputChannel } from "./utils/uiUtils";
 import * as cache from "./commands/cache";
+import { UserAuthProviderFactory } from "./auth/UserAuthProviderFactory";
 
 
 class PtaExecutor extends EventEmitter implements Disposable {
@@ -135,77 +135,12 @@ class PtaExecutor extends EventEmitter implements Disposable {
         });
     }
 
-    public async signIn(value: PtaLoginMethod, callback: CallBack<IUserSession>): Promise<void> {
-        if (value === PtaLoginMethod.WeChat) {
-            await this.wechatSignIn(callback);
-        } else {
-            vscode.window.showInformationMessage("Logging in with PTA account will be implemented in the future.");
-            await this.accountSignIn(callback);
-        }
-    }
-
-    public async signOut(): Promise<void> {
-        const userFilePath = path.join(configPath, "user.json");
-        if (await fs.pathExists(userFilePath)) {
-            const loginSession: IUserSession = await fs.readJSON(userFilePath);
-            await Promise.all([ptaApi.signOut(loginSession.cookie), fs.remove(userFilePath), cache.clearCache()]);
-            vscode.window.showInformationMessage("Successfully signed out.");
-            ptaChannel.appendLine(`[INFO] Logout the current user successfully and remove user information from ${userFilePath}.`);
-        } else {
-            vscode.window.showInformationMessage("The user is not logged in.");
-        }
-    }
-
-    public async wechatSignIn(callback: CallBack<IUserSession>): Promise<void> {
-        try {
-            const auth: IWechatAuth = await ptaApi.getWechatAuth();
-            await ptaLoginProvider.showQRCode(auth.url);
-            let cnt = 0;
-            let interval = setInterval(async () => {
-                const authState = await ptaApi.getWechatAuthState(auth.state);
-                if (authState.status === AuthStatus.SUCCESSFUL) {
-
-                    const userState: IWechatUserState = await ptaApi.getWechatAuthUser(auth.state);
-                    const userInfo: IWechatUserInfo = await ptaApi.getWechatUserInfo(auth.state, userState.id);
-
-                    callback("SUCCESS", {
-                        id: userInfo.user.id,
-                        user: userInfo.user.nickname,
-                        email: userInfo.user.email,
-                        loginMethod: PtaLoginMethod.WeChat,
-                        cookie: userInfo.cookie
-                    });
-
-                    ptaLoginProvider.dispose();
-                    clearInterval(interval);
-                }
-                if (++cnt === 60) {
-                    callback("TIMEOUT");
-                    ptaLoginProvider.dispose();
-                    clearInterval(interval);
-                }
-            }, 2000);
-            ptaLoginProvider.onDidDisposeCallBack(() => {
-                clearInterval(interval);
-                callback("");
-            });
-        } catch (error: any) {
-            ptaChannel.append(error.toString());
-            await promptForOpenOutputChannel("Failed to login PTA. Please open the output channel for details.", DialogType.error);
-        }
-    }
-
-    public async accountSignIn(callback: (msg: string, data?: IUserSession) => void): Promise<void> {
-        return Promise.resolve();
-    }
-
     public async clearCache(): Promise<void> {
         if (await fs.pathExists(cacheDirPath)) {
             await fs.remove(cacheDirPath);
             ptaChannel.appendLine(`[INFO] Clear the cache from the "${cacheDirPath}"`);
         }
     }
-
 
     public dispose() {
     }

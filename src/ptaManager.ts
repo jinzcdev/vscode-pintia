@@ -1,7 +1,6 @@
 import { EventEmitter } from "events";
 import * as vscode from "vscode";
 import { configPath, IQuickPickItem, PtaLoginMethod, UserStatus } from "./shared";
-import { ptaExecutor } from "./ptaExecutor";
 import { IUserSession } from "./entity/userLoginSession";
 import { ptaApi } from "./utils/api";
 import * as fs from "fs-extra";
@@ -9,6 +8,8 @@ import * as path from "path";
 import { IPtaUser } from "./entity/IPtaUser";
 import { ptaChannel } from "./ptaChannel";
 import { DialogType, promptForOpenOutputChannel } from "./utils/uiUtils";
+import { UserAuthProviderFactory } from "./auth/UserAuthProviderFactory";
+import * as cache from "./commands/cache";
 
 
 class PtaManager extends EventEmitter {
@@ -39,11 +40,6 @@ class PtaManager extends EventEmitter {
                 label: "$(device-camera) QR Code",
                 detail: "Use WeChat QRCode to login",
                 value: PtaLoginMethod.WeChat
-            },
-            {
-                label: "$(account) PTA Account (Not Implemented)",
-                detail: "Use Pintia account to login",
-                value: PtaLoginMethod.PTA,
             }
         );
 
@@ -52,10 +48,7 @@ class PtaManager extends EventEmitter {
             return;
         }
 
-        if (choice.value === PtaLoginMethod.PTA) {
-            vscode.window.showInformationMessage("Logging in with PTA account will be implemented in the future.");
-            return;
-        }
+        const userAuthProvider = UserAuthProviderFactory.createUserAuthProvider(choice.value);
 
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
@@ -64,32 +57,29 @@ class PtaManager extends EventEmitter {
         }, async (p: vscode.Progress<{ message?: string; increment?: number }>) => {
             return new Promise<void>(async (resolve: () => void, reject: (e: Error) => void): Promise<void> => {
                 try {
-                    await ptaExecutor.signIn(choice.value, async (msg: string, data?: IUserSession) => {
-                        switch (msg) {
-                            case "SUCCESS":
-                                const userSessionPath: string = path.join(configPath, 'user.json');
-                                await fs.createFile(userSessionPath);
-                                await fs.writeJson(userSessionPath, data)
-                                    .catch(reason => {
-                                        ptaChannel.appendLine(reason);
-                                        reject(reason);
-                                    });
-                                vscode.window.showInformationMessage(`Successfully, ${choice.value}.`);
-                                this.userSession = data;
-                                this.userStatus = UserStatus.SignedIn;
+                    const userSession = await userAuthProvider.signIn();
 
-                                ptaChannel.appendLine(`Login successfully and save \`user.json\` to ${path}`);
+                    if (userSession) {
+                        const userSessionPath: string = path.join(configPath, 'user.json');
+                        await fs.createFile(userSessionPath);
+                        await fs.writeJson(userSessionPath, userSession)
+                            .catch(reason => {
+                                ptaChannel.appendLine(reason);
+                                reject(reason);
+                            });
+                        vscode.window.showInformationMessage(`Successfully, ${choice.value}.`);
+                        this.userSession = userSession;
+                        this.userStatus = UserStatus.SignedIn;
 
-                                this.emit("statusChanged");
-                                break;
-                            case "TIMEOUT":
-                                vscode.window.showErrorMessage("Login timed out!");
-                                ptaChannel.appendLine("Login timed out!");
-                                break;
-                            default:
-                        }
-                        resolve();
-                    });
+                        ptaChannel.appendLine(`Login successfully and save \`user.json\` to ${path}`);
+
+                        this.emit("statusChanged");
+                    } else {
+                        vscode.window.showErrorMessage("Login timed out!");
+                        ptaChannel.appendLine("Login timed out!");
+                    }
+
+                    resolve();
                 }
                 catch (error: any) {
                     ptaChannel.appendLine(error.toString());
@@ -102,7 +92,20 @@ class PtaManager extends EventEmitter {
 
     public async signOut(): Promise<void> {
         try {
-            await ptaExecutor.signOut();
+
+            const userFilePath = path.join(configPath, "user.json");
+            if (await fs.pathExists(userFilePath)) {
+                const loginSession: IUserSession = await fs.readJSON(userFilePath);
+                const userAuthProvider = UserAuthProviderFactory.createUserAuthProvider(loginSession.loginMethod as PtaLoginMethod);
+
+                await Promise.all([userAuthProvider.signOut(loginSession.cookie), fs.remove(userFilePath), cache.clearCache()]);
+                vscode.window.showInformationMessage("Successfully signed out.");
+                ptaChannel.appendLine(`[INFO] Logout the current user successfully and remove user information from ${userFilePath}.`);
+            } else {
+                vscode.window.showInformationMessage("The user is not logged in.");
+                return;
+            }
+
             this.userSession = undefined;
             this.userStatus = UserStatus.SignedOut;
             this.emit("statusChanged");
