@@ -208,7 +208,11 @@ class PtaAPI {
         }
 
         const data: IProblem = await httpGet(`${this.problemUrl}/${psID}/exam-problems/${pID}`, cookie)
-            .then(json => json["problemSetProblem"]);
+            .then(json => {
+                const problem = json["problemSetProblem"]
+                problem['organization'] = json["organization"]
+                return problem;
+            });
 
         await fs.createFile(filePath);
         await fs.writeJson(filePath, data);

@@ -8,24 +8,14 @@ export interface IProblem {
         codeCompletionProblemConfig?: ProblemConfig;
         multipleFileProblemConfig?: MultipleFileProblemConfig;
         solutionVisible: boolean;
+        answerVisible: boolean;
     };
     deadline: string;
     title: string;
     content: string;
     type: string;
     author: string;
-    authorOrganization: {
-        id: string;
-        name: string;
-        comment: string;
-        code: string;
-        country: string;
-        membersCount: number;
-        type: string;
-        balance: number;
-        subdomain: string;
-        logo: string;
-    };
+    difficulty: number,
     compiler: string;   // compiler to be allowed to use in this problem.
     problemStatus: string;
     lastSubmissionId: string;
@@ -36,6 +26,11 @@ export interface IProblem {
     problemPoolIndex: number;
     indexInProblemPool: number;
 
+    // put `organization` in `problem`
+    authorOrganizationId: string;
+    organization: Organization;
+
+    // put `submissionDetail` in `problem`
     lastSubmissionDetail?: {
         problemSetProblemId: string; // "0" denotes no submission.
         programmingSubmissionDetail?: {
@@ -75,6 +70,7 @@ interface ProblemConfig {
     customizeLimits: [];
     stackSizeLimit: 0;
     tools: [];
+    ignorePresentationError: boolean;
 }
 
 /**
@@ -94,4 +90,12 @@ interface MultipleFileProblemConfig {
     tools: string[];
     withLocalhostNetwork: boolean;
     fileContents: {}
+}
+
+interface Organization {
+    id: string;
+    name: string;
+    code: string;
+    type: string;
+    logo: string;
 }

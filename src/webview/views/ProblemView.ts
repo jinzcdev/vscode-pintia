@@ -43,7 +43,7 @@ export class ProblemView {
         this.author = problem.author;
         this.content = problem.content;
         this.problemSetId = problem.problemSetId;
-        this.organization = problem.authorOrganization.name;
+        this.organization = problem.organization.name;
         this.lastSubmissionId = problem.lastSubmissionId;
         this.type = problem.type as ProblemType;
         this.score = problem.score;
