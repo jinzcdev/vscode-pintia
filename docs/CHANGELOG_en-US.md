@@ -4,6 +4,14 @@
 
 ---
 
+## [0.5.4] - 2023/09/10
+
+### Bug
+
+- The structure of the 'organization' field in the problem model changes
+
+---
+
 ## [0.5.3] - 2023/06/08
 
 ### Bug
