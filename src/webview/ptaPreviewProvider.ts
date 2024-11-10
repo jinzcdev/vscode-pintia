@@ -136,13 +136,13 @@ class PtaPreviewProvider extends PtaWebview {
                 }
 
                 
-                code { color: var(--vscode-textPreformat-foreground); }
                 pre code {
                     font-family: var(--vscode-editor-font-family, "SF Mono", Monaco, Menlo, Consolas, "Ubuntu Mono", "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace);
                     font-size: 1.05em;
                     line-height: 1.357em;
                     border-radius: 0.1875rem;
                     color: var(--vscode-editor-foreground);
+                    background-color: transparent;
                     margin: 0 0.125rem;
                     white-space: pre-wrap;
 
@@ -152,15 +152,21 @@ class PtaPreviewProvider extends PtaWebview {
                 }
                 pre { background-color: var(--pre-bg-color); }
                 pre:hover { background-color: var(--pre-bg-color-hover); }
-                pre:active { background-color: var(--pre-bg-color-active); }
-                pre:hover:after {
+
+                .copy-button {
                     position: absolute;
                     right: 5px;
                     top: 5px;
-                    padding: 1px;
+                    padding: 1px 5px;
                     border-radius: 5px;
-                    content: "Click to Copy";
+                    background-color: #ccc;
+                    cursor: pointer;
                     z-index: 2;
+                    display: none;
+                }
+
+                pre:hover .copy-button {
+                    display: block;
                 }
 
                 .pta-note {
@@ -259,7 +265,11 @@ class PtaPreviewProvider extends PtaWebview {
                 
                 var lst_pre = document.getElementsByTagName("pre");
                 for (const pre of lst_pre) {
-                    pre.onclick = (event) => {
+                    const copyButton = document.createElement('button');
+                    copyButton.className = 'copy-button';
+                    copyButton.innerText = 'Copy';
+                    copyButton.onclick = (event) => {
+                        event.stopPropagation();
                         var content = pre.innerText;
                         navigator.clipboard.writeText(content).then(() => {
                             vscode.postMessage({
@@ -267,7 +277,8 @@ class PtaPreviewProvider extends PtaWebview {
                                 value: 'Successfully copied to the clipboard!'
                             });
                         });
-                    }
+                    };
+                    pre.appendChild(copyButton);
                 }
             </script>
         `;
