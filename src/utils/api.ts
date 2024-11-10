@@ -122,7 +122,7 @@ class PtaAPI {
             limit = 200;
         }
         const problemList: IProblemInfo[] = await this.getAllProblemInfoList(psID, problemType);
-        const data = [];
+        const data: IProblemInfo[] = [];
         for (let i = 0; i < limit; i++) {
             if (page * limit + i >= problemList.length) break;
             data.push(problemList[page * limit + i]);
@@ -345,7 +345,7 @@ class PtaAPI {
                 'Content-Type': 'application/json'
             }
         });
-        let userInfo: IWechatUserInfo = await response.json();
+        let userInfo: IWechatUserInfo = await response.json() as IWechatUserInfo;
         let cookie = response.headers.get("Set-Cookie")!;
         for (const s of cookie.split(";")) {
             if (s.includes("PTASession")) {

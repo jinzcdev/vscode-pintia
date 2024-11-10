@@ -1,4 +1,3 @@
-
 import * as vscode from "vscode";
 import { ptaConfig } from '../ptaConfig';
 import { IPtaCode, langCompilerMapping, ProblemType } from '../shared';
@@ -43,8 +42,8 @@ class PtaPreviewProvider extends PtaWebview {
 
     protected getStyle(data?: any): string {
         return `
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/styles/atom-one-light.min.css">
+        <link rel="stylesheet" href="${require.resolve('katex/dist/katex.min.css')}">
+        <link rel="stylesheet" href="${require.resolve('highlight.js/styles/atom-one-light.css')}">
             <style>
                 .vscode-dark {
                     /* default .vscode-dark */
