@@ -23,7 +23,10 @@ import { ptaTestProvider } from './webview/ptaTestProvider';
 import { favoriteProblemsManager } from "./favorites/favoriteProblemsManager";
 
 
+let globalContext: vscode.ExtensionContext;
+
 export async function activate(context: vscode.ExtensionContext) {
+	globalContext = context;
 
 	ptaManager.on("statusChanged", () => {
 		const userStatus: UserStatus = ptaManager.getStatus();
@@ -82,6 +85,10 @@ export async function activate(context: vscode.ExtensionContext) {
 	user.autoCheckInPTA();
 
 	await cache.createProblemSearchIndex(context);
+}
+
+export function getGlobalContext(): vscode.ExtensionContext {
+	return globalContext;
 }
 
 export function deactivate() { }

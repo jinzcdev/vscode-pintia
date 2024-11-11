@@ -4,6 +4,7 @@ import { IPtaCode, langCompilerMapping, ProblemType } from '../shared';
 import { markdownEngine } from './markdownEngine';
 import { PtaWebview } from './PtaWebview';
 import { ProblemView } from "./views/ProblemView";
+import { getGlobalContext } from "../extension";
 
 class PtaPreviewProvider extends PtaWebview {
 
@@ -39,11 +40,23 @@ class PtaPreviewProvider extends PtaWebview {
             .replace(/###\s(\u8F93\u5165\u6837|Sample\sIn)/g, '\n\n------\n\n### $1'); // \u8F93\u5165\u6837 -> 输入样
     }
 
+    private getMediaPath(mediaFile: string, defaultUri: string = ""): vscode.Uri {
+        const webview: vscode.Webview | undefined = this.getWebview();
+        if (!webview) {
+            return vscode.Uri.parse(defaultUri);
+        }
+        return webview.asWebviewUri(vscode.Uri.joinPath(getGlobalContext().extensionUri, 'media', mediaFile));
+    }
+
 
     protected getStyle(data?: any): string {
+
+        const katexCssPath = this.getMediaPath('katex.min.css', '');
+        const highlightCssPath = this.getMediaPath('atom-one-light.css', '');
+
         return `
-        <link rel="stylesheet" href="${require.resolve('katex/dist/katex.min.css')}">
-        <link rel="stylesheet" href="${require.resolve('highlight.js/styles/atom-one-light.css')}">
+            <link rel="stylesheet" href="${katexCssPath}">
+            <link rel="stylesheet" href="${highlightCssPath}">
             <style>
                 .vscode-dark {
                     /* default .vscode-dark */

@@ -69,5 +69,9 @@ export abstract class PtaWebview implements Disposable {
         }
     }
 
+    protected getWebview(): vscode.Webview | undefined {
+        return this.currentPanel?.webview;
+    }
+
     protected async onDidReceiveMessage(_msg: any): Promise<void> { }
 }
