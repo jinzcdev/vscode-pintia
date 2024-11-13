@@ -4,23 +4,21 @@ import { codeLensController } from './codelens/CodeLensController';
 import * as cache from "./commands/cache";
 import * as language from "./commands/language";
 import * as show from "./commands/show";
+import * as star from "./commands/star";
 import * as submit from "./commands/submit";
 import * as user from "./commands/user";
 import * as workspace from "./commands/workspace";
-import * as star from "./commands/star";
 import { explorerController } from "./explorer/explorerController";
 import { PtaNode } from "./explorer/PtaNode";
+import { favoriteProblemsManager } from "./favorites/favoriteProblemsManager";
 import { favoritesTreeDataProvider } from "./favorites/favoritesTreeDataProvider";
 import { ptaChannel } from './ptaChannel';
 import { ptaExecutor } from './ptaExecutor';
 import { ptaManager } from './ptaManager';
 import { configPath, IPtaCode, UserStatus } from './shared';
 import { ptaStatusBarController } from './statusbar/ptaStatusBarController';
-import { ptaLoginProvider } from './webview/ptaLoginProvider';
-import { ptaPreviewProvider } from './webview/ptaPreviewProvider';
-import { ptaSubmissionProvider } from './webview/ptaSubmissionProvider';
-import { ptaTestProvider } from './webview/ptaTestProvider';
-import { favoriteProblemsManager } from "./favorites/favoriteProblemsManager";
+import { PtaPreviewProvider } from './webview/PtaPreviewProvider';
+import { ProblemView } from "./webview/views/ProblemView";
 
 
 let globalContext: vscode.ExtensionContext;
@@ -42,11 +40,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	});
 
 	context.subscriptions.push(
-		ptaPreviewProvider,
-		ptaLoginProvider,
-		ptaSubmissionProvider,
 		ptaStatusBarController,
-		ptaTestProvider,
 		codeLensController,
 		ptaExecutor,
 		ptaChannel,
@@ -59,7 +53,9 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand("pintia.clearCache", () => cache.clearCache()),
 		vscode.commands.registerCommand("pintia.signIn", () => ptaManager.signIn()),
 		vscode.commands.registerCommand("pintia.signOut", () => ptaManager.signOut()),
-		vscode.commands.registerCommand("pintia.previewProblem", (psID: string, pID: string) => ptaPreviewProvider.showPreview(psID, pID)),
+		vscode.commands.registerCommand("pintia.previewProblem", (psID: string, pID: string) => {
+			PtaPreviewProvider.createOrUpdate(new ProblemView(psID, pID)).show();
+		}),
 		vscode.commands.registerCommand("pintia.manageUser", () => user.showUserManager()),
 		vscode.commands.registerCommand("pintia.checkIn", () => user.checkInPTA()),
 		vscode.commands.registerCommand("pintia.reportIssue", () => user.reportIssue()),

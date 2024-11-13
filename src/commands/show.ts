@@ -3,7 +3,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import * as fs from "fs-extra";
 import { selectWorkspaceFolder } from "../utils/workspaceUtils";
-import { commentFormatMapping, compilerLangMapping, configPath, IPtaCode, IQuickPickItem, langCompilerMapping, ProblemType, problemTypeNameMapping, ptaCompiler, searchIndexPath, ZOJ_PROBLEM_SET_ID } from "../shared";
+import { commentFormatMapping, compilerLangMapping, configPath, IPtaCode, IQuickPickItem, langCompilerMapping, ProblemType, problemTypeInfoMapping, ptaCompiler, searchIndexPath, ZOJ_PROBLEM_SET_ID } from "../shared";
 import { ptaChannel } from "../ptaChannel";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import { ptaConfig } from "../ptaConfig";
@@ -12,7 +12,8 @@ import { IProblem } from "../entity/IProblem";
 import { ptaManager } from "../ptaManager";
 import { IUserSession } from "../entity/userLoginSession";
 import { IProblemSearchItem } from "../entity/IProblemSearchItem";
-import { ptaPreviewProvider } from "../webview/ptaPreviewProvider";
+import { PtaPreviewProvider } from "../webview/PtaPreviewProvider";
+import { ProblemView } from "../webview/views/ProblemView";
 
 
 export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
@@ -69,7 +70,7 @@ export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
                 `@pintia psid=${ptaCode.psID} pid=${ptaCode.pID} compiler=${defaultCompiler}`,
                 `ProblemSet: ${ptaCode.psName ?? "None"}`,
                 `Title: ${ptaCode.title!}`,
-                `https://pintia.cn/problem-sets/${ptaCode.psID}/exam/problems/${ptaCode.pID}`
+                ptaApi.getProblemURL(ptaCode.psID, ptaCode.pID, problem.type),
             ];
 
             const format = commentFormatMapping.get(compilerLangMapping.get(defaultCompiler) ?? "") ?? commentFormatMapping.get("C++ (g++)")!;
@@ -111,7 +112,7 @@ export async function searchProblem(): Promise<void> {
     if (!choice) {
         return;
     }
-    await ptaPreviewProvider.showPreview(choice.value.psID, choice.value.pID);
+    PtaPreviewProvider.createOrUpdate(new ProblemView(choice.value.psID, choice.value.pID)).show();
 }
 
 async function fetchProblemIndex(): Promise<Array<IProblemSearchItem>> {
@@ -153,7 +154,7 @@ async function parseProblemsToPicks(p: Promise<IProblemSearchItem[]>): Promise<A
         const picks: Array<IQuickPickItem<IProblemSearchItem>> = (await p).map((problem: IProblemSearchItem) => Object.assign({}, {
             label: `[${++cnt}] ${problem.label} ${problem.title}`,
             description: "",
-            detail: `Score: ${problem.score}, Type: ${problemTypeNameMapping.get(problem.type)}, PS: ${problem.psName}`,
+            detail: `Score: ${problem.score}, Type: ${problemTypeInfoMapping.get(problem.type)?.name ?? "Unknown"}, PS: ${problem.psName}`,
             value: problem,
         }));
         resolve(picks);

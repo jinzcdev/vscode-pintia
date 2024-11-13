@@ -9,6 +9,7 @@ export const configPath: string = path.join(os.homedir(), ".pintia");
 export const cacheDirPath: string = path.join(configPath, "cache");
 export const searchIndexPath: string = path.join(configPath, "search_index.json");
 export const favoriteProblemsPath: string = path.join(configPath, "favorites.json");
+export const imgUrlPrefix: string = "https://images.ptausercontent.com";
 export const ZOJ_PROBLEM_SET_ID: string = "91827364500";
 
 export import ptaCache = require('memory-cache');
@@ -156,13 +157,13 @@ export const langCompilerMapping: Map<string, string> = new Map([
     ["Ruby (ruby)", "RUBY"],
     ["Bash (bash)", "BASH"],
     ["Plaintext (cat)", "CAT"],
-    ["CommonLisp  (sbcl)", "CLISP"],
+    ["CommonLisp (sbcl)", "CLISP"],
     ["Pascal (fpc)", "FPC"],
     ["Go (go)", "GO"],
     ["Haskell (ghc)", "GHC"],
     ["Lua (lua)", "LUA"],
     ["Lua (luajit)", "LUAJIT"],
-    ["C# (mcs)", "MCS"],
+    ["C# (dotnet)", "MCS"],
     ["JavaScript (node)", "NODE"],
     ["OCaml (ocamlc)", "OCAMLC"],
     ["PHP (php)", "PHP"],
@@ -171,10 +172,10 @@ export const langCompilerMapping: Map<string, string> = new Map([
     ["D (dmd)", "DMD"],
     ["Racket (racket)", "RKT"],
     ["Vala (valac)", "VALAC"],
-    ["Visual Basic (vbnc)", "VBNC"],
+    ["Visual Basic (dotnet)", "VBNC"],
     ["Kotlin (kotlinc)", "KOTLIN"],
     ["Swift (swiftc)", "SWIFT"],
-    ["Objective-C (gcc)", "OBJC"],
+    ["Objective-C (clang)", "OBJC"],
     ["Fortran95 (gfortran)", "FORTRAN"],
     ["Octave (octave-cli)", "OCTAVE"],
     ["R (R)", "RLANG"],
@@ -182,11 +183,11 @@ export const langCompilerMapping: Map<string, string> = new Map([
     ["Rust (rustc)", "RUST"],
     ["Scala (scalac)", "SCALA"],
     ["Python (pypy3)", "PYPY3"],
+    ["仓颉 (cjc)", "CANGJIE"],
     ["SQL (SQL)", "SQL"]
 ]);
 
 export const compilerLangMapping: Map<string, string> = new Map([
-    ["NO_COMPILER", ""],
     ["GCC", "C (gcc)"],
     ["GXX", "C++ (g++)"],
     ["CLANG", "C (clang)"],
@@ -197,13 +198,13 @@ export const compilerLangMapping: Map<string, string> = new Map([
     ["RUBY", "Ruby (ruby)"],
     ["BASH", "Bash (bash)"],
     ["CAT", "Plaintext (cat)"],
-    ["CLISP", "CommonLisp  (sbcl)"],
+    ["CLISP", "CommonLisp (sbcl)"],
     ["FPC", "Pascal (fpc)"],
     ["GO", "Go (go)"],
     ["GHC", "Haskell (ghc)"],
     ["LUA", "Lua (lua)"],
     ["LUAJIT", "Lua (luajit)"],
-    ["MCS", "C# (mcs)"],
+    ["MCS", "C# (dotnet)"],
     ["NODE", "JavaScript (node)"],
     ["OCAMLC", "OCaml (ocamlc)"],
     ["PHP", "PHP (php)"],
@@ -212,10 +213,10 @@ export const compilerLangMapping: Map<string, string> = new Map([
     ["DMD", "D (dmd)"],
     ["RKT", "Racket (racket)"],
     ["VALAC", "Vala (valac)"],
-    ["VBNC", "Visual Basic (vbnc)"],
+    ["VBNC", "Visual Basic (dotnet)"],
     ["KOTLIN", "Kotlin (kotlinc)"],
     ["SWIFT", "Swift (swiftc)"],
-    ["OBJC", "Objective-C (gcc)"],
+    ["OBJC", "Objective-C (clang)"],
     ["FORTRAN", "Fortran95 (gfortran)"],
     ["OCTAVE", "Octave (octave-cli)"],
     ["RLANG", "R (R)"],
@@ -223,8 +224,8 @@ export const compilerLangMapping: Map<string, string> = new Map([
     ["RUST", "Rust (rustc)"],
     ["SCALA", "Scala (scalac)"],
     ["PYPY3", "Python (pypy3)"],
-    ["SQL", "SQL (SQL)"],
-    ["VERILOG", "Verilog"]
+    ["CANGJIE", "仓颉 (cjc)"],
+    ["SQL", "SQL (SQL)"]
 ]);
 
 export const commentFormatMapping: Map<string, { single: string, start: string, middle: string, end: string }> = new Map([
@@ -235,10 +236,22 @@ export const commentFormatMapping: Map<string, { single: string, start: string, 
     ["Bash (bash)", { single: "# ", start: "# ", middle: "# ", end: "" }],
 ]);
 
-export const problemTypeNameMapping: Map<string, string> = new Map([
-    ["PROGRAMMING", "编程题"],
-    ["CODE_COMPLETION", "函数题"],
-    ["MULTIPLE_FILE", "多文件编程题"]
+export const problemTypeInfoMapping: Map<string, {
+    name: string,
+    type: number,
+    prefix: string
+}> = new Map([
+    ["PROGRAMMING", { name: "编程题", type: 7, prefix: "programming" }],
+    ["CODE_COMPLETION", { name: "函数题", type: 6, prefix: "codeCompletion" }],
+    ["MULTIPLE_FILE", { name: "多文件编程题", type: 9, prefix: "multipleFile" }],
+]);
+
+export const colorThemeMapping: Map<string, string[]> = new Map([
+    ["atom-one", ["atom-one-light.min.css", "atom-one-dark.min.css"]],
+    ["github", ["github.min.css", "github-dark.min.css"]],
+    ["a11y", ["a11y-light.min.css", "a11y-dark.min.css"]],
+    ["stackoverflow", ["stackoverflow-light.min.css", "stackoverflow-dark.min.css"]],
+    ["kimbie", ["kimbie-light.min.css", "kimbie-dark.min.css"]]
 ]);
 
 export enum DescriptionConfiguration {
@@ -253,7 +266,6 @@ export const ptaCompiler = {
     NO_COMPILER: {
         name: "NO_COMPILER",
         ordinal: 0,
-        mime: "text/plain",
         isHidden: !0,
         ext: "",
         language: "",
@@ -263,58 +275,52 @@ export const ptaCompiler = {
     GCC: {
         name: "GCC",
         ordinal: 1,
-        mime: "text/x-csrc",
         ext: "c",
         language: "C",
         displayName: "gcc",
-        version: "6.5.0",
+        version: "11.4.0",
         compileCmd: "gcc -DONLINE_JUDGE -fno-tree-ch -O2 -Wall -std=c99 -pipe $src -lm -o $exe"
     },
     GXX: {
         name: "GXX",
         ordinal: 2,
-        mime: "text/x-c++src",
         ext: "cpp",
         language: "C++",
         displayName: "g++",
-        version: "6.5.0",
+        version: "11.4.0",
         compileCmd: "g++ -DONLINE_JUDGE -fno-tree-ch -O2 -Wall -std=c++17 -pipe $src -lm -o $exe"
     },
     CLANG: {
         name: "CLANG",
         ordinal: 3,
-        mime: "text/x-csrc",
         ext: "clang.c",
         language: "C",
         displayName: "clang",
-        version: "6.0.0",
+        version: "17.0.6",
         compileCmd: "clang -DONLINE_JUDGE -O2 -Wall -std=c99 -pipe $src -lm -o $exe"
     },
     CLANGXX: {
         name: "CLANGXX",
         ordinal: 4,
-        mime: "text/x-c++src",
         ext: "clang.cpp",
         language: "C++",
         displayName: "clang++",
-        version: "6.0.0",
+        version: "17.0.6",
         compileCmd: "clang++ -DONLINE_JUDGE -O2 -Wall -std=c++17 -pipe $src -lm -o $exe"
     },
     JAVAC: {
         name: "JAVAC",
         ordinal: 5,
-        mime: "text/x-java",
         ext: "java",
         language: "Java",
         displayName: "javac",
-        version: "1.8.0",
+        version: "11.0.19",
         compileCmd: "javac -encoding UTF8 $src",
         runCmd: "java Main"
     },
     PYTHON2: {
         name: "PYTHON2",
         ordinal: 6,
-        mime: "text/x-python",
         ext: "py",
         language: "Python",
         displayName: "python2",
@@ -324,27 +330,24 @@ export const ptaCompiler = {
     PYTHON3: {
         name: "PYTHON3",
         ordinal: 7,
-        mime: "text/x-python",
-        ext: "py",
+        ext: "3.py",
         language: "Python",
         displayName: "python3",
-        version: "3.7.11",
+        version: "3.10.13",
         runCmd: "python3 $src"
     },
     RUBY: {
         name: "RUBY",
         ordinal: 8,
-        mime: "text/x-ruby",
         ext: "rb",
         language: "Ruby",
         displayName: "ruby",
-        version: "2.7.1",
+        version: "2.7.5",
         runCmd: "ruby $src"
     },
     BASH: {
         name: "BASH",
         ordinal: 9,
-        mime: "text/x-sh",
         ext: "sh",
         language: "Bash",
         displayName: "bash",
@@ -354,7 +357,6 @@ export const ptaCompiler = {
     CAT: {
         name: "CAT",
         ordinal: 10,
-        mime: "text/plain",
         ext: "txt",
         language: "Plaintext",
         displayName: "cat",
@@ -364,7 +366,6 @@ export const ptaCompiler = {
     CLISP: {
         name: "CLISP",
         ordinal: 11,
-        mime: "text/x-common-lisp",
         ext: "cl",
         language: "Common Lisp",
         displayName: "sbcl",
@@ -374,7 +375,6 @@ export const ptaCompiler = {
     FPC: {
         name: "FPC",
         ordinal: 12,
-        mime: "text/x-pascal",
         ext: "pas",
         language: "Pascal",
         displayName: "fpc",
@@ -384,17 +384,15 @@ export const ptaCompiler = {
     GO: {
         name: "GO",
         ordinal: 13,
-        mime: "text/x-go",
         ext: "go",
         language: "Go",
         displayName: "go",
-        version: "1.9.4",
+        version: "1.20.3",
         compileCmd: "go build $src"
     },
     GHC: {
         name: "GHC",
         ordinal: 14,
-        mime: "text/x-haskell",
         ext: "hs",
         language: "Haskell",
         displayName: "ghc",
@@ -404,7 +402,6 @@ export const ptaCompiler = {
     LUA: {
         name: "LUA",
         ordinal: 15,
-        mime: "text/x-lua",
         ext: "lua",
         language: "Lua",
         displayName: "lua",
@@ -414,7 +411,6 @@ export const ptaCompiler = {
     LUAJIT: {
         name: "LUAJIT",
         ordinal: 16,
-        mime: "text/x-lua",
         ext: "jit.lua",
         language: "Lua",
         displayName: "luajit",
@@ -424,28 +420,25 @@ export const ptaCompiler = {
     MCS: {
         name: "MCS",
         ordinal: 17,
-        mime: "text/x-csharp",
         ext: "cs",
         language: "C#",
-        displayName: "mcs",
-        version: "4.6.2.0",
-        compileCmd: "mcs -debug- -optimize+ -define:ONLINE_JUDGE $src",
-        runCmd: "mono -O=all $exe"
+        displayName: "dotnet",
+        version: "6.0.413",
+        compileCmd: "dotnet build",
+        runCmd: "$exe"
     },
     NODE: {
         name: "NODE",
         ordinal: 18,
-        mime: "text/javascript",
         ext: "js",
         language: "JavaScript",
         displayName: "node",
-        version: "12.22.1",
+        version: "12.22.12",
         runCmd: "node $src"
     },
     OCAMLC: {
         name: "OCAMLC",
         ordinal: 19,
-        mime: "text/x-ocaml",
         ext: "ml",
         language: "OCaml",
         displayName: "ocamlc",
@@ -455,7 +448,6 @@ export const ptaCompiler = {
     PHP: {
         name: "PHP",
         ordinal: 20,
-        mime: "text/x-php",
         ext: "php",
         language: "PHP",
         displayName: "php",
@@ -465,7 +457,6 @@ export const ptaCompiler = {
     PERL: {
         name: "PERL",
         ordinal: 21,
-        mime: "text/x-perl",
         ext: "pl",
         language: "Perl",
         displayName: "perl",
@@ -475,7 +466,6 @@ export const ptaCompiler = {
     AWK: {
         name: "AWK",
         ordinal: 22,
-        mime: "text/plain",
         ext: "awk",
         language: "AWK",
         displayName: "awk",
@@ -485,7 +475,6 @@ export const ptaCompiler = {
     DMD: {
         name: "DMD",
         ordinal: 23,
-        mime: "text/x-d",
         ext: "d",
         language: "D",
         displayName: "dmd",
@@ -495,7 +484,6 @@ export const ptaCompiler = {
     RKT: {
         name: "RKT",
         ordinal: 24,
-        mime: "text/plain",
         ext: "rkt",
         language: "Racket",
         displayName: "racket",
@@ -506,7 +494,6 @@ export const ptaCompiler = {
     VALAC: {
         name: "VALAC",
         ordinal: 25,
-        mime: "text/plain",
         ext: "vala",
         language: "Vala",
         displayName: "valac",
@@ -516,29 +503,26 @@ export const ptaCompiler = {
     VBNC: {
         name: "VBNC",
         ordinal: 26,
-        mime: "text/x-vb",
         ext: "vb",
         language: "Visual Basic",
-        displayName: "vbnc",
-        version: "0.0.0.5943",
-        compileCmd: "vbnc2 /libpath:/usr/lib/mono/4.5 $src",
-        runCmd: "mono -O=all $exe"
+        displayName: "dotnet",
+        version: "6.0.413",
+        compileCmd: "dotnet build",
+        runCmd: "$exe"
     },
     KOTLIN: {
         name: "KOTLIN",
         ordinal: 27,
-        mime: "text/x-kotlin",
         ext: "kt",
         language: "Kotlin",
         displayName: "kotlinc",
-        version: "1.5.10",
+        version: "1.6.21",
         compileCmd: "kotlinc $src -include-runtime -d Main.jar",
         runCmd: "java -jar Main.jar"
     },
     SWIFT: {
         name: "SWIFT",
         ordinal: 28,
-        mime: "text/x-swift",
         ext: "swift",
         language: "Swift",
         displayName: "swiftc",
@@ -548,17 +532,15 @@ export const ptaCompiler = {
     OBJC: {
         name: "OBJC",
         ordinal: 29,
-        mime: "text/x-objectivec",
         ext: "m",
         language: "Objective-C",
-        displayName: "gcc",
-        version: "7.5.0",
-        compileCmd: "gcc $src -MMD -MP -DGNUSTEP -DGNUSTEP_BASE_LIBRARY=1 -DGNU_GUI_LIBRARY=1 -DGNU_RUNTIME=1 -DGNUSTEP_BASE_LIBRARY=1 -fno-strict-aliasing -fexceptions -fobjc-exceptions -D_NATIVE_OBJC_EXCEPTIONS -pthread -fPIC -Wall -DGSWARN -DGSDIAGNOSE -Wno-import -g -O2 -fgnu-runtime -fconstant-string-class=NSConstantString -fexec-charset=UTF-8 -I. -I/home/judger/GNUstep/Library/Headers -I/usr/local/include/GNUstep -I/usr/include/GNUstep -o $exe"
+        displayName: "clang",
+        version: "17.0.6",
+        compileCmd: "clang $src -MMD -MP -DGNUSTEP -DGNUSTEP_BASE_LIBRARY=1 -DGNU_GUI_LIBRARY=1 -DGNU_RUNTIME=1 -fno-strict-aliasing -fexceptions -fobjc-exceptions -D_NATIVE_OBJC_EXCEPTIONS -pthread -fPIC -Wall -DGSWARN -DGSDIAGNOSE -Wno-import -g -O2 -fgnu-runtime -fconstant-string-class=NSConstantString -fexec-charset=UTF-8 -I. -I/home/judger/GNUstep/Library/Headers -I/usr/local/include/GNUstep -I/usr/include/GNUstep -rdynamic -shared-libgcc -lgnustep-base -lobjc -lm -o $exe"
     },
     FORTRAN: {
         name: "FORTRAN",
         ordinal: 30,
-        mime: "text/x-fortran",
         ext: "f95",
         language: "Fortran95",
         displayName: "gfortran",
@@ -568,7 +550,6 @@ export const ptaCompiler = {
     OCTAVE: {
         name: "OCTAVE",
         ordinal: 31,
-        mime: "text/x-octave",
         ext: "octave",
         language: "Octave",
         displayName: "octave-cli",
@@ -578,7 +559,6 @@ export const ptaCompiler = {
     RLANG: {
         name: "RLANG",
         ordinal: 32,
-        mime: "text/x-rsrc",
         ext: "r",
         language: "R",
         displayName: "R",
@@ -588,7 +568,6 @@ export const ptaCompiler = {
     ASM: {
         name: "ASM",
         ordinal: 33,
-        mime: "text/plain",
         ext: "asm",
         language: "ASM",
         displayName: "nasm.sh",
@@ -598,50 +577,48 @@ export const ptaCompiler = {
     RUST: {
         name: "RUST",
         ordinal: 34,
-        mime: "text/x-rustsrc",
         ext: "rs",
         language: "Rust",
         displayName: "rustc",
-        version: "1.53.0",
+        version: "1.79.0",
         compileCmd: "rustc --edition=2018 -O --cfg ONLINE_JUDGE $src -o $exe"
     },
     SCALA: {
         name: "SCALA",
         ordinal: 35,
-        mime: "text/x-scala",
         ext: "scala",
         language: "Scala",
         displayName: "scalac",
-        version: "2.13.4",
+        version: "2.13.8",
         compileCmd: "scalac -encoding UTF8 $src",
-        runCmd: "java -Xbootclasspath/a:/usr/share/scala/lib/jline-3.16.0.jar:/usr/share/scala/lib/jna-5.3.1.jar:/usr/share/scala/lib/scala-compiler.jar:/usr/share/scala/lib/scala-library.jar:/usr/share/scala/lib/scala-reflect.jar:/usr/share/scala/lib/scalap-2.13.4.jar -classpath '\"\"' -Dscala.boot.class.path=/usr/share/scala/lib/jline-3.16.0.jar:/usr/share/scala/lib/jna-5.3.1.jar:/usr/share/scala/lib/scala-compiler.jar:/usr/share/scala/lib/scala-library.jar:/usr/share/scala/lib/scala-reflect.jar:/usr/share/scala/lib/scalap-2.13.4.jar -Dscala.home=/usr/share/scala -Dscala.usejavacp=true scala.tools.nsc.MainGenericRunner Main"
+        runCmd: `java -Xbootclasspath/a:/usr/share/scala/lib/jline-3.16.0.jar:/usr/share/scala/lib/jna-5.3.1.jar:/usr/share/scala/lib/scala-compiler.jar:/usr/share/scala/lib/scala-library.jar:/usr/share/scala/lib/scala-reflect.jar:/usr/share/scala/lib/scalap-2.13.4.jar -classpath '""' -Dscala.boot.class.path=/usr/share/scala/lib/jline-3.16.0.jar:/usr/share/scala/lib/jna-5.3.1.jar:/usr/share/scala/lib/scala-compiler.jar:/usr/share/scala/lib/scala-library.jar:/usr/share/scala/lib/scala-reflect.jar:/usr/share/scala/lib/scalap-2.13.4.jar -Dscala.home=/usr/share/scala -Dscala.usejavacp=true scala.tools.nsc.MainGenericRunner Main`
     },
     PYPY3: {
         name: "PYPY3",
         ordinal: 36,
-        mime: "text/x-python",
-        ext: "3.py",
+        ext: "pypy.3.py",
         language: "Python",
         displayName: "pypy3",
-        version: "3.7",
+        version: "3.9.19",
         runCmd: "pypy3 $src"
+    },
+    CANGJIE: {
+        name: "CANGJIE",
+        ordinal: 37,
+        ext: "cj",
+        language: "仓颉",
+        displayName: "cjc",
+        version: "0.53.4",
+        runCmd: "cjc $src",
+        compileCmd: "cjc --cfg ENV=ONLINE_JUDGE -O2 -Won all --error-count-limit 10 $src -o $exe"
     },
     SQL: {
         name: "SQL",
         ordinal: 100,
-        mime: "text/x-sql",
         isHidden: !0,
         ext: "sql",
         language: "SQL",
         displayName: "SQL",
         version: ""
-    },
-    VERILOG: {
-        name: "VERILOG",
-        ext: "v",
-        language: "verilog",
-        displayName: "VERILOG",
-        version: ""
     }
-}
-
+};

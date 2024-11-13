@@ -10,7 +10,7 @@ import { favoriteProblemsManager } from "../favorites/favoriteProblemsManager";
 import { ptaChannel } from "../ptaChannel";
 import { ptaConfig } from "../ptaConfig";
 import { ptaManager } from "../ptaManager";
-import { defaultPtaNode, IPtaNodeValue, ProblemSubmissionState, ProblemType, problemTypeNameMapping, PtaNodeType } from "../shared";
+import { defaultPtaNode, IPtaNodeValue, ProblemSubmissionState, ProblemType, problemTypeInfoMapping, PtaNodeType } from "../shared";
 import { ptaApi } from "../utils/api";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import { PtaNode } from "./PtaNode";
@@ -72,7 +72,7 @@ class ExplorerNodeManager implements Disposable {
                 nodeList.push(new PtaNode(Object.assign({}, defaultPtaNode, {
                     psID: node.psID,
                     type: PtaNodeType.ProblemSubSet,
-                    label: problemTypeNameMapping.get(problemType) ?? "ERROR",
+                    label: problemTypeInfoMapping.get(problemType)?.name ?? "Unknown",
                     value: Object.assign({}, value, {
                         problemType: problemType as ProblemType,
                     })

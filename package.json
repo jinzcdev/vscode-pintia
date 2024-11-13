@@ -2,7 +2,7 @@
     "name": "vscode-pintia",
     "displayName": "Pintia",
     "description": "%description%",
-    "version": "0.5.4",
+    "version": "0.5.5",
     "author": "Zhichao Jin",
     "publisher": "jinzcdev",
     "license": "MIT",
@@ -20,7 +20,9 @@
         "pta",
         "pat",
         "algorithm",
-        "oj"
+        "oj",
+        "拼题",
+        "刷题"
     ],
     "preview": true,
     "categories": [
@@ -251,6 +253,19 @@
                     "scope": "application",
                     "description": "%configuration.pintia.paging.pageSize%"
                 },
+                "pintia.codeColorTheme": {
+                    "type": "string",
+                    "default": "atom-one",
+                    "enum": [
+                        "atom-one",
+                        "github",
+                        "a11y",
+                        "stackoverflow",
+                        "kimbie"
+                    ],
+                    "scope": "application",
+                    "description": "%configuration.pintia.codeColorTheme%"
+                },
                 "pintia.showLocked": {
                     "type": "boolean",
                     "default": true,
@@ -283,13 +298,13 @@
                         "Ruby (ruby)",
                         "Bash (bash)",
                         "Plaintext (cat)",
-                        "CommonLisp  (sbcl)",
+                        "CommonLisp (sbcl)",
                         "Pascal (fpc)",
                         "Go (go)",
                         "Haskell (ghc)",
                         "Lua (lua)",
                         "Lua (luajit)",
-                        "C# (mcs)",
+                        "C# (dotnet)",
                         "JavaScript (node)",
                         "OCaml (ocamlc)",
                         "PHP (php)",
@@ -298,10 +313,10 @@
                         "D (dmd)",
                         "Racket (racket)",
                         "Vala (valac)",
-                        "Visual Basic (vbnc)",
+                        "Visual Basic (dotnet)",
                         "Kotlin (kotlinc)",
                         "Swift (swiftc)",
-                        "Objective-C (gcc)",
+                        "Objective-C (clang)",
                         "Fortran95 (gfortran)",
                         "Octave (octave-cli)",
                         "R (R)",
@@ -309,6 +324,7 @@
                         "Rust (rustc)",
                         "Scala (scalac)",
                         "Python (pypy3)",
+                        "仓颉 (cjc)",
                         "SQL (SQL)"
                     ],
                     "scope": "application",

@@ -6,7 +6,7 @@ import { IProblemSubmission } from "../entity/IProblemSubmission";
 import { IProblemSubmissionResult } from "../entity/IProblemSubmissionResult";
 import { IProblemSummary } from "../entity/IProblemSummary";
 import { IProblemCode } from "../entity/problemSubmissionCode";
-import { cacheDirPath, ProblemType, ptaCache } from "../shared";
+import { cacheDirPath, ProblemType, problemTypeInfoMapping, ptaCache } from "../shared";
 import { httpGet, httpPost } from "./httpUtils";
 
 import * as fs from "fs-extra";
@@ -416,6 +416,15 @@ class PtaAPI {
             ptaChannel.appendLine(`[ERROR]: ${error.toString()}. The delay is too short.`);
         }
         return {};
+    }
+
+    public getProblemURL(psID: string, pID: string, problemType: string): string {
+        if (!problemType || problemType.trim() === "") {
+            return `https://pintia.cn/problem-sets/${psID}`;
+        }
+        const problemTypeID: number = problemTypeInfoMapping.get(problemType)?.type ?? -1;
+        return problemTypeID === -1 ? `https://pintia.cn/problem-sets/${psID}` :
+            `https://pintia.cn/problem-sets/${psID}/exam/problems/type/${problemTypeID}?problemSetProblemId=${pID}`
     }
 }
 

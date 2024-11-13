@@ -19,6 +19,7 @@
     "contributes.viewsWelcome.pintiaExplorer": "Welcome to use the Pintia extension to practice PTA exercises. Please refer to the user manual for instructions on how to use this extension. Alternatively, visit the extension homepage at [vscode-pintia](https://github.com/jinzcdev/vscode-pintia) for more detailed information. \n[Sign in PTA](command:pintia.signIn) \n[Open Tutorial](command:pintia.welcome)",
     "configuration.pintia.workspaceFolder": "The path of the workspace folder to store the problem files.",
     "configuration.pintia.paging.pageSize": "Specify whether to page the problem list when the problem set is too large. It is not paged when pageSize is 0.",
+    "configuration.pintia.codeColorTheme": "Specify the code color theme.",
     "configuration.pintia.showLocked": "Show locked problems.",
     "configuration.pintia.enableStatusBar": "Specify whether the Pintia status bar is displayed.",
     "configuration.pintia.autoCheckIn": "Specify whether to automatically check in Pintia's education supermarket when the Pintia Extension is activated.",

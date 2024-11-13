@@ -1,27 +1,29 @@
 import * as QRCode from 'qrcode';
 import { PtaWebview } from "./PtaWebview";
+import { LoginView } from './views/LoginView';
 
+export class PtaLoginProvider extends PtaWebview<LoginView> {
 
-class PtaLoginProvider extends PtaWebview {
+    private static instance: PtaLoginProvider | null = null;
 
-    public async showQRCode(qrcode: string) {
-
-        const qrcodeBase64 = await QRCode.toDataURL(qrcode, {
-            type: "image/png"
-        });
-
-        this.data = {
-            title: "QRCode",
-            style: this.getStyle(),
-            content: this.getContent({
-                qrcodeBase64: qrcodeBase64
-            })
-        };
-
-        this.show()
+    public static createOrUpdate(view: LoginView): PtaLoginProvider {
+        if (!PtaLoginProvider.instance) {
+            PtaLoginProvider.instance = new PtaLoginProvider(view);
+        }
+        PtaLoginProvider.instance.updateView(view);
+        return PtaLoginProvider.instance;
     }
 
-    protected getStyle(data?: any): string {
+    protected async loadViewData(loginView: LoginView): Promise<void> {
+        this.data = {
+            title: "QRCode",
+            qrcodeBase64: await QRCode.toDataURL(loginView.qrcode, {
+                type: "image/png"
+            })
+        }
+    }
+
+    protected getStyle(): string {
         return `
             <style>
                 html {
@@ -47,16 +49,14 @@ class PtaLoginProvider extends PtaWebview {
             </style>
         `;
     }
-    protected getContent(data?: any): string {
+    protected getContent(): string {
         return `
             <div class="banner">
                 <h1>请使用微信扫码此二维码或<a href="https://pintia.cn/home/bindings">点此</a>绑定</p>
                 <img class="qrcode"
-                src="${data.qrcodeBase64}">
+                src="${this.data.qrcodeBase64}">
             </div>
         `
     }
 
 }
-
-export const ptaLoginProvider: PtaLoginProvider = new PtaLoginProvider();
