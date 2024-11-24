@@ -1,12 +1,24 @@
-import { IProblemSubmissionResult } from "../entity/IProblemSubmissionResult";
 import { ptaChannel } from "../ptaChannel";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import { PtaWebview } from "./PtaWebview";
+import { TestView } from "./views/TestView";
 
+export class PtaTestProvider extends PtaWebview<TestView> {
 
-class PtaTestProvider extends PtaWebview {
+    private static instance: PtaTestProvider | null = null;
 
-    public async showTestResult(result: IProblemSubmissionResult, answer?: string) {
+    public static createOrUpdate(view: TestView): PtaTestProvider {
+        if (!PtaTestProvider.instance) {
+            PtaTestProvider.instance = new PtaTestProvider(view);
+        }
+        PtaTestProvider.instance.updateView(view);
+        return PtaTestProvider.instance;
+    }
+
+    protected async loadViewData(testView: TestView): Promise<void> {
+        const result = testView.result;
+        const answer = testView.answer;
+
         try {
             const judgeResponseContent = result.submission.judgeResponseContents[0];
             const codeJudgeResponseContent = judgeResponseContent.programmingJudgeResponseContent
@@ -15,27 +27,24 @@ class PtaTestProvider extends PtaWebview {
 
             this.data = {
                 title: "Test",
-                style: this.getStyle(),
-                content: this.getContent({
+                testResult: {
                     testCase: result.submission.submissionDetails[0].customTestData?.content,
-                    answer: answer ? answer : "",
-                    myanswer: judgeResponseContent.status === "COMPILE_ERROR" ? "COMPILE_ERROR" : testcaseJudgeResults?.custom.stdout ?? "",
+                    answer: answer ?? "",
+                    myAnswer: judgeResponseContent.status === "COMPILE_ERROR" ? "COMPILE_ERROR" : testcaseJudgeResults?.custom.stdout ?? "",
                     problemType: result.submission.problemType,
                     compiler: result.submission.compiler,
                     time: result.submission.time,
                     memory: result.submission.memory,
                     compilationOutput: codeJudgeResponseContent!.compilationResult.log
-                })
+                }
             };
-
-            this.show()
         } catch (error: any) {
             ptaChannel.appendLine(error.toString());
-            await promptForOpenOutputChannel("Failed to test!", DialogType.error);
+            promptForOpenOutputChannel("Failed to test!", DialogType.error);
         }
     }
 
-    protected getStyle(data?: any): string {
+    protected getStyle(): string {
         return `
             <style>
                 :root {
@@ -97,11 +106,13 @@ class PtaTestProvider extends PtaWebview {
                     max-height: 250px;
                     overflow: scroll;
                     display: block;
+                    background-color: transparent;
                 }
             </style>`;
     }
 
-    protected getContent(data?: any): string {
+    protected getContent(): string {
+        const testResult = this.data.testResult;
         return `
             <h2>测试结果</h2>
 
@@ -113,20 +124,18 @@ class PtaTestProvider extends PtaWebview {
                 </thead>
                 <tbody>
                     <tr>
-                        <td><pre><code>${data.testCase}</pre></code></td>
-                        <td><pre><code>${data.myanswer}</pre></code></td>
-                        <td><pre><code>${data.answer}</pre></code></td>
+                        <td><pre><code>${testResult.testCase}</pre></code></td>
+                        <td><pre><code>${testResult.myAnswer}</pre></code></td>
+                        <td><pre><code>${testResult.answer}</pre></code></td>
                     </tr>
                 </tbody>
             </table>
 
             <h2>编译器输出</h2>
             <div class="code-preview">
-                <pre><code>${data.compilationOutput}</code></pre>
+                <pre><code>${testResult.compilationOutput}</code></pre>
             </div>
         `;
     }
 
 }
-
-export const ptaTestProvider: PtaTestProvider = new PtaTestProvider();

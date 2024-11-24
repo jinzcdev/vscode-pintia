@@ -101,7 +101,7 @@ class PtaConfig {
     public setSearchIndexIgnoreLockedProblemSets(ignoredLocked: boolean) {
         this.update("searchIndex.ignoreLockedProblemSets", ignoredLocked);
     }
-    
+
     public getSearchIndexAutoRefresh(): boolean {
         return this.getConfiguration().get<boolean>("searchIndex.autoRefresh", false);
     }
@@ -118,7 +118,13 @@ class PtaConfig {
         this.update("autoCreateProblemSetFolder", autoCreatePbsFolder);
     }
 
-    
+    public getCodeColorTheme(): string {
+        return this.getConfiguration().get<string>("codeColorTheme", "atom-one");
+    }
+
+    public setCodeColorTheme(codeColorTheme: string) {
+        this.update("codeColorTheme", codeColorTheme);
+    }
 }
 
 export const ptaConfig: PtaConfig = new PtaConfig();

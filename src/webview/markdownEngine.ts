@@ -1,3 +1,4 @@
+import { imgUrlPrefix } from "../shared";
 
 const hljs = require('highlight.js');
 
@@ -15,12 +16,12 @@ export const markdownEngine = require('markdown-it')({
 })
     .use(require('markdown-it-replace-link'), {
         replaceLink: function (link: string, env: any) {
-            if (link.includes("http")) {
+            link = link.trim();
+            if (link.startsWith("http")) {
                 return link;
             }
             let i = link.length - 1
             while (i >= 0 && link[i] !== "/") i--;
-            return "https://images.ptausercontent.com/" + link.substring(i + 1);
+            return `${imgUrlPrefix}/${link.substring(i + 1)}`;
         }
     });
-

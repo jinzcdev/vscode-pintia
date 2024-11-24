@@ -11,8 +11,9 @@ import { ptaExecutor } from "../ptaExecutor";
 import { IPtaCode, IQuickPickItem } from "../shared";
 import { ptaApi } from "../utils/api";
 import { DialogType, promptForOpenOutputChannel, showFileSelectDialog } from "../utils/uiUtils";
-import { ptaSubmissionProvider } from "../webview/ptaSubmissionProvider";
-import { ptaTestProvider } from "../webview/ptaTestProvider";
+import { PtaSubmissionProvider } from "../webview/PtaSubmissionProvider";
+import { PtaTestProvider } from "../webview/PtaTestProvider";
+import { TestView } from "../webview/views/TestView";
 
 export async function submitSolution(ptaCode: IPtaCode): Promise<void> {
     try {
@@ -28,8 +29,9 @@ export async function submitSolution(ptaCode: IPtaCode): Promise<void> {
         await ptaExecutor.submitSolution(ptaCode.psID, ptaCode.pID, solution, (msg: string, data?: IProblemSubmissionResult) => {
             switch (msg) {
                 case "SUCCESS":
-                    ptaSubmissionProvider.showSubmission(data!);
-                    explorerController.refreshTreeData();
+                    PtaSubmissionProvider.createOrUpdate(data!).show().then(() => {
+                        explorerController.refreshTreeData();
+                    });
                     break;
                 default:
                     vscode.window.showInformationMessage("submission failed!");
@@ -162,7 +164,7 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
         await ptaExecutor.testSolution(ptaCode.psID, ptaCode.pID, solution, (msg: string, data?: IProblemSubmissionResult) => {
             switch (msg) {
                 case "SUCCESS":
-                    ptaTestProvider.showTestResult(data!, testOutput);
+                    PtaTestProvider.createOrUpdate(new TestView(data!, testOutput)).show();
                     break;
                 default:
             }
@@ -186,7 +188,7 @@ export async function testCustomSample(ptaCode: IPtaCode, index: number): Promis
         await ptaExecutor.testSolution(ptaCode.psID, ptaCode.pID, solution, (msg: string, data?: IProblemSubmissionResult) => {
             switch (msg) {
                 case "SUCCESS":
-                    ptaTestProvider.showTestResult(data!);
+                    PtaTestProvider.createOrUpdate(new TestView(data!)).show();
                     break;
                 default:
             }
