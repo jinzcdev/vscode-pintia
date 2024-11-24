@@ -7,24 +7,23 @@ export interface IProblemCode {
 }
 
 export interface IProblemSubmissionDetail {
-    problemId: string;
     problemSetProblemId: string;
-    codeCompletionSubmissionDetail?: SubmissionDetail;
-    programmingSubmissionDetail?: SubmissionDetail;
-    multipleFileSubmissionDetail?: MultipleFileSubmissionDetail;
-
+    codeCompletionSubmissionDetail?: ICodeCompletionAndProgrammingSubmissionDetail;
+    programmingSubmissionDetail?: ICodeCompletionAndProgrammingSubmissionDetail;
+    multipleFileSubmissionDetail?: IMultipleFileSubmissionDetail;
     customTestData?: {
         hasCustomTestData: boolean;
         content: string;
     }
+    problemId: string;
 }
 
-interface SubmissionDetail {
+interface ICodeCompletionAndProgrammingSubmissionDetail {
     compiler: string;
     program: string;
 }
 
-interface MultipleFileSubmissionDetail {
+interface IMultipleFileSubmissionDetail {
     memoryLimit: number;
     cpuCount: number;
     template: number;
@@ -36,6 +35,9 @@ interface MultipleFileSubmissionDetail {
     originalScore: number;
     compiles: string[];
     tools: string[];
+    answerZip: string;
     withLocalhostNetwork: boolean;
-    fileContents: {}
+    fileContents: {
+        [key: string]: string;
+    };
 }

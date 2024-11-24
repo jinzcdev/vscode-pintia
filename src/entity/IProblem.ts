@@ -4,9 +4,9 @@ export interface IProblem {
     label: string;
     score: number;
     problemConfig: {
-        programmingProblemConfig?: ProblemConfig;
-        codeCompletionProblemConfig?: ProblemConfig;
-        multipleFileProblemConfig?: MultipleFileProblemConfig;
+        programmingProblemConfig?: IProblemConfig;
+        codeCompletionProblemConfig?: IProblemConfig;
+        multipleFileProblemConfig?: IProblemConfig;
         solutionVisible: boolean;
         answerVisible: boolean;
     };
@@ -50,17 +50,27 @@ export interface IProblem {
     },
 }
 
+export interface IProblemConfig extends ICodeCompletionAndProgrammingProblemConfig, IMultipleFileProblemConfig {
+    timeLimit: number;
+    memoryLimit: number;
+    cases: {
+        [key: string]: {
+            hint: string;
+            showHint: boolean;
+            score: number;
+            isPublic: boolean;
+        };
+    };
+    tools: string[];
+}
 
 
 /**
  * programmingProblemConfig
  * codeCompletionProblemConfig
  */
-interface ProblemConfig {
-    timeLimit: number;
-    memoryLimit: number;
+interface ICodeCompletionAndProgrammingProblemConfig {
     codeSizeLimit: number;
-    cases: {};
     exampleTestDatas: [{
         name: string;
         input: string;
@@ -68,16 +78,14 @@ interface ProblemConfig {
     }];
     testdataDescriptionCode: string;
     customizeLimits: [];
-    stackSizeLimit: 0;
-    tools: [];
+    stackSizeLimit: number;
     ignorePresentationError: boolean;
 }
 
 /**
  * multipleFileProblemConfig
  */
-interface MultipleFileProblemConfig {
-    memoryLimit: number;
+interface IMultipleFileProblemConfig {
     cpuCount: number;
     template: string;
     files: [{
@@ -87,9 +95,10 @@ interface MultipleFileProblemConfig {
     judgeZip: string,
     originalScore: 100,
     compiles: string[];
-    tools: string[];
     withLocalhostNetwork: boolean;
-    fileContents: {}
+    fileContents: {
+        [key: string]: string;
+    };
 }
 
 interface Organization {

@@ -4,6 +4,24 @@
 
 ---
 
+## [0.5.5] - 2024/11/24
+
+### Added
+
+- Added configuration item `pintia.codeColorTheme` for code preview themes, supporting themes: `atom-one`, `github`, `a11y`, `stackoverflow`, `kimbie`
+
+### Updated
+
+- The webview title of the problem preview now displays the problem name
+
+### Fixed
+
+- Modified the style of the problem preview
+- Fixed the issue where images could not be displayed in certain situations
+- Corrected the problem's jump link
+
+---
+
 ## [0.5.4] - 2023/09/10
 
 ### Bug

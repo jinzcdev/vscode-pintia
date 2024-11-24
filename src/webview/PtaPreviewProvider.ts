@@ -1,33 +1,64 @@
 import * as vscode from "vscode";
 import { ptaConfig } from '../ptaConfig';
-import { IPtaCode, langCompilerMapping, ProblemType } from '../shared';
+import { colorThemeMapping, imgUrlPrefix, langCompilerMapping, ProblemType } from '../shared';
+import { ptaApi } from "../utils/api";
 import { markdownEngine } from './markdownEngine';
 import { PtaWebview } from './PtaWebview';
 import { ProblemView } from "./views/ProblemView";
-import { getGlobalContext } from "../extension";
+import { ColorThemeKind } from "vscode";
 
-class PtaPreviewProvider extends PtaWebview {
+export class PtaPreviewProvider extends PtaWebview<ProblemView> {
 
-    private ptaCode?: IPtaCode;
-    public async showPreview(psID: string, pID: string) {
-        const problem = new ProblemView(psID, pID);
-        await problem.fetch();
+    private activeColorTheme: string = "atom-one-dark.css";
 
-        const compiler: string = langCompilerMapping.get(ptaConfig.getDefaultLanguage()) ?? "GXX";
-        this.ptaCode = {
-            pID: problem.id,
-            psID: problem.problemSetId,
-            psName: problem.problemSetName,
-            problemType: problem.type as ProblemType,
-            compiler: compiler,
-            title: problem.label + " " + problem.title
-        };
-        this.data = {
-            title: problem.label,
-            content: this.getContent(problem),
-            style: this.getStyle()
+    private static instance: PtaPreviewProvider | null = null;
+
+    constructor(view: ProblemView) {
+        super(view);
+        vscode.window.onDidChangeActiveColorTheme((e) => {
+            const mapping = colorThemeMapping.get(ptaConfig.getCodeColorTheme());
+            if (!mapping) {
+                return;
+            }
+            this.activeColorTheme = mapping[e.kind === vscode.ColorThemeKind.Light ? 0 : 1];
+            this.show();
+        });
+        vscode.workspace.onDidChangeConfiguration((e) => {
+            if (e.affectsConfiguration("pintia.codeColorTheme")) {
+                const colorThemeKind: ColorThemeKind = vscode.window.activeColorTheme.kind;
+                const mapping = colorThemeMapping.get(ptaConfig.getCodeColorTheme());
+                if (!mapping) {
+                    return;
+                }
+                this.activeColorTheme = mapping[colorThemeKind === vscode.ColorThemeKind.Light ? 0 : 1];
+                this.show();
+            }
+        });
+    }
+
+    public static createOrUpdate(view: ProblemView): PtaPreviewProvider {
+        if (!PtaPreviewProvider.instance) {
+            PtaPreviewProvider.instance = new PtaPreviewProvider(view);
         }
-        this.show();
+        PtaPreviewProvider.instance.updateView(view);
+        return PtaPreviewProvider.instance;
+    }
+
+    protected async loadViewData(problem: ProblemView): Promise<void> {
+        const compiler: string = langCompilerMapping.get(ptaConfig.getDefaultLanguage()) ?? "GXX";
+        await problem.fetch();
+        this.data = {
+            title: `${problem.label} ${problem.title}`,
+            ptaCode: {
+                pID: problem.id,
+                psID: problem.problemSetId,
+                psName: problem.problemSetName,
+                problemType: problem.type as ProblemType,
+                compiler: compiler,
+                title: `${problem.label} ${problem.title}`
+            },
+            problem: problem
+        };
     }
 
     private formatMarkdown(str: string): string {
@@ -35,24 +66,27 @@ class PtaPreviewProvider extends PtaWebview {
             match.substring(2, match.length - 2),
             { throwOnError: false }
         );
+
+        const convertImageSyntax = (match: string, alt: string, link: string) => {
+            link = link.trim();
+            if (link.startsWith("http")) {
+                return `<img alt="${alt}" src="${link}">`;
+            }
+            let i = link.length - 1;
+            while (i >= 0 && link[i] !== "/") i--;
+            return `<img alt="${alt}" src="${imgUrlPrefix}/${link.substring(i + 1)}">`;
+        };
+
         return str
             .replace(/\${2}(.+?)\${2}/g, convertTexMath)
-            .replace(/###\s(\u8F93\u5165\u6837|Sample\sIn)/g, '\n\n------\n\n### $1'); // \u8F93\u5165\u6837 -> 输入样
+            .replace(/###\s(\u8F93\u5165\u6837|Sample\sIn)/g, '\n\n------\n\n### $1') // \u8F93\u5165\u6837 -> 输入样例
+            .replace(/!\[([^\]]*)\]\((.*?)\)/g, convertImageSyntax);
     }
 
-    private getMediaPath(mediaFile: string, defaultUri: string = ""): vscode.Uri {
-        const webview: vscode.Webview | undefined = this.getWebview();
-        if (!webview) {
-            return vscode.Uri.parse(defaultUri);
-        }
-        return webview.asWebviewUri(vscode.Uri.joinPath(getGlobalContext().extensionUri, 'media', mediaFile));
-    }
+    protected getStyle(): string {
 
-
-    protected getStyle(data?: any): string {
-
-        const katexCssPath = this.getMediaPath('katex.min.css', '');
-        const highlightCssPath = this.getMediaPath('atom-one-light.css', '');
+        const katexCssPath = this.getWebview()?.asWebviewUri(vscode.Uri.parse(require.resolve("katex/dist/katex.min.css")));
+        const highlightCssPath = this.getWebview()?.asWebviewUri(vscode.Uri.parse(require.resolve(`highlight.js/styles/${this.activeColorTheme}`)));
 
         return `
             <link rel="stylesheet" href="${katexCssPath}">
@@ -221,21 +255,22 @@ class PtaPreviewProvider extends PtaWebview {
         </style>`
     }
 
-    protected getContent(data: ProblemView): string {
-        const keyword: string = `${data.label} ${data.title}`.replace(/ /g, '+');
+    protected getContent(): string {
+        const problem = this.data.problem as ProblemView;
+        const keyword: string = `${problem.label} ${problem.title}`.replace(/ /g, '+');
         return `
             <div class="banner" >
                 <div class="banner-header">
-                    ${markdownEngine.render(`# [${data.title}](https://pintia.cn/problem-sets/${data.problemSetId}/exam/problems/${data.id})`)}
+                    ${markdownEngine.render(`# [${problem.title}](${ptaApi.getProblemURL(problem.problemSetId, problem.id, problem.type)})`)}
                 </div>
                 <div class="ques-info">
-                    <div class="detail">分数 ${data.score} &nbsp; 提交人数 ${data.submitCount} &nbsp; 通过人数 ${data.acceptCount} &nbsp; 通过率 ${data.submitCount === 0 ? 0 : (data.acceptCount / data.submitCount * 100).toFixed(2)}%</div>
-                    <div class="department">作者 ${data.author} &nbsp;&nbsp;&nbsp; 单位 ${data.organization}</div>
+                    <div class="detail">分数 ${problem.score} &nbsp; 提交人数 ${problem.submitCount} &nbsp; 通过人数 ${problem.acceptCount} &nbsp; 通过率 ${problem.submitCount === 0 ? 0 : (problem.acceptCount / problem.submitCount * 100).toFixed(2)}%</div>
+                    <div class="department">作者 ${problem.author} &nbsp;&nbsp;&nbsp; 单位 ${problem.organization}</div>
                 </div>
                 <hr class="banner-line"></hr>
             </div>
 
-            ${markdownEngine.render(this.formatMarkdown(data.content))}
+            ${markdownEngine.render(this.formatMarkdown(problem.content))}
 
 
             ${markdownEngine.render([
@@ -246,21 +281,21 @@ class PtaPreviewProvider extends PtaWebview {
             " | ",
             `[Bing](https://cn.bing.com/search?q=${keyword})`,
             " | ",
-            `[Solution](https://github.com/jinzcdev/PTA/tree/main/${this.formatProblemSetName(data.problemSetName)})`
+            `[Solution](https://github.com/jinzcdev/PTA/tree/main/${this.formatProblemSetName(problem.problemSetName)})`
         ].join("\n"))}
 
-            ${data.problemNote ? `
-                <h3>Problem Note</h3>
+            ${problem.problemNote ? `
+                <h3>我的笔记</h3>
                 <div class="pta-note">
-                    ${markdownEngine.render(data.problemNote)}
+                    ${markdownEngine.render(problem.problemNote)}
                 </div>
             ` : ""}
 
-            ${data.lastProgram.trim().length ?
+            ${problem.lastProgram.trim().length ?
                 markdownEngine.render([
-                    `### Last Submission ${data.lastSubmittedLang.trim().length ? "(" + data.lastSubmittedLang + ")" : ""}`,
-                    "```" + data.lastSubmittedLang,
-                    data.lastProgram,
+                    `### 最后一次提交 ${problem.lastSubmittedLang.trim().length ? "(" + problem.lastSubmittedLang + ")" : ""}`,
+                    "```" + problem.lastSubmittedLang,
+                    problem.lastProgram,
                     "```"
                 ].join("\n")) : ""}
 
@@ -300,7 +335,7 @@ class PtaPreviewProvider extends PtaWebview {
     protected async onDidReceiveMessage(msg: IWebViewMessage): Promise<void> {
         switch (msg.type) {
             case "command":
-                await vscode.commands.executeCommand(msg.value, this.ptaCode);
+                await vscode.commands.executeCommand(msg.value, this.data.ptaCode);
                 break;
             case "text":
                 vscode.window.showInformationMessage(msg.value);
@@ -318,8 +353,6 @@ class PtaPreviewProvider extends PtaWebview {
     }
 
 }
-
-export const ptaPreviewProvider: PtaPreviewProvider = new PtaPreviewProvider();
 
 interface IWebViewMessage {
     type: string; // 'command' or 'text'

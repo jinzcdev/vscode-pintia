@@ -1,20 +1,17 @@
 
+import { EventEmitter } from "events";
+import * as fs from "fs-extra";
+import * as vscode from "vscode";
 import { Disposable } from "vscode";
 import { IProblemSubmission } from "./entity/IProblemSubmission";
 import { IProblemSubmissionResult } from "./entity/IProblemSubmissionResult";
-import { ptaApi } from "./utils/api";
-import * as fs from "fs-extra";
-import { cacheDirPath, CallBack, configPath, ProblemType, PtaLoginMethod } from "./shared";
-import * as path from "path";
-import { IUserSession } from "./entity/userLoginSession";
-import { EventEmitter } from "events";
-import { ptaManager } from "./ptaManager";
 import { IProblemSubmissionDetail } from "./entity/problemSubmissionCode";
-import * as vscode from "vscode";
+import { IUserSession } from "./entity/userLoginSession";
 import { ptaChannel } from "./ptaChannel";
+import { ptaManager } from "./ptaManager";
+import { cacheDirPath, CallBack, ProblemType } from "./shared";
+import { ptaApi } from "./utils/api";
 import { DialogType, promptForOpenOutputChannel } from "./utils/uiUtils";
-import * as cache from "./commands/cache";
-import { UserAuthProviderFactory } from "./auth/UserAuthProviderFactory";
 
 
 class PtaExecutor extends EventEmitter implements Disposable {
