@@ -1,37 +1,51 @@
-import { PtaWebview } from "./PtaWebview";
+import { IProblem, IProblemConfig } from "../entity/IProblem";
 import { IProblemSubmissionResult } from "../entity/IProblemSubmissionResult";
-import { ProblemType, solutionStatusMapping, ptaCompiler, compilerLangMapping } from "../shared";
 import { IProblemSubmissionDetail } from "../entity/problemSubmissionCode";
+import { ProblemType, problemTypeInfoMapping, ptaCompiler, solutionStatusMapping } from "../shared";
+import { ptaApi } from "../utils/api";
 import { markdownEngine } from "./markdownEngine";
+import { PtaWebview } from "./PtaWebview";
 
-class PtaSubmissionProvider extends PtaWebview {
+export class PtaSubmissionProvider extends PtaWebview<IProblemSubmissionResult> {
 
-    public async showSubmission(result: IProblemSubmissionResult) {
+    private static instance: PtaSubmissionProvider | null = null;
+
+    public static createOrUpdate(view: IProblemSubmissionResult): PtaSubmissionProvider {
+        if (!PtaSubmissionProvider.instance) {
+            PtaSubmissionProvider.instance = new PtaSubmissionProvider(view);
+        }
+        PtaSubmissionProvider.instance.updateView(view);
+        return PtaSubmissionProvider.instance;
+    }
+
+    protected async loadViewData(result: IProblemSubmissionResult): Promise<void> {
         const submissionDetail: IProblemSubmissionDetail = result.submission.submissionDetails[0];
         const judgeResponseContent = result.submission.judgeResponseContents[0];
         const codeJudgeResponseContent = judgeResponseContent.programmingJudgeResponseContent ??
             judgeResponseContent.codeCompletionJudgeResponseContent;
         const testcaseJudgeResults = codeJudgeResponseContent!.testcaseJudgeResults;
 
+        const psID = result.submission.problemSetId, pID = result.submission.problemSetProblemId;
+        const problem: IProblem = await ptaApi.getProblem(psID, pID);
+
+        const prefix: string = problemTypeInfoMapping.get(result.submission.problemType)?.prefix ?? "";
+        const problemConfig: IProblemConfig = problem.problemConfig[`${prefix}ProblemConfig` as keyof typeof problem.problemConfig] as IProblemConfig;
+        const testCases = problemConfig && typeof problemConfig === 'object' ? problemConfig.cases : [];
+
         const hints = result.submission.hints;
-        let isHint: boolean = hints.length > 0;
-        if (isHint) {
-            let allEmpty: boolean = true;
-            for (const k of Object.keys(hints)) {
-                if (hints[k].trim().length !== 0) {
-                    allEmpty = false;
-                    break;
-                }
-            }
-            isHint = !allEmpty;
-        }
+        const isHint: boolean = Object.values(hints).some((hint: any) => typeof hint === "string" && hint.trim().length > 0);
         this.data = {
-            title: "Submission",
-            style: this.getStyle({ isHint: isHint }),
-            content: this.getContent({
+            title: `提交结果 | ${problem.title}`,
+            isHint: isHint,
+            content: {
+                totalScore: problem.score,
+                timeLimit: problemConfig.timeLimit,
+                memoryLimit: problemConfig.memoryLimit,
+                nickname: result.examMember.user.nickname,
                 submitAt: result.submission.submitAt,
                 status: judgeResponseContent.status,
                 score: judgeResponseContent.score,
+                testCases: testCases,
                 testcaseJudgeResults: testcaseJudgeResults,
                 hints: result.submission.hints,
                 problemType: result.submission.problemType,
@@ -42,13 +56,11 @@ class PtaSubmissionProvider extends PtaWebview {
                 program: result.submission.problemType === ProblemType.PROGRAMMING ?
                     submissionDetail.programmingSubmissionDetail!.program :
                     submissionDetail.codeCompletionSubmissionDetail!.program
-            })
+            }
         };
-
-        this.show()
     }
 
-    protected getStyle(data?: any): string {
+    protected getStyle(): string {
         return `
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/styles/atom-one-light.min.css">
             <style>
@@ -90,7 +102,7 @@ class PtaSubmissionProvider extends PtaWebview {
                     padding: 16px;
                 }
 
-                ${data.isHint ? "" : " .visible { display: none; } "}
+                ${this.data.isHint ? "" : " .visible { display: none; } "}
 
                 .code-block {
                     border: 0.5px solid var(--border-color);
@@ -109,6 +121,7 @@ class PtaSubmissionProvider extends PtaWebview {
                     color: var(--vscode-editor-color);
                     overflow: scroll;
                     display: block;
+                    background-color: transparent;
                 }
 
                 .build-output code {
@@ -129,22 +142,29 @@ class PtaSubmissionProvider extends PtaWebview {
             </style>`;
     }
 
-    protected getContent(data?: any): string {
-        const compiler: any = ptaCompiler[data.compiler as keyof typeof ptaCompiler];
+    protected getContent(): string {
+        const content = this.data.content;
+        const compiler: any = ptaCompiler[content.compiler as keyof typeof ptaCompiler];
         let cases: string = "";
-        for (const i in data.testcaseJudgeResults) {
-            const element = data.testcaseJudgeResults[i];
+        for (const i in content.testcaseJudgeResults) {
+            const testcaseJudgeResult = content.testcaseJudgeResults[i];
+            const testCase = content.testCases[i];
+            const scoreText = testCase !== undefined ? `${testcaseJudgeResult.testcaseScore} / ${testCase.score}` : testcaseJudgeResult.testcaseScore;
             cases += `
             <tr>
                 <td>${i}</td>
-                <td class="visible">${data.hints[i]}</td>
-                ${solutionStatusMapping.get(element.result)}
-                <td>${element.testcaseScore}</td>
-                <td>${(element.time * 1000).toFixed()}ms</td>
-                <td>${element.memory / 1024}KB</td>
+                <td class="visible">${content.hints[i]}</td>
+                ${solutionStatusMapping.get(testcaseJudgeResult.result)}
+                <td>${scoreText}</td>
+                <td>${(testcaseJudgeResult.time * 1000).toFixed()}ms</td>
+                <td>${testcaseJudgeResult.memory / 1024}KB</td>
             </tr>
             `;
         }
+
+        const scoreText = content.totalScore ? `${content.score} / ${content.totalScore}` : content.score;
+        const timeText = content.timeLimit ? `${(content.time * 1000).toFixed()} / ${content.timeLimit}ms` : `${(content.time * 1000).toFixed()}ms`;
+
         return `
 
         <div>
@@ -161,19 +181,19 @@ class PtaSubmissionProvider extends PtaWebview {
                 </thead>
                 <tbody>
                     <tr>
-                        <td>${this.formatDate(new Date(data.submitAt))}</td>
-                        ${solutionStatusMapping.get(data.status)}
-                        <td>${data.score}</td>
-                        <td>${data.problemType === "PROGRAMMING" ? "编程题" : "函数题"}</td>
+                        <td>${this.formatDate(new Date(content.submitAt))}</td>
+                        ${solutionStatusMapping.get(content.status)}
+                        <td>${scoreText}</td>
+                        <td>${problemTypeInfoMapping.get(content.problemType)?.name ?? "Unknown"}</td>
                         <td>${compiler.language} (${compiler.displayName})</td>
-                        <td>${(data.time * 1000).toFixed()}ms</td>
-                        <td></td>
+                        <td>${timeText}</td>
+                        <td>${content.nickname}</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <div ${data.status === "COMPILE_ERROR" ? "style='display: none;'" : ""}" >
+        <div ${content.status === "COMPILE_ERROR" ? "style='display: none;'" : ""}" >
             <h2>单点测试得分</h2>
             <table>
                 <thead>
@@ -194,12 +214,12 @@ class PtaSubmissionProvider extends PtaWebview {
 
         <h2>编译器输出</h2>
         <div class="code-block build-output">
-            <pre><code>${data.compilationOutput}</code></pre>
+            <pre><code>${content.compilationOutput}</code></pre>
         </div>
 
         <h2>代码</h2>
         <div class="code-block code-preview">
-            ${markdownEngine.render(["```" + compiler.language, data.program, "```"].join("\n"))}
+            ${markdownEngine.render(["```" + compiler.language, content.program, "```"].join("\n"))}
         </div>
         `
     }
@@ -215,5 +235,3 @@ class PtaSubmissionProvider extends PtaWebview {
         return `${year}/${month}/${day} ${f(hour)}:${f(minute)}:${f(second)}`;
     }
 }
-
-export const ptaSubmissionProvider: PtaSubmissionProvider = new PtaSubmissionProvider()

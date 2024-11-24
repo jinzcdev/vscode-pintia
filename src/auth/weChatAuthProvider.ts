@@ -2,8 +2,9 @@ import { AuthStatus, IUserSession, IWechatAuth, IWechatUserInfo, IWechatUserStat
 import { ptaChannel } from "../ptaChannel";
 import { PtaLoginMethod } from "../shared";
 import { ptaApi } from "../utils/api";
-import { promptForOpenOutputChannel, DialogType } from "../utils/uiUtils";
-import { ptaLoginProvider } from "../webview/ptaLoginProvider";
+import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
+import { PtaLoginProvider } from "../webview/PtaLoginProvider";
+import { LoginView } from "../webview/views/LoginView";
 import { IUserAuthProvider } from "./IUserAuthProvider";
 
 class WeChatAuthProvider implements IUserAuthProvider {
@@ -12,7 +13,8 @@ class WeChatAuthProvider implements IUserAuthProvider {
         return new Promise(async (resolve, reject) => {
             try {
                 const auth: IWechatAuth = await ptaApi.getWechatAuth();
-                await ptaLoginProvider.showQRCode(auth.url);
+                const ptaLoginProvider = PtaLoginProvider.createOrUpdate(new LoginView(auth.url));
+                await ptaLoginProvider.show();
                 let userSession: IUserSession | undefined;
                 let logged: boolean = false, cnt: number = 0;
                 let interval = setInterval(async () => {

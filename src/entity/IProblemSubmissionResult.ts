@@ -1,88 +1,89 @@
 import { IProblemSubmissionDetail } from "./problemSubmissionCode";
 
+
 export interface IProblemSubmissionResult {
+    publicCases: {
+        [key: string]: boolean;
+    };
     queued: number;
-    submission: {
+    submission: ISubmission;
+    examMember: IExamMember;
+}
+
+interface ICompilationResult {
+    log: string;
+    success: boolean;
+    error: string;
+}
+
+interface ICodeCompletionAndProgrammingJudgeResponseContent {
+    compilationResult: ICompilationResult;
+    checkerCompilationResult: ICompilationResult;
+    testcaseJudgeResults: {
+        [key: string]: {
+            result: string;
+            exceed: string;
+            time: number;
+            memory: number;
+            exitcode: number;
+            termsig: number;
+            error: string;
+            stdout: string;
+            stderr: string;
+            checkerOutput: string;
+            testcaseScore: number;
+            stdoutTruncated: boolean;
+            stderrTruncated: boolean;
+            showOutput: boolean;
+        };
+    };
+}
+
+interface IJudgeResponseContent {
+    status: string;
+    score: number;
+    codeCompletionJudgeResponseContent?: ICodeCompletionAndProgrammingJudgeResponseContent;
+    programmingJudgeResponseContent?: ICodeCompletionAndProgrammingJudgeResponseContent;
+    multipleFileJudgeResponseContent?: {
+        stderr: string;
+        stdout: string;
+        info: string;
+    };
+    problemSetProblemId: string;
+}
+
+interface ISubmission {
+    id: string;
+    userId: string;
+    problemType: string;
+    problemSetProblemId: string;
+    submitAt: string;
+    status: string;
+    score: number;
+    compiler: string;
+    time: number;
+    memory: number;
+    submissionDetails: IProblemSubmissionDetail[];
+    judgeResponseContents: IJudgeResponseContent[];
+    hints: {
+        [key: string]: string;
+    };
+    problemSetId: string;
+    previewSubmission: boolean;
+    cause: string;
+    judgeAt: string;
+}
+
+interface IExamMember {
+    user: {
         id: string;
-        user: {
-            studentUser: {
-                studentNumber: string;
-                name: string;
-                id: string;
-            }
-        };
-        problemType: string;
-        problemSetProblem: {
-            id: string;
-            label: string;
-            type: string; // PROGRAMMING or CODE_COMPLETION
-            problemPoolIndex: number;
-            indexInProblemPool: number;
-        };
-        submitAt: string;
-        status: string;
-        score: number;
-        compiler: string;
-        time: number;
-        memory: number;
-        submissionDetails: IProblemSubmissionDetail[];
-        judgeResponseContents: [{
-            status: string;
-            score: number;
-            // "codeCompletionJudgeResponseContent" or "programmingJudgeResponseContent"
-            codeCompletionJudgeResponseContent?: JudgeResponseContent;
-            programmingJudgeResponseContent?: JudgeResponseContent;
-            multipleFileJudgeResponseContent?: MultipleFileJudgeResponseContent;
-            problemSetProblemId: string;
-        }];
-        hints: any;
-        // {
-        //     0: "sample 满3位没有0",
-        // };
-        problemSetId: string;
-        previewSubmission: boolean;
-        cause: string;
+        nickname: string;
     };
-    error?: {
-        code: string;
-        message: string;
-    }
-}
-
-interface JudgeResponseContent {
-    compilationResult: {
-        log: string;
-        success: boolean;
-        error: string;
-    },
-    checkerCompilationResult: {
-        log: string;
-        success: boolean;
-        error: string;
-    },
-    testcaseJudgeResults: any;
-    /*
-    {
-    "0": {
-        "result": "ACCEPTED",
-        "exceed": "UNKNOWN_TESTCASE_EXCEED",
-        "time": 0.004,
-        "memory": 466944,
-        "exitcode": 0,
-        "termsig": 0,
-        "error": "",
-        "stdout": "",
-        "stderr": "",
-        "checkerOutput": "",
-        "testcaseScore": 12,
-        "stdoutTruncated": false,
-        "stderrTruncated": false
+    studentUser: {
+        studentNumber: string;
+        name: string;
+        id: string;
     };
-    */
-}
-
-interface MultipleFileJudgeResponseContent {
-    stderr: string;
-    stdout: string;
-    info: string;
+    userGroupId: string;
+    examId: string;
 }
