@@ -6,7 +6,7 @@ export abstract class PtaWebview<T> implements Disposable {
     private currentPanel: vscode.WebviewPanel | undefined = undefined;
     private listeners: Disposable[] = [];
     private callback?: (data?: any) => void;
-    
+
     protected data: any;
     protected abstract getStyle(): string;
     protected abstract getContent(): string;
@@ -15,12 +15,12 @@ export abstract class PtaWebview<T> implements Disposable {
     protected constructor(private view: T) {
     }
 
-    public async show(): Promise<void> {
+    public async show(focused: boolean = true): Promise<void> {
         await this.loadViewData(this.view);
         if (this.currentPanel) {
             this.currentPanel.title = `PTA: ${this.data.title}`;
             this.currentPanel.webview.html = await this.getWebviewContent();
-            this.currentPanel.reveal(vscode.ViewColumn.One);
+            focused && this.currentPanel.reveal(vscode.ViewColumn.One);
             return;
         }
         this.currentPanel = vscode.window.createWebviewPanel(

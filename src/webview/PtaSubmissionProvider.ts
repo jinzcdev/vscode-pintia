@@ -1,12 +1,13 @@
+import * as vscode from "vscode";
 import { IProblem, IProblemConfig } from "../entity/IProblem";
 import { IProblemSubmissionResult } from "../entity/IProblemSubmissionResult";
 import { IProblemSubmissionDetail } from "../entity/problemSubmissionCode";
 import { ProblemType, problemTypeInfoMapping, ptaCompiler, solutionStatusMapping } from "../shared";
 import { ptaApi } from "../utils/api";
+import { PtaWebviewWithCodeStyle } from "./PtaWebviewWithCodeStyle";
 import { markdownEngine } from "./markdownEngine";
-import { PtaWebview } from "./PtaWebview";
 
-export class PtaSubmissionProvider extends PtaWebview<IProblemSubmissionResult> {
+export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmissionResult> {
 
     private static instance: PtaSubmissionProvider | null = null;
 
@@ -61,8 +62,11 @@ export class PtaSubmissionProvider extends PtaWebview<IProblemSubmissionResult> 
     }
 
     protected getStyle(): string {
+
+        const highlightCssPath = this.getWebview()?.asWebviewUri(vscode.Uri.parse(require.resolve(`highlight.js/styles/${this.activeColorTheme}`)));
+
         return `
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/styles/atom-one-light.min.css">
+            <link rel="stylesheet" href="${highlightCssPath}">
             <style>
                 :root {
                     --border-color: rgba(121, 121, 121, 0.12);
