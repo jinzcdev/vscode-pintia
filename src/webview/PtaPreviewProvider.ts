@@ -1,40 +1,14 @@
 import * as vscode from "vscode";
 import { ptaConfig } from '../ptaConfig';
-import { colorThemeMapping, imgUrlPrefix, langCompilerMapping, ProblemType } from '../shared';
+import { imgUrlPrefix, langCompilerMapping, ProblemType } from '../shared';
 import { ptaApi } from "../utils/api";
+import { PtaWebviewWithCodeStyle } from "./PtaWebviewWithCodeStyle";
 import { markdownEngine } from './markdownEngine';
-import { PtaWebview } from './PtaWebview';
 import { ProblemView } from "./views/ProblemView";
-import { ColorThemeKind } from "vscode";
 
-export class PtaPreviewProvider extends PtaWebview<ProblemView> {
-
-    private activeColorTheme: string = "atom-one-dark.css";
+export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
 
     private static instance: PtaPreviewProvider | null = null;
-
-    constructor(view: ProblemView) {
-        super(view);
-        vscode.window.onDidChangeActiveColorTheme((e) => {
-            const mapping = colorThemeMapping.get(ptaConfig.getCodeColorTheme());
-            if (!mapping) {
-                return;
-            }
-            this.activeColorTheme = mapping[e.kind === vscode.ColorThemeKind.Light ? 0 : 1];
-            this.show();
-        });
-        vscode.workspace.onDidChangeConfiguration((e) => {
-            if (e.affectsConfiguration("pintia.codeColorTheme")) {
-                const colorThemeKind: ColorThemeKind = vscode.window.activeColorTheme.kind;
-                const mapping = colorThemeMapping.get(ptaConfig.getCodeColorTheme());
-                if (!mapping) {
-                    return;
-                }
-                this.activeColorTheme = mapping[colorThemeKind === vscode.ColorThemeKind.Light ? 0 : 1];
-                this.show();
-            }
-        });
-    }
 
     public static createOrUpdate(view: ProblemView): PtaPreviewProvider {
         if (!PtaPreviewProvider.instance) {
