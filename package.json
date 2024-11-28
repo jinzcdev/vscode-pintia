@@ -2,7 +2,7 @@
     "name": "vscode-pintia",
     "displayName": "Pintia",
     "description": "%description%",
-    "version": "0.5.5",
+    "version": "0.5.6",
     "author": "Zhichao Jin",
     "publisher": "jinzcdev",
     "license": "MIT",
@@ -22,6 +22,7 @@
         "algorithm",
         "oj",
         "拼题",
+        "拼题A",
         "刷题"
     ],
     "preview": true,
