@@ -4,6 +4,14 @@
 
 ---
 
+## [0.5.6] - 2024/11/28
+
+### Fixed
+
+- Fixed the code style issue in the webview of the submission page
+
+---
+
 ## [0.5.5] - 2024/11/24
 
 ### Added
