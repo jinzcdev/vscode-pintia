@@ -56,7 +56,6 @@ export class PtaTestProvider extends PtaWebview<TestView> {
                 }
 
                 html {
-                    font-family: 'Harmony', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
                     width: 90%;
                     margin: 0 auto;
                     font-size: 15px;
@@ -93,7 +92,9 @@ export class PtaTestProvider extends PtaWebview<TestView> {
                     border: 0.5px solid var(--border-color);
                     margin-top: 15px;
                     padding: 12px;
-                    font-size: 16px;
+                    overflow: auto;
+                    font-size: 15px;
+                    max-height: 250px;
                 }
 
                 pre, code {
@@ -102,11 +103,10 @@ export class PtaTestProvider extends PtaWebview<TestView> {
                 }
 
                 code {
-                    color: var(--vscode-editor-color)
-                    max-height: 250px;
-                    overflow: scroll;
+                    color: var(--vscode-editor-color);
                     display: block;
                     background-color: transparent;
+                    font-family: var(--vscode-editor-font-family, "SF Mono", Monaco, Menlo, Consolas, "Ubuntu Mono", "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace);
                 }
             </style>`;
     }

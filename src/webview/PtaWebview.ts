@@ -80,5 +80,19 @@ export abstract class PtaWebview<T> implements Disposable {
         this.view = view;
     }
 
-    protected async onDidReceiveMessage(_msg: any): Promise<void> { }
+    protected async onDidReceiveMessage(_msg: IWebViewMessage): Promise<void> { }
+}
+
+export function getNonce() {
+    let text = '';
+    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    for (let i = 0; i < 32; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    return text;
+}
+
+export interface IWebViewMessage {
+    type: string; // 'command' or 'text'
+    value: string; // the value of `type`
 }
