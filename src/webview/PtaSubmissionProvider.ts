@@ -6,6 +6,8 @@ import { ProblemType, problemTypeInfoMapping, ptaCompiler, solutionStatusMapping
 import { ptaApi } from "../utils/api";
 import { PtaWebviewWithCodeStyle } from "./PtaWebviewWithCodeStyle";
 import { markdownEngine } from "./markdownEngine";
+import { getNonce, IWebViewMessage } from "./PtaWebview";
+import { getGlobalContext } from "../extension";
 
 export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmissionResult> {
 
@@ -62,88 +64,7 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
     }
 
     protected getStyle(): string {
-
-        const highlightCssPath = this.getWebview()?.asWebviewUri(vscode.Uri.parse(require.resolve(`highlight.js/styles/${this.activeColorTheme}`)));
-
-        return `
-            <link rel="stylesheet" href="${highlightCssPath}">
-            <style>
-                :root {
-                    --border-color: rgba(121, 121, 121, 0.12);
-                }
-
-                .vscode-light {
-                    --border-color: hsla(0, 0%, 0%, 0.06);
-                }
-
-                html {
-                    font-family: 'Harmony', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-                    width: 90%;
-                    margin: 0 auto 35px;
-                }
-
-                h2 {
-                    color: var(--vscode-foreground);
-                    font-size: 18px;
-                    margin: 0 auto;
-                    margin-top: 35px;
-                }
-
-                table {
-                    width: 95%;
-                    margin: 0 auto;
-                    border-collapse: collapse;
-                    text-align: center;
-                    font-size: 14px;
-                }
-
-                thead {
-                    font-size: 15px;
-                }
-
-                th, td {
-                    border-bottom: 0.8px solid var(--border-color);
-                    padding: 16px;
-                }
-
-                ${this.data.isHint ? "" : " .visible { display: none; } "}
-
-                .code-block {
-                    border: 0.5px solid var(--border-color);
-                    margin-top: 15px;
-                    padding: 12px;
-                    font-size: 14px;
-                }
-
-                pre, code {
-                    margin: 0;
-                    padding: 0;
-                }
-
-                code {
-                    font-family: var(--vscode-editor-font-family);
-                    color: var(--vscode-editor-color);
-                    overflow: scroll;
-                    display: block;
-                    background-color: transparent;
-                }
-
-                .build-output code {
-                    max-height: 265px;
-                }
-
-                .code-preview code {
-                    line-height: 1.357em;
-                    border-radius: 0.1875rem;
-                    color: var(--vscode-editor-foreground);
-                    margin: 0 0.125rem;
-                    /* white-space: pre-wrap; */
-                    /* add scroll */
-                    display: block;
-                    overflow: scroll;
-                }
-
-            </style>`;
+        return super.getStyle() + `\n<style>${this.data.isHint ? "" : " .visible { display: none; } "}</style>`;
     }
 
     protected getContent(): string {
@@ -168,6 +89,8 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
 
         const scoreText = content.totalScore ? `${content.score} / ${content.totalScore}` : content.score;
         const timeText = content.timeLimit ? `${(content.time * 1000).toFixed()} / ${content.timeLimit}ms` : `${(content.time * 1000).toFixed()}ms`;
+
+        const copyButtonScriptUri = this.getWebview()?.asWebviewUri(vscode.Uri.joinPath(getGlobalContext().extensionUri, "media", "main.js"));
 
         return `
 
@@ -225,7 +148,18 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
         <div class="code-block code-preview">
             ${markdownEngine.render(["```" + compiler.language, content.program, "```"].join("\n"))}
         </div>
+
+        <script nonce="${getNonce()}" src="${copyButtonScriptUri}"></script>
         `
+    }
+
+    protected async onDidReceiveMessage(msg: IWebViewMessage): Promise<void> {
+        switch (msg.type) {
+            case "text":
+                vscode.window.showInformationMessage(msg.value);
+                break;
+            default:
+        }
     }
 
     private formatDate(date: Date): string {

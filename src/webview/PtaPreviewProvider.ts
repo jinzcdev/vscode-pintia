@@ -5,6 +5,8 @@ import { ptaApi } from "../utils/api";
 import { PtaWebviewWithCodeStyle } from "./PtaWebviewWithCodeStyle";
 import { markdownEngine } from './markdownEngine';
 import { ProblemView } from "./views/ProblemView";
+import { getGlobalContext } from "../extension";
+import { getNonce, IWebViewMessage } from "./PtaWebview";
 
 export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
 
@@ -57,181 +59,10 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
             .replace(/!\[([^\]]*)\]\((.*?)\)/g, convertImageSyntax);
     }
 
-    protected getStyle(): string {
-
-        const katexCssPath = this.getWebview()?.asWebviewUri(vscode.Uri.parse(require.resolve("katex/dist/katex.min.css")));
-        const highlightCssPath = this.getWebview()?.asWebviewUri(vscode.Uri.parse(require.resolve(`highlight.js/styles/${this.activeColorTheme}`)));
-
-        return `
-            <link rel="stylesheet" href="${katexCssPath}">
-            <link rel="stylesheet" href="${highlightCssPath}">
-            <style>
-                .vscode-dark {
-                    /* default .vscode-dark */
-                    --pre-bg-color: rgba(10, 10, 10, 0.4);
-                    --pre-bg-color-hover: rgba(10, 10, 10, 0.5);
-                    --pre-bg-color-active: rgba(10, 10, 10, 0.4);
-                    --pre-border-color: hsla(0, 0%, 0%, 0.06);
-                }
-
-                .vscode-light {
-                    --pre-bg-color: rgba(231, 231, 231, 0.4);
-                    --pre-border-color: rgba(10, 10, 10, 0.05);
-                    --pre-bg-color-hover: rgba(231, 231, 231, 0.7);
-                    --pre-bg-color-active: rgba(231, 231, 231, 0.4);
-                }
-
-                .vscode-high-contrast {
-                    --pre-bg-color: rgba(255, 255, 255, 0);
-                    --pre-border-color: rgb(255, 255, 255);
-                    --pre-bg-color-hover: rgba(255, 255, 255, 0.2);
-                    --pre-bg-color-active: rgba(255, 255, 255, 0.1);
-                }
-                
-                .vscode-high-contrast-light {
-                    --pre-bg-color: rgba(255, 255, 255, 0);
-                    --pre-border-color: rgb(0, 0, 0);
-                    --pre-bg-color-hover: rgba(10, 10, 10, 0.05);
-                    --pre-bg-color-active: rgba(10, 10, 10, 0.02);
-                }
-                
-
-                html {
-                    line-height: 1.5;
-                    padding: 10px 30px;
-                    margin: 0;
-                }
-                
-                h1, h2, h3, h4, h5, h6 {
-                    font-family: inherit;
-                    font-weight: 500;
-                    line-height: 1.2;
-                }
-
-                h1 {
-                    font-size: 30px;
-                    margin-top: 10px;
-                    margin-bottom: 0px;
-                }
-
-                h3 {
-                    margin: 16px 0;
-                    font-size: 20px;
-                }
-
-                hr {
-                    border: 0;
-                    height: 1px;
-                    border-bottom: 1px solid;
-                }
-                
-                a { color: var(--vscode-textLink-foreground); }
-                a:link { text-decoration: none; }
-                a:hover { color: var(--vscode-textLink-activeForeground); }
-                
-                p {
-                    margin: 7.5px 0;
-                    font-size: 16px;
-                    color: inherit;
-                }
-
-                p img {
-                    display: block;
-                    width: 500px;
-                    max-width: 80%;
-                }
-
-                ul, ol { font-size: 15px; }
-                
-                pre {
-                    word-break: initial;
-                    hyphens: none;
-                    position: relative;
-                    overflow: visible;
-                    display: block;
-                    
-                    padding: 0.375rem 0.75rem;
-                    background: hsl(211, 20%, 97%);
-                    border: 1px solid var(--pre-border-color);
-                    border-radius: 0.1875rem;
-                }
-
-                
-                pre code {
-                    font-family: var(--vscode-editor-font-family, "SF Mono", Monaco, Menlo, Consolas, "Ubuntu Mono", "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace);
-                    font-size: 1.05em;
-                    line-height: 1.357em;
-                    border-radius: 0.1875rem;
-                    color: var(--vscode-editor-foreground);
-                    background-color: transparent;
-                    margin: 0 0.125rem;
-                    white-space: pre-wrap;
-
-                    /* add scroll */
-                    display: block;
-                    overflow-x: auto;
-                }
-                pre { background-color: var(--pre-bg-color); }
-                pre:hover { background-color: var(--pre-bg-color-hover); }
-
-                .copy-button {
-                    position: absolute;
-                    right: 5px;
-                    top: 5px;
-                    padding: 1px 5px;
-                    border-radius: 5px;
-                    background-color: #ccc;
-                    cursor: pointer;
-                    z-index: 2;
-                    display: none;
-                }
-
-                pre:hover .copy-button {
-                    display: block;
-                }
-
-                .pta-note {
-                    border: 1px solid var(--vscode-editor-foreground);
-                    border-radius: 5px;
-                    padding: 4px 16px;
-                }
-            </style>
-            
-            <style>
-                #solve {
-                    position: fixed;
-                    bottom: 1rem;
-                    right: 1rem;
-                    border: 0;
-                    margin: 1rem 0;
-                    padding: 0.2rem 1rem;
-                    color: var(--vscode-button-foreground);
-                    background-color: var(--vscode-button-background);
-                }
-                #solve:hover {
-                    background-color: var(--vscode-button-hoverBackground);
-                }
-                #solve:active {
-                    border: 0;
-                }
-		</style>
-
-		<style>
-            .banner .ques-info {
-                /* display & justify-content*/
-                display: flex;
-                justify-content: space-between;
-                margin-top: 8px;
-                font-size: 13px;
-            }
-            .banner .ques-info .detail, .department { display: flex; }
-            .banner-line { margin: 8px auto 10px; }
-        </style>`
-    }
-
     protected getContent(): string {
         const problem = this.data.problem as ProblemView;
         const keyword: string = `${problem.label} ${problem.title}`.replace(/ /g, '+');
+        const copyButtonScriptUri = this.getWebview()?.asWebviewUri(vscode.Uri.joinPath(getGlobalContext().extensionUri, "media", "main.js"));
         return `
             <div class="banner" >
                 <div class="banner-header">
@@ -274,35 +105,7 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
                 ].join("\n")) : ""}
 
             <button id="solve">Code Now</button>
-
-            <script>
-                const vscode = acquireVsCodeApi();
-                const button = document.getElementById('solve');
-                button.onclick = () => {
-                    vscode.postMessage({
-                        type: 'command',
-                        value: 'pintia.codeProblem'
-                    });
-                };
-                
-                var lst_pre = document.getElementsByTagName("pre");
-                for (const pre of lst_pre) {
-                    const copyButton = document.createElement('button');
-                    copyButton.className = 'copy-button';
-                    copyButton.innerText = 'Copy';
-                    copyButton.onclick = (event) => {
-                        event.stopPropagation();
-                        var content = pre.querySelector('code')?.innerText || '';
-                        navigator.clipboard.writeText(content).then(() => {
-                            vscode.postMessage({
-                                type: 'text',
-                                value: 'Successfully copied to the clipboard!'
-                            });
-                        });
-                    };
-                    pre.appendChild(copyButton);
-                }
-            </script>
+            <script nonce="${getNonce()}" src="${copyButtonScriptUri}"></script>
         `;
     }
 
@@ -326,9 +129,4 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
         return name;
     }
 
-}
-
-interface IWebViewMessage {
-    type: string; // 'command' or 'text'
-    value: string; // the value of `type`
 }
