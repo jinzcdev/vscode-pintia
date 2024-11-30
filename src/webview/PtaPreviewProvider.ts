@@ -292,7 +292,7 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
                     copyButton.innerText = 'Copy';
                     copyButton.onclick = (event) => {
                         event.stopPropagation();
-                        var content = pre.innerText;
+                        var content = pre.querySelector('code')?.innerText || '';
                         navigator.clipboard.writeText(content).then(() => {
                             vscode.postMessage({
                                 type: 'text',
