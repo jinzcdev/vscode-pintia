@@ -79,9 +79,9 @@ class PtaAPI {
     }
 
     public async getProblemPermission(psID: string, cookie: string): Promise<number | undefined> {
-        const problemSet: IProblemSet = await httpGet(`https://pintia.cn/api/problem-sets/${psID}/exams`, cookie)
-            .then(json => json["problemSet"]);
-        return problemSet.permission?.permission;
+        const permission = await httpGet(`https://pintia.cn/api/problem-sets/${psID}/exams`, cookie)
+            .then(json => json["permission"]);
+        return permission?.permission ?? -1;
     }
 
     /**
