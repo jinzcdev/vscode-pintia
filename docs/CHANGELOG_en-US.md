@@ -4,6 +4,22 @@
 
 ---
 
+## [0.5.7] - 2024/12/01
+
+### Updated
+
+- The plugin name has been changed to `Pintia (拼题A)`
+
+### Fixed
+
+- Fixed the issue where the locked icon was not displayed for unlocked problem sets in the problem set list
+- Fixed the issue where the `Copy` string was included in the content copied by the Copy button
+- Code on the submission page now supports copying
+- Some latex formulas in problems cannot be parsed
+- Line break issue in problem preview
+
+---
+
 ## [0.5.6] - 2024/11/28
 
 ### Fixed
