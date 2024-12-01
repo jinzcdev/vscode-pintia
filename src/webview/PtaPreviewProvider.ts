@@ -81,14 +81,12 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
 
             ${markdownEngine.render([
             "-----",
-            `[Google](https://www.google.com/search?q=${keyword})`,
-            " | ",
-            `[Baidu](https://www.baidu.com/s?wd=${keyword})`,
-            " | ",
-            `[Bing](https://cn.bing.com/search?q=${keyword})`,
-            " | ",
-            `[Solution](https://github.com/jinzcdev/PTA/tree/main/${this.formatProblemSetName(problem.problemSetName)})`
-        ].join("\n"))}
+            [
+                `[Google](https://www.google.com/search?q=${keyword})`,
+                `[Baidu](https://www.baidu.com/s?wd=${keyword})`,
+                `[Bing](https://cn.bing.com/search?q=${keyword})`,
+                `[Solution](https://github.com/jinzcdev/PTA/tree/main/${this.formatProblemSetName(problem.problemSetName)})`
+            ].join(" | ")].join("\n"))}
 
             ${problem.problemNote ? `
                 <h3>我的笔记</h3>
