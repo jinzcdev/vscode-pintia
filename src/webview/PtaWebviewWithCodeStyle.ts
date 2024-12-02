@@ -3,6 +3,7 @@ import { ptaConfig } from "../ptaConfig";
 import { colorThemeMapping } from "../shared";
 import { PtaWebview } from "./PtaWebview";
 import { getGlobalContext } from "../extension";
+import * as path from 'path';
 
 export abstract class PtaWebviewWithCodeStyle<T> extends PtaWebview<T> {
 
@@ -33,8 +34,8 @@ export abstract class PtaWebviewWithCodeStyle<T> extends PtaWebview<T> {
 
     protected getStyle(): string {
 
-        const katexCssPath = this.getWebview()?.asWebviewUri(vscode.Uri.parse(require.resolve("katex/dist/katex.min.css")));
-        const highlightCssPath = this.getWebview()?.asWebviewUri(vscode.Uri.parse(require.resolve(`highlight.js/styles/${this.activeColorTheme}`)));
+        const katexCssPath = this.getWebview()?.asWebviewUri(vscode.Uri.file(path.resolve(require.resolve("katex/dist/katex.min.css"))));
+        const highlightCssPath = this.getWebview()?.asWebviewUri(vscode.Uri.file(path.resolve(require.resolve(`highlight.js/styles/${this.activeColorTheme}`))));
         const previewCssPath = this.getWebview()?.asWebviewUri(vscode.Uri.joinPath(getGlobalContext().extensionUri, "media", "preview_submission.css"));
 
         return `
