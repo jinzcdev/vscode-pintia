@@ -19,6 +19,8 @@ import { configPath, IPtaCode, UserStatus } from './shared';
 import { ptaStatusBarController } from './statusbar/ptaStatusBarController';
 import { PtaPreviewProvider } from './webview/PtaPreviewProvider';
 import { ProblemView } from "./webview/views/ProblemView";
+import { historyTreeDataProvider } from "./view-history/historyTreeDataProvider";
+import { historyManager } from "./view-history/historyManager";
 
 
 let globalContext: vscode.ExtensionContext;
@@ -35,6 +37,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			explorerController.dispose();
 			vscode.commands.executeCommand('setContext', 'pintia.showWelcome', true);
 		}
+		historyTreeDataProvider.refresh();
 		favoritesTreeDataProvider.refresh();
 		ptaStatusBarController.updateStatusBar(ptaManager.getUserSession());
 	});
@@ -46,6 +49,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		ptaChannel,
 		explorerController,
 		favoriteProblemsManager,
+		historyManager,
+		vscode.window.createTreeView("pintiaProblemHistory", { treeDataProvider: historyTreeDataProvider, showCollapseAll: true }),
 		vscode.window.createTreeView("pintiaMyFavorites", { treeDataProvider: favoritesTreeDataProvider, showCollapseAll: true }),
 		vscode.commands.registerCommand("pintia.openPintiaHome", () => user.openPintiaHome()),
 		vscode.commands.registerCommand("pintia.openExtensionRepo", () => user.openExtensionRepo()),
@@ -53,8 +58,18 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand("pintia.clearCache", () => cache.clearCache()),
 		vscode.commands.registerCommand("pintia.signIn", () => ptaManager.signIn()),
 		vscode.commands.registerCommand("pintia.signOut", () => ptaManager.signOut()),
-		vscode.commands.registerCommand("pintia.previewProblem", (psID: string, pID: string) => {
-			PtaPreviewProvider.createOrUpdate(new ProblemView(psID, pID)).show();
+		vscode.commands.registerCommand("pintia.previewProblem", async (psID: string, pID: string) => {
+			const problemView = await new ProblemView(psID, pID).fetch();
+			PtaPreviewProvider.createOrUpdate(problemView).show().then(() => {
+				historyManager.addProblem(historyManager.getCurrentUserId(), {
+					pID: problemView.id,
+					psID: problemView.problemSetId,
+					psName: problemView.problemSetName,
+					label: problemView.label,
+					title: problemView.title
+				});
+				historyTreeDataProvider.refresh();
+			});
 		}),
 		vscode.commands.registerCommand("pintia.manageUser", () => user.showUserManager()),
 		vscode.commands.registerCommand("pintia.checkIn", () => user.checkInPTA()),

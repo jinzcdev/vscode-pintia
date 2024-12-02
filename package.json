@@ -49,6 +49,11 @@
                     "name": "%contributes.views.pintia.pintiaExplorer%"
                 },
                 {
+                    "id": "pintiaProblemHistory",
+                    "name": "%contributes.views.pintia.pintiaProblemHistory%",
+                    "visibility": "collapsed"
+                },
+                {
                     "id": "pintiaMyFavorites",
                     "name": "%contributes.views.pintia.pintiaMyFavorites%",
                     "visibility": "collapsed"
