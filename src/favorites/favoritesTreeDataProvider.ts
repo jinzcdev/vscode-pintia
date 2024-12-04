@@ -38,7 +38,13 @@ export class FavoritesTreeDataProvider implements vscode.TreeDataProvider<IFavor
         }
         if (!element) {
             // root directory
-            return favoriteProblemsManager.getFavoriteProblems(favoriteProblemsManager.getCurrentUserId());
+            const favoriteProblems = favoriteProblemsManager.getFavoriteProblems(favoriteProblemsManager.getCurrentUserId());
+            const modifiedProblems = favoriteProblems.map((problem, index) => ({
+                ...problem,
+                title: `[${index + 1}] ${problem.title}`
+            }));
+            return modifiedProblems;
+
         }
 
         return null;

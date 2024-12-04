@@ -27,7 +27,7 @@ export class HistoryTreeDataProvider implements vscode.TreeDataProvider<HistoryP
                 arguments: [element.psID, element.pID]
             },
             tooltip: element.psName,
-            contextValue: "problem-favorite"
+            contextValue: "problem-history"
         };
     }
 
@@ -38,7 +38,12 @@ export class HistoryTreeDataProvider implements vscode.TreeDataProvider<HistoryP
         }
         if (!element) {
             // root directory
-            return historyManager.getProblemHistory(historyManager.getCurrentUserId());
+            const problems = historyManager.getProblemHistory(historyManager.getCurrentUserId());
+            const modifiedProblems = problems.map((problem, index) => ({
+                ...problem,
+                label: `[${index + 1}] ${problem.label}`
+            }));
+            return modifiedProblems;
         }
 
         return null;
