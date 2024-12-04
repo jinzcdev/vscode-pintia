@@ -382,6 +382,13 @@
                     "default": true,
                     "scope": "application",
                     "description": "%configuration.pintia.autoCreateProblemSetFolder%"
+                },
+                "pintia.problemHistoryListSize": {
+                    "type": "number",
+                    "default": 200,
+                    "minimum": 0,
+                    "scope": "application",
+                    "description": "%configuration.pintia.problemHistoryListSize%"
                 }
             }
         },

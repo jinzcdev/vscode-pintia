@@ -1,6 +1,6 @@
-
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import * as vscode from "vscode";
 import { Disposable } from 'vscode';
 import { HistoryProblem } from './HistoryProblem';
 import { ptaChannel } from '../ptaChannel';
@@ -8,7 +8,8 @@ import { ptaChannel } from '../ptaChannel';
 import { viewedProblemPath } from '../shared';
 import { DialogType, promptForOpenOutputChannel } from '../utils/uiUtils';
 import { ptaManager } from '../ptaManager';
-
+import { ptaConfig } from '../ptaConfig';
+import { historyTreeDataProvider } from './historyTreeDataProvider';
 
 class HistoryManager implements Disposable {
     private static instance: HistoryManager;
@@ -18,6 +19,12 @@ class HistoryManager implements Disposable {
     private constructor() {
         this.filePath = viewedProblemPath;
         this.load();
+        vscode.workspace.onDidChangeConfiguration((e) => {
+            if (e.affectsConfiguration("pintia.problemHistoryListSize")) {
+                this.trimViewedProblems();
+                historyTreeDataProvider.refresh();
+            }
+        });
     }
 
     public static getInstance(): HistoryManager {
@@ -37,9 +44,7 @@ class HistoryManager implements Disposable {
             problems.splice(index, 1);
         }
         problems.unshift(problem);
-        if (problems.length > 200) {
-            problems.pop();
-        }
+        this.trimViewedProblemsForUser(userId);
     }
 
     public getProblemHistory(userId: string): HistoryProblem[] {
@@ -54,13 +59,13 @@ class HistoryManager implements Disposable {
             } else {
                 const data = fs.readFileSync(this.filePath, 'utf-8');
                 this.viewedProblems = JSON.parse(data);
+                this.trimViewedProblems();
             }
         } catch (error: any) {
             ptaChannel.appendLine(error.toString());
             await promptForOpenOutputChannel("Failed to load viewed problems. Please check the output channel for details.", DialogType.error);
         }
     }
-
 
     private async save() {
         try {
@@ -72,10 +77,22 @@ class HistoryManager implements Disposable {
         }
     }
 
+    private trimViewedProblems() {
+        for (const userId in this.viewedProblems) {
+            this.trimViewedProblemsForUser(userId);
+        }
+    }
+
+    private trimViewedProblemsForUser(userId: string) {
+        const maxSize = ptaConfig.getProblemHistoryListSize();
+        if (this.viewedProblems[userId].length > maxSize) {
+            this.viewedProblems[userId] = this.viewedProblems[userId].slice(0, maxSize);
+        }
+    }
+
     public getCurrentUserId(): string {
         return ptaManager.getUserSession()?.id ?? "";
     }
-
 
     public async dispose() {
         await this.save();
