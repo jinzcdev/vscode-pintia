@@ -48,7 +48,7 @@ class FavoriteProblemsManager implements Disposable {
     }
 
     public getFavoriteProblems(userId: string): IFavoriteProblem[] {
-        return this.favoriteProblems[userId] || [];
+        return this.favoriteProblems[userId] ?? [];
     }
 
     public isProblemFavorite(userId: string, pID: string): boolean {

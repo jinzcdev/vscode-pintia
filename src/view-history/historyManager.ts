@@ -43,7 +43,7 @@ class HistoryManager implements Disposable {
     }
 
     public getProblemHistory(userId: string): HistoryProblem[] {
-        return this.viewedProblems[userId] || [];
+        return this.viewedProblems[userId] ?? [];
     }
 
     private async load() {
