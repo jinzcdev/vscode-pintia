@@ -33,6 +33,7 @@
     "configuration.pintia.searchIndex.ignoreLockedProblemSets": "指定搜索题目时，是否忽略 ***未被解锁的*** 题集。",
     "configuration.pintia.searchIndex.autoRefresh": "指定是否在激活插件时自动刷新题目搜索索引（不推荐设置，因为固定题集更新频率较低且获取索引较耗时）。",
     "configuration.pintia.autoCreateProblemSetFolder": "指定创建题目源文件时是否自动创建其习题集文件夹并将源代码文件放入相应的文件夹中。",
+    "configuration.pintia.problemHistoryListSize": "指定题目预览历史列表的大小。",
     "walkthroughs.title": "开始使用 Pintia 插件",
     "walkthroughs.description": "在 VS Code 中练习 拼题A 的习题",
     "walkthroughs.overview.title": "概述",

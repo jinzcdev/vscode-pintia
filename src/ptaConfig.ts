@@ -125,6 +125,14 @@ class PtaConfig {
     public setCodeColorTheme(codeColorTheme: string) {
         this.update("codeColorTheme", codeColorTheme);
     }
+
+    public getProblemHistoryListSize(): number {
+        return this.getConfiguration().get<number>("problemHistoryListSize", 200);
+    }
+
+    public setProblemHistoryListSize(problemHistoryListSize: number) {
+        this.update("problemHistoryListSize", problemHistoryListSize);
+    }
 }
 
 export const ptaConfig: PtaConfig = new PtaConfig();
