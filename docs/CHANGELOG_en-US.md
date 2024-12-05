@@ -4,6 +4,15 @@
 
 ---
 
+## [0.6.0] - 2024/12/04
+
+### Added
+
+- Added local problem preview history and plugin configuration items
+- Optimized the prefix number of "Favorites" problems
+
+---
+
 ## [0.5.7] - 2024/12/01
 
 ### Updated

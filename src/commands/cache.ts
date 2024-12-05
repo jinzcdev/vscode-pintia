@@ -4,7 +4,7 @@ import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs-extra";
-import { searchIndexPath, ZOJ_PROBLEM_SET_ID } from "../shared";
+import { ProblemPermissionEnum, searchIndexPath, ZOJ_PROBLEM_SET_ID } from "../shared";
 import { ptaChannel } from "../ptaChannel";
 import { ptaApi } from "../utils/api";
 import { ptaConfig } from "../ptaConfig";
@@ -52,8 +52,7 @@ export async function refreshProblemSearchIndex(): Promise<void> {
                 const problemSets: IProblemSet[] = await ptaApi.getAllProblemSets(ptaManager.getUserSession()?.cookie);
                 const problemSetAllowedIndex: string[] = [];
                 for (const pbs of problemSets) {
-                    if ((ignoredZOJ && pbs.id === ZOJ_PROBLEM_SET_ID)
-                        || (ignoredLocked && (pbs.permission?.permission ?? 0) === 9)) {
+                    if (ignoredZOJ && pbs.id === ZOJ_PROBLEM_SET_ID) {
                         continue;
                     }
                     problemSetAllowedIndex.push(pbs.id);

@@ -9,6 +9,7 @@ export const configPath: string = path.join(os.homedir(), ".pintia");
 export const cacheDirPath: string = path.join(configPath, "cache");
 export const searchIndexPath: string = path.join(configPath, "search_index.json");
 export const favoriteProblemsPath: string = path.join(configPath, "favorites.json");
+export const viewedProblemPath: string = path.join(configPath, "view_history.json");
 export const imgUrlPrefix: string = "https://images.ptausercontent.com";
 export const ZOJ_PROBLEM_SET_ID: string = "91827364500";
 
@@ -47,6 +48,11 @@ export enum PtaNodeType {
     ProblemSubSet = 2,
     ProblemPage = 3,
     Problem = 4
+}
+
+export enum ProblemPermissionEnum {
+    UNKNOWN = -1,
+    LOCKED = 9
 }
 
 export interface IPtaCode {

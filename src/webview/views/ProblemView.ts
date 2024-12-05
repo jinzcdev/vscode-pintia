@@ -26,6 +26,7 @@ export class ProblemView {
     public problemNote: string = "";
 
     private problem!: IProblem;
+    private instance?: ProblemView;
 
     constructor(psID: string, pID: string) {
         this.id = pID;
@@ -33,6 +34,9 @@ export class ProblemView {
     }
 
     public async fetch(): Promise<ProblemView> {
+        if (this.instance) {
+            return this.instance;
+        }
         const problem = await ptaApi.getProblem(this.problemSetId, this.id, ptaManager.getUserSession()?.cookie);
         const problemInfo: IProblemInfo = await ptaApi.getProblemInfoByID(this.problemSetId, this.id, problem.type as ProblemType);
 
@@ -54,7 +58,7 @@ export class ProblemView {
         this.submitCount = problemInfo.submitCount;
         [this.lastSubmittedLang, this.lastProgram] = await this.getLastSubmittedProgram();
         [this.problemNote, this.lastProgram] = this.parseProblemNote(this.lastProgram, "@pintia note=start", "@pintia note=end");
-        return this;
+        return this.instance = this;
     }
 
     private parseCompiler2Lang(compiler: string): string {
