@@ -4,6 +4,14 @@
 
 ---
 
+## [0.6.1] - 2024/12/05
+
+### Fixed
+
+- Fixed markdown parsing errors
+
+---
+
 ## [0.6.0] - 2024/12/04
 
 ### Added

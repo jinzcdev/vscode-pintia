@@ -38,11 +38,7 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
     }
 
     private formatMarkdown(str: string): string {
-        const convertTexMath = (match: string) => require("katex").renderToString(
-            match.substring(2, match.length - 2),
-            { throwOnError: false }
-        );
-
+        const convertTexMath = (match: string, p1: string) => require("katex").renderToString(p1, { throwOnError: false });
         const convertImageSyntax = (match: string, alt: string, link: string) => {
             link = link.trim();
             if (link.startsWith("http")) {
@@ -54,7 +50,7 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
         };
 
         return str
-            .replace(/\${2}(.+?)\${2}/g, convertTexMath)
+            .replace(/\${2}(.+?)\${2}/g, (_, p1) => `\$${p1}\$`)
             .replace(/\$(.+?)\$/g, convertTexMath)
             .replace(/###\s(\u8F93\u5165\u6837|Sample\sIn)/g, '\n\n------\n\n### $1') // \u8F93\u5165\u6837 -> 输入样例
             .replace(/!\[([^\]]*)\]\((.*?)\)/g, convertImageSyntax);
