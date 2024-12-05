@@ -48,7 +48,7 @@ class FavoriteProblemsManager implements Disposable {
     }
 
     public getFavoriteProblems(userId: string): IFavoriteProblem[] {
-        return this.favoriteProblems[userId] || [];
+        return this.favoriteProblems[userId] ?? [];
     }
 
     public isProblemFavorite(userId: string, pID: string): boolean {
@@ -60,7 +60,7 @@ class FavoriteProblemsManager implements Disposable {
         try {
             if (!fs.existsSync(this.filePath)) {
                 fs.mkdirSync(path.dirname(this.filePath), { recursive: true });
-                fs.writeFileSync(this.filePath, JSON.stringify([]));
+                fs.writeFileSync(this.filePath, JSON.stringify({}));
             } else {
                 const data = fs.readFileSync(this.filePath, 'utf-8');
                 this.favoriteProblems = JSON.parse(data);

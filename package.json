@@ -2,7 +2,7 @@
     "name": "vscode-pintia",
     "displayName": "Pintia (拼题A)",
     "description": "%description%",
-    "version": "0.5.9",
+    "version": "0.6.0",
     "author": "Zhichao Jin",
     "publisher": "jinzcdev",
     "license": "MIT",
@@ -47,6 +47,11 @@
                 {
                     "id": "pintiaExplorer",
                     "name": "%contributes.views.pintia.pintiaExplorer%"
+                },
+                {
+                    "id": "pintiaProblemHistory",
+                    "name": "%contributes.views.pintia.pintiaProblemHistory%",
+                    "visibility": "collapsed"
                 },
                 {
                     "id": "pintiaMyFavorites",
@@ -377,6 +382,13 @@
                     "default": true,
                     "scope": "application",
                     "description": "%configuration.pintia.autoCreateProblemSetFolder%"
+                },
+                "pintia.problemHistoryListSize": {
+                    "type": "number",
+                    "default": 200,
+                    "minimum": 0,
+                    "scope": "application",
+                    "description": "%configuration.pintia.problemHistoryListSize%"
                 }
             }
         },

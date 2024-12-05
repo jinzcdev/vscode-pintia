@@ -1,17 +1,17 @@
 
 import * as vscode from "vscode";
 import { ptaManager } from "../ptaManager";
-import { IFavoriteProblem } from "./IFavoriteProblem";
-import { favoriteProblemsManager } from "./favoriteProblemsManager";
+import { HistoryProblem } from "./HistoryProblem";
+import { historyManager } from "./historyManager";
 
 
-export class FavoritesTreeDataProvider implements vscode.TreeDataProvider<IFavoriteProblem>, vscode.Disposable {
+export class HistoryTreeDataProvider implements vscode.TreeDataProvider<HistoryProblem>, vscode.Disposable {
 
-    private onDidChangeTreeDataEvent: vscode.EventEmitter<IFavoriteProblem | undefined | null> = new vscode.EventEmitter<IFavoriteProblem | undefined | null>();
+    private onDidChangeTreeDataEvent: vscode.EventEmitter<HistoryProblem | undefined | null> = new vscode.EventEmitter<HistoryProblem | undefined | null>();
 
     public readonly onDidChangeTreeData: vscode.Event<any> = this.onDidChangeTreeDataEvent.event;
 
-    getTreeItem(element: IFavoriteProblem): vscode.TreeItem | Thenable<vscode.TreeItem> {
+    getTreeItem(element: HistoryProblem): vscode.TreeItem | Thenable<vscode.TreeItem> {
         if (element.pID === "-1") {
             return {
                 label: "",
@@ -19,7 +19,7 @@ export class FavoritesTreeDataProvider implements vscode.TreeDataProvider<IFavor
             };
         }
         return {
-            label: element.title,
+            label: `${element.label} ${element.title}`,
             collapsibleState: vscode.TreeItemCollapsibleState.None,
             command: {
                 title: "Preview Problem",
@@ -27,24 +27,23 @@ export class FavoritesTreeDataProvider implements vscode.TreeDataProvider<IFavor
                 arguments: [element.psID, element.pID]
             },
             tooltip: element.psName,
-            contextValue: "problem-favorite"
+            contextValue: "problem-history"
         };
     }
 
-    getChildren(element?: IFavoriteProblem): vscode.ProviderResult<IFavoriteProblem[]> {
+    getChildren(element?: HistoryProblem): vscode.ProviderResult<HistoryProblem[]> {
 
         if (!ptaManager.getUserSession()) {
-            return [{ pID: "-1", psID: "-1", psName: "", title: "" }];
+            return [{ pID: "-1", psID: "-1", psName: "", label: "", title: "" }];
         }
         if (!element) {
             // root directory
-            const favoriteProblems = favoriteProblemsManager.getFavoriteProblems(favoriteProblemsManager.getCurrentUserId());
-            const modifiedProblems = favoriteProblems.map((problem, index) => ({
+            const problems = historyManager.getProblemHistory(historyManager.getCurrentUserId());
+            const modifiedProblems = problems.map((problem, index) => ({
                 ...problem,
-                title: `[${index + 1}] ${problem.title}`
+                label: `[${index + 1}] ${problem.label}`
             }));
             return modifiedProblems;
-
         }
 
         return null;
@@ -60,4 +59,4 @@ export class FavoritesTreeDataProvider implements vscode.TreeDataProvider<IFavor
 
 }
 
-export const favoritesTreeDataProvider = new FavoritesTreeDataProvider();
+export const historyTreeDataProvider = new HistoryTreeDataProvider();

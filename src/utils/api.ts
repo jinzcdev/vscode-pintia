@@ -6,7 +6,7 @@ import { IProblemSubmission } from "../entity/IProblemSubmission";
 import { IProblemSubmissionResult } from "../entity/IProblemSubmissionResult";
 import { IProblemSummary } from "../entity/IProblemSummary";
 import { IProblemCode } from "../entity/problemSubmissionCode";
-import { cacheDirPath, ProblemType, problemTypeInfoMapping, ptaCache } from "../shared";
+import { cacheDirPath, ProblemPermissionEnum, ProblemType, problemTypeInfoMapping, ptaCache } from "../shared";
 import { httpGet, httpPost } from "./httpUtils";
 
 import * as fs from "fs-extra";
@@ -232,7 +232,7 @@ class PtaAPI {
         const problemSets: IProblemSet[] = await ptaApi.getAllProblemSets(cookie);
         const psIDs: string[] = [];
         for (const ps of problemSets) {
-            if ((ps.permission?.permission ?? 0) !== 9) {
+            if ((ps.permission?.permission ?? ProblemPermissionEnum.UNKNOWN) !== ProblemPermissionEnum.LOCKED) {
                 psIDs.push(ps.id);
             }
         }

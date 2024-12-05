@@ -10,7 +10,7 @@ import { favoriteProblemsManager } from "../favorites/favoriteProblemsManager";
 import { ptaChannel } from "../ptaChannel";
 import { ptaConfig } from "../ptaConfig";
 import { ptaManager } from "../ptaManager";
-import { defaultPtaNode, IPtaNodeValue, ProblemSubmissionState, ProblemType, problemTypeInfoMapping, PtaNodeType } from "../shared";
+import { defaultPtaNode, IPtaNodeValue, ProblemPermissionEnum, ProblemSubmissionState, ProblemType, problemTypeInfoMapping, PtaNodeType } from "../shared";
 import { ptaApi } from "../utils/api";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import { PtaNode } from "./PtaNode";
@@ -31,7 +31,7 @@ class ExplorerNodeManager implements Disposable {
             dashes.set(section.title, []);
         }
         for (const item of problemSetList) {
-            if ((item.permission?.permission ?? 0) === 9 && !showLocked) {
+            if ((item.permission?.permission ?? ProblemPermissionEnum.UNKNOWN) === ProblemPermissionEnum.LOCKED && !showLocked) {
                 continue;
             }
             dashes.get(pbs2dash.get(item.id) ?? OTHER_SECTION)?.push(item);
@@ -50,7 +50,7 @@ class ExplorerNodeManager implements Disposable {
                         psID: item.id,
                         label: item.name,
                         type: PtaNodeType.ProblemSet,
-                        locked: (item.permission?.permission ?? 0) === 9,
+                        locked: (item.permission?.permission ?? ProblemPermissionEnum.UNKNOWN) === ProblemPermissionEnum.LOCKED,
                         value: {
                             problemSet: item.name,
                             summaries: item.summaries
