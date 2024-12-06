@@ -5,7 +5,7 @@ import { IProblemSubmissionDetail } from "../entity/problemSubmissionCode";
 import { ProblemType, problemTypeInfoMapping, ptaCompiler, solutionStatusMapping } from "../shared";
 import { ptaApi } from "../utils/api";
 import { PtaWebviewWithCodeStyle } from "./PtaWebviewWithCodeStyle";
-import { markdownEngine } from "./markdownEngine";
+import * as markdownEngine from "./markdownEngine";
 import { getNonce, IWebViewMessage } from "./PtaWebview";
 import { getGlobalContext } from "../extension";
 

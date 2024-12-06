@@ -3,7 +3,7 @@ import { ptaConfig } from '../ptaConfig';
 import { imgUrlPrefix, langCompilerMapping, ProblemType } from '../shared';
 import { ptaApi } from "../utils/api";
 import { PtaWebviewWithCodeStyle } from "./PtaWebviewWithCodeStyle";
-import { markdownEngine } from './markdownEngine';
+import * as markdownEngine from './markdownEngine';
 import { ProblemView } from "./views/ProblemView";
 import { getGlobalContext } from "../extension";
 import { getNonce, IWebViewMessage } from "./PtaWebview";
@@ -38,22 +38,8 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
     }
 
     private formatMarkdown(str: string): string {
-        const convertTexMath = (match: string, p1: string) => require("katex").renderToString(p1, { throwOnError: false });
-        const convertImageSyntax = (match: string, alt: string, link: string) => {
-            link = link.trim();
-            if (link.startsWith("http")) {
-                return `<img alt="${alt}" src="${link}">`;
-            }
-            let i = link.length - 1;
-            while (i >= 0 && link[i] !== "/") i--;
-            return `<img alt="${alt}" src="${imgUrlPrefix}/${link.substring(i + 1)}">`;
-        };
-
         return str
-            .replace(/\${2}(.+?)\${2}/g, (_, p1) => `\$${p1}\$`)
-            .replace(/\$(.+?)\$/g, convertTexMath)
-            .replace(/###\s(\u8F93\u5165\u6837|Sample\sIn)/g, '\n\n------\n\n### $1') // \u8F93\u5165\u6837 -> 输入样例
-            .replace(/!\[([^\]]*)\]\((.*?)\)/g, convertImageSyntax);
+            .replace(/###\s(\u8F93\u5165\u6837|Sample\sIn)/g, '\n\n------\n\n### $1'); // \u8F93\u5165\u6837 -> 输入样例
     }
 
     protected getContent(): string {
