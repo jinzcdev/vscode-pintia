@@ -555,6 +555,7 @@
         "vscode-test": "^1.5.0"
     },
     "dependencies": {
+        "@vscode/markdown-it-katex": "^1.1.0",
         "fs-extra": "11.2.0",
         "highlight.js": "^11.10.0",
         "katex": "0.16.11",
