@@ -28,7 +28,7 @@ class FavoriteProblemsManager implements Disposable {
     }
 
     public addFavoriteProblem(userId: string, problem: IFavoriteProblem) {
-        if (!this.isProblemFavorite(userId, problem.pID)) {
+        if (!this.isFavoriteProblem(userId, problem.pID)) {
             if (!this.favoriteProblems[userId]) {
                 this.favoriteProblems[userId] = [];
             }
@@ -51,7 +51,7 @@ class FavoriteProblemsManager implements Disposable {
         return this.favoriteProblems[userId] ?? [];
     }
 
-    public isProblemFavorite(userId: string, pID: string): boolean {
+    public isFavoriteProblem(userId: string, pID: string): boolean {
         const problems = this.favoriteProblems[userId] || [];
         return problems.some(p => p.pID === pID);
     }

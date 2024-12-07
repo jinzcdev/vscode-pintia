@@ -65,8 +65,7 @@ export async function activate(context: vscode.ExtensionContext) {
 					pID: problemView.id,
 					psID: problemView.problemSetId,
 					psName: problemView.problemSetName,
-					label: problemView.label,
-					title: problemView.title
+					title: `${problemView.label} ${problemView.title}`
 				});
 				historyTreeDataProvider.refresh();
 			});
@@ -87,7 +86,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			vscode.commands.executeCommand(`workbench.action.openWalkthrough`, `jinzcdev.vscode-pintia#pintia`, false);
 		}),
 		vscode.commands.registerCommand("pintia.addFavorite", (ptaNode: PtaNode) => star.addFavoriteProblem(ptaNode)),
-		vscode.commands.registerCommand("pintia.removeFavorite", (ptaNode: PtaNode) => star.removeFavoriteProblem(ptaNode))
+		vscode.commands.registerCommand("pintia.removeFavorite", (ptaNode: PtaNode) => star.removeFavoriteProblem(ptaNode.pID))
 	);
 
 	await fs.mkdirs(configPath);

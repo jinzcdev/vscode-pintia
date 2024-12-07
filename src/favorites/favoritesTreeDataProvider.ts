@@ -12,14 +12,14 @@ export class FavoritesTreeDataProvider implements vscode.TreeDataProvider<IFavor
     public readonly onDidChangeTreeData: vscode.Event<any> = this.onDidChangeTreeDataEvent.event;
 
     getTreeItem(element: IFavoriteProblem): vscode.TreeItem | Thenable<vscode.TreeItem> {
-        if (element.pID === "-1") {
+        if (!element) {
             return {
                 label: "",
                 collapsibleState: vscode.TreeItemCollapsibleState.None
             };
         }
         return {
-            label: element.title,
+            label: element.displayTitle ?? "",
             collapsibleState: vscode.TreeItemCollapsibleState.None,
             command: {
                 title: "Preview Problem",
@@ -32,16 +32,15 @@ export class FavoritesTreeDataProvider implements vscode.TreeDataProvider<IFavor
     }
 
     getChildren(element?: IFavoriteProblem): vscode.ProviderResult<IFavoriteProblem[]> {
-
         if (!ptaManager.getUserSession()) {
-            return [{ pID: "-1", psID: "-1", psName: "", title: "" }];
+            return null;
         }
         if (!element) {
             // root directory
             const favoriteProblems = favoriteProblemsManager.getFavoriteProblems(favoriteProblemsManager.getCurrentUserId());
             const modifiedProblems = favoriteProblems.map((problem, index) => ({
                 ...problem,
-                title: `[${index + 1}] ${problem.title}`
+                displayTitle: `[${index + 1}] ${problem.title}`
             }));
             return modifiedProblems;
 
