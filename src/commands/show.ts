@@ -112,7 +112,7 @@ export async function searchProblem(): Promise<void> {
     if (!choice) {
         return;
     }
-    PtaPreviewProvider.createOrUpdate(new ProblemView(choice.value.psID, choice.value.pID)).show();
+    vscode.commands.executeCommand('pintia.previewProblem', choice.value.psID, choice.value.pID);
 }
 
 async function fetchProblemIndex(): Promise<Array<IProblemSearchItem>> {

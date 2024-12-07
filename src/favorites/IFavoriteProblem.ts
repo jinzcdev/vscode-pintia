@@ -4,4 +4,5 @@ export interface IFavoriteProblem {
     psID: string;
     psName: string;
     title: string;
+    displayTitle?: string;
 }

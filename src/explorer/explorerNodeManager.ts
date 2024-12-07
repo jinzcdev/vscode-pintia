@@ -128,7 +128,7 @@ class ExplorerNodeManager implements Disposable {
                         type: PtaNodeType.Problem,
                         score: pb.score,
                         state: problemExamMapping.get(pb.id) ?? ProblemSubmissionState.PROBLEM_NO_ANSWER,
-                        isFavorite: favoriteProblemsManager.isProblemFavorite(favoriteProblemsManager.getCurrentUserId(), pb.id),
+                        isFavorite: favoriteProblemsManager.isFavoriteProblem(favoriteProblemsManager.getCurrentUserId(), pb.id),
                         value: {
                             problemType: problemType,
                             problemInfo: pb,
