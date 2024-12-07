@@ -12,8 +12,6 @@ import { IProblem } from "../entity/IProblem";
 import { ptaManager } from "../ptaManager";
 import { IUserSession } from "../entity/userLoginSession";
 import { IProblemSearchItem } from "../entity/IProblemSearchItem";
-import { PtaPreviewProvider } from "../webview/PtaPreviewProvider";
-import { ProblemView } from "../webview/views/ProblemView";
 
 
 export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {

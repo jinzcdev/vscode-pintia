@@ -60,7 +60,6 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
 
             ${markdownEngine.render(this.formatMarkdown(problem.content))}
 
-
             ${markdownEngine.render([
             "-----",
             [
@@ -85,7 +84,10 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
                     "```"
                 ].join("\n")) : ""}
 
-            <button id="solve">Code Now</button>
+            <div class="button-container">
+                <button id="btnSolve">开始编程</button>
+                <button id="btnUpdate">刷新题目</button>
+            </div>
             <script nonce="${getNonce()}" src="${copyButtonScriptUri}"></script>
         `;
     }
@@ -93,7 +95,11 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
     protected async onDidReceiveMessage(msg: IWebViewMessage): Promise<void> {
         switch (msg.type) {
             case "command":
-                await vscode.commands.executeCommand(msg.value, this.data.ptaCode);
+                if (msg.value === "pintia.codeProblem") {
+                    await vscode.commands.executeCommand("pintia.codeProblem", this.data.ptaCode);
+                } else if (msg.value === "pintia.previewProblem") {
+                    await vscode.commands.executeCommand("pintia.previewProblem", this.data.ptaCode.psID, this.data.ptaCode.pID);
+                }
                 break;
             case "text":
                 vscode.window.showInformationMessage(msg.value);
