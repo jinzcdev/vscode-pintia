@@ -1,5 +1,6 @@
 :root {
     --border-color: rgba(121, 121, 121, 0.12);
+    --primary-font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .vscode-light {
@@ -35,6 +36,7 @@ html {
     line-height: 1.5;
     padding: 10px 30px;
     margin: 0;
+    font-family: var(--primary-font);
 }
 
 h1,
@@ -45,17 +47,17 @@ h5,
 h6 {
     font-family: inherit;
     font-weight: 500;
-    line-height: 1.2;
+    line-height: 1.3;
 }
 
 h1 {
-    font-size: 30px;
+    font-size: 2rem;
     margin: 10px 0 0;
 }
 
 h3 {
     margin: 16px 0;
-    font-size: 20px;
+    font-size: 1.25rem;
 }
 
 hr {
@@ -74,20 +76,22 @@ a:hover {
 }
 
 p {
-    margin: 7.5px 0;
-    font-size: 16px;
+    margin: 10px 0;
+    font-size: 1rem;
     color: inherit;
 }
 
 p img {
     display: block;
-    width: 500px;
-    max-width: 80%;
+    width: 100%;
+    max-width: 500px;
 }
 
 ul,
 ol {
-    font-size: 15px;
+    font-size: 1rem;
+    margin: 10px 0;
+    padding-left: 20px;
 }
 
 pre {
@@ -96,17 +100,17 @@ pre {
     position: relative;
     overflow: auto;
     display: block;
-    padding: 0.375rem 0.75rem;
+    padding: 0.75rem;
     background: var(--pre-bg-color, hsl(211, 20%, 97%));
     border: 1px solid var(--pre-border-color);
-    border-radius: 0.1875rem;
+    border-radius: 0.25rem;
 }
 
 pre code {
     font-family: var(--vscode-editor-font-family, "SF Mono", Monaco, Menlo, Consolas, "Ubuntu Mono", "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace);
-    font-size: 1.05em;
-    line-height: 1.357em;
-    border-radius: 0.1875rem;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    border-radius: 0.25rem;
     color: var(--vscode-editor-foreground);
     background-color: transparent;
     margin: 0 0.125rem;
@@ -122,7 +126,7 @@ pre:hover {
     position: absolute;
     right: 5px;
     top: 5px;
-    padding: 1px 5px;
+    padding: 2px 8px;
     border-radius: 5px;
     background-color: #ccc;
     cursor: pointer;
@@ -137,29 +141,51 @@ pre:hover .copy-button {
 .pta-note {
     border: 1px solid var(--vscode-editor-foreground);
     border-radius: 5px;
-    padding: 4px 16px;
+    padding: 8px 16px;
 }
 
-#solve {
+.button-container {
     position: fixed;
     bottom: 1rem;
     right: 1rem;
     border: 0;
     margin: 1rem 0;
-    padding: 0.2rem 1rem;
-    color: var(--vscode-button-foreground);
-    background-color: var(--vscode-button-background);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    background-color: var(--vscode-sideBar-background);
+    border: 1px solid var(--vscode-sideBar-border);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem;
 }
 
-#solve:hover {
+.button-container button {
+    color: var(--vscode-button-foreground);
+    background-color: var(--vscode-button-background);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.button-container button:hover {
     background-color: var(--vscode-button-hoverBackground);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.button-container button:active {
+    transform: translateY(0);
 }
 
 .banner .ques-info {
     display: flex;
     justify-content: space-between;
     margin-top: 8px;
-    font-size: 13px;
+    font-size: 0.875rem;
 }
 
 .banner .ques-info .detail,
@@ -172,20 +198,20 @@ pre:hover .copy-button {
 }
 
 table {
-    width: 95%;
+    width: 100%;
     margin: 0 auto;
     border-collapse: collapse;
     text-align: center;
-    font-size: 14px;
+    font-size: 1rem;
 }
 
 thead {
-    font-size: 15px;
+    font-size: 1.1rem;
 }
 
 th,
 td {
-    border-bottom: 0.8px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
     padding: 16px;
 }
 
@@ -203,8 +229,8 @@ td {
 }
 
 .code-preview code {
-    line-height: 1.357em;
-    border-radius: 0.1875rem;
+    line-height: 1.5;
+    border-radius: 0.25rem;
     color: var(--vscode-editor-foreground);
     margin: 0 0.125rem;
     display: block;
