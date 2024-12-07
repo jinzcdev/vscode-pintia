@@ -2,18 +2,18 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as vscode from "vscode";
 import { Disposable } from 'vscode';
-import { HistoryProblem } from './HistoryProblem';
 import { ptaChannel } from '../ptaChannel';
 
+import { ProblemBasicInfo } from '../entity/ProblemBasicInfo';
+import { ptaConfig } from '../ptaConfig';
+import { ptaManager } from '../ptaManager';
 import { viewedProblemPath } from '../shared';
 import { DialogType, promptForOpenOutputChannel } from '../utils/uiUtils';
-import { ptaManager } from '../ptaManager';
-import { ptaConfig } from '../ptaConfig';
 import { historyTreeDataProvider } from './historyTreeDataProvider';
 
 class HistoryManager implements Disposable {
     private static instance: HistoryManager;
-    private viewedProblems: Record<string, HistoryProblem[]> = {};
+    private viewedProblems: Record<string, ProblemBasicInfo[]> = {};
     private readonly filePath: string;
 
     private constructor() {
@@ -34,7 +34,7 @@ class HistoryManager implements Disposable {
         return HistoryManager.instance;
     }
 
-    public addProblem(userId: string, problem: HistoryProblem) {
+    public addProblem(userId: string, problem: ProblemBasicInfo) {
         if (!this.viewedProblems[userId]) {
             this.viewedProblems[userId] = [];
         }
@@ -47,7 +47,7 @@ class HistoryManager implements Disposable {
         this.trimViewedProblemsForUser(userId);
     }
 
-    public getProblemHistory(userId: string): HistoryProblem[] {
+    public getProblemHistory(userId: string): ProblemBasicInfo[] {
         return this.viewedProblems[userId] ?? [];
     }
 

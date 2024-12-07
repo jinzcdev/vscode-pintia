@@ -1,18 +1,18 @@
 
 import * as vscode from "vscode";
-import { ptaManager } from "../ptaManager";
-import { HistoryProblem } from "./HistoryProblem";
-import { historyManager } from "./historyManager";
+import { ProblemBasicInfo } from "../entity/ProblemBasicInfo";
 import { favoriteProblemsManager } from "../favorites/favoriteProblemsManager";
+import { ptaManager } from "../ptaManager";
+import { historyManager } from "./historyManager";
 
 
-export class HistoryTreeDataProvider implements vscode.TreeDataProvider<HistoryProblem>, vscode.Disposable {
+export class HistoryTreeDataProvider implements vscode.TreeDataProvider<ProblemBasicInfo>, vscode.Disposable {
 
-    private onDidChangeTreeDataEvent: vscode.EventEmitter<HistoryProblem | undefined | null> = new vscode.EventEmitter<HistoryProblem | undefined | null>();
+    private onDidChangeTreeDataEvent: vscode.EventEmitter<ProblemBasicInfo | undefined | null> = new vscode.EventEmitter<ProblemBasicInfo | undefined | null>();
 
     public readonly onDidChangeTreeData: vscode.Event<any> = this.onDidChangeTreeDataEvent.event;
 
-    getTreeItem(element: HistoryProblem): vscode.TreeItem | Thenable<vscode.TreeItem> {
+    getTreeItem(element: ProblemBasicInfo): vscode.TreeItem | Thenable<vscode.TreeItem> {
         if (!element) {
             return {
                 label: "",
@@ -33,7 +33,7 @@ export class HistoryTreeDataProvider implements vscode.TreeDataProvider<HistoryP
         };
     }
 
-    getChildren(element?: HistoryProblem): vscode.ProviderResult<HistoryProblem[]> {
+    getChildren(element?: ProblemBasicInfo): vscode.ProviderResult<ProblemBasicInfo[]> {
         if (!ptaManager.getUserSession()) {
             return null;
         }

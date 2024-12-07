@@ -2,10 +2,10 @@ import { explorerController } from "../explorer/explorerController";
 import { PtaNode } from "../explorer/PtaNode";
 import { favoriteProblemsManager } from "../favorites/favoriteProblemsManager";
 import { favoritesTreeDataProvider } from "../favorites/favoritesTreeDataProvider";
-import { IFavoriteProblem } from "../favorites/IFavoriteProblem";
+import { ProblemBasicInfo } from "../entity/ProblemBasicInfo";
 import { historyTreeDataProvider } from "../view-history/historyTreeDataProvider";
 
-export async function addFavoriteProblem(problem: PtaNode | IFavoriteProblem) {
+export async function addFavoriteProblem(problem: PtaNode | ProblemBasicInfo) {
     favoriteProblemsManager.addFavoriteProblem(favoriteProblemsManager.getCurrentUserId(), {
         pID: problem.pID,
         psID: problem.psID,

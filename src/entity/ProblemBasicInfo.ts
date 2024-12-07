@@ -1,5 +1,5 @@
 
-export interface IFavoriteProblem {
+export interface ProblemBasicInfo {
     pID: string;
     psID: string;
     psName: string;

@@ -2,17 +2,17 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { Disposable } from 'vscode';
-import { IFavoriteProblem } from './IFavoriteProblem';
 import { ptaChannel } from '../ptaChannel';
 
 import { favoriteProblemsPath } from '../shared';
 import { DialogType, promptForOpenOutputChannel } from '../utils/uiUtils';
 import { ptaManager } from '../ptaManager';
+import { ProblemBasicInfo } from '../entity/ProblemBasicInfo';
 
 
 class FavoriteProblemsManager implements Disposable {
     private static instance: FavoriteProblemsManager;
-    private favoriteProblems: Record<string, IFavoriteProblem[]> = {};
+    private favoriteProblems: Record<string, ProblemBasicInfo[]> = {};
     private filePath: string;
 
     private constructor() {
@@ -27,7 +27,7 @@ class FavoriteProblemsManager implements Disposable {
         return FavoriteProblemsManager.instance;
     }
 
-    public addFavoriteProblem(userId: string, problem: IFavoriteProblem) {
+    public addFavoriteProblem(userId: string, problem: ProblemBasicInfo) {
         if (!this.isFavoriteProblem(userId, problem.pID)) {
             if (!this.favoriteProblems[userId]) {
                 this.favoriteProblems[userId] = [];
@@ -47,7 +47,7 @@ class FavoriteProblemsManager implements Disposable {
         }
     }
 
-    public getFavoriteProblems(userId: string): IFavoriteProblem[] {
+    public getFavoriteProblems(userId: string): ProblemBasicInfo[] {
         return this.favoriteProblems[userId] ?? [];
     }
 
