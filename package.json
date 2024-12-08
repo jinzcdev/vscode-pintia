@@ -253,6 +253,12 @@
                     "description": "%configuration.pintia.workspaceFolder%",
                     "default": ""
                 },
+                "pintia.previewProblemAndCodeIt": {
+                    "type": "boolean",
+                    "default": true,
+                    "scope": "application",
+                    "description": "%configuration.pintia.previewProblemAndCodeIt%"
+                },
                 "pintia.paging.pageSize": {
                     "type": "number",
                     "default": 100,

@@ -8,6 +8,7 @@ import { PtaWebviewWithCodeStyle } from "./PtaWebviewWithCodeStyle";
 import * as markdownEngine from "./markdownEngine";
 import { getNonce, IWebViewMessage } from "./PtaWebview";
 import { getGlobalContext } from "../extension";
+import { ProblemView } from "./views/ProblemView";
 
 export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmissionResult> {
 
@@ -31,8 +32,7 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
         const psID = result.submission.problemSetId, pID = result.submission.problemSetProblemId;
         const problem: IProblem = await ptaApi.getProblem(psID, pID);
 
-        const prefix: string = problemTypeInfoMapping.get(result.submission.problemType)?.prefix ?? "";
-        const problemConfig: IProblemConfig = problem.problemConfig[`${prefix}ProblemConfig` as keyof typeof problem.problemConfig] as IProblemConfig;
+        const problemConfig = ProblemView.parseProblemConfig(problem);
         const testCases = problemConfig && typeof problemConfig === 'object' ? problemConfig.cases : [];
 
         const hints = result.submission.hints;
@@ -42,8 +42,8 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
             isHint: isHint,
             content: {
                 totalScore: problem.score,
-                timeLimit: problemConfig.timeLimit,
-                memoryLimit: problemConfig.memoryLimit,
+                timeLimit: problemConfig?.timeLimit ?? "Unknown",
+                memoryLimit: problemConfig?.memoryLimit ?? "Unknown",
                 nickname: result.examMember.user.nickname,
                 submitAt: result.submission.submitAt,
                 status: judgeResponseContent.status,

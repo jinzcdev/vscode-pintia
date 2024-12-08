@@ -426,6 +426,10 @@ class PtaAPI {
         return problemTypeID === -1 ? `https://pintia.cn/problem-sets/${psID}` :
             `https://pintia.cn/problem-sets/${psID}/exam/problems/type/${problemTypeID}?problemSetProblemId=${pID}`
     }
+
+    public getProblemSetURL(psID: string): string {
+        return `https://pintia.cn/problem-sets/${psID}`;
+    }
 }
 
 function delay(ms: number) {
