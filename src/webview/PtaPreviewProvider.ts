@@ -7,6 +7,7 @@ import * as markdownEngine from './markdownEngine';
 import { ProblemView } from "./views/ProblemView";
 import { getGlobalContext } from "../extension";
 import { getNonce, IWebViewMessage } from "./PtaWebview";
+import { IProblemConfig } from "../entity/IProblem";
 
 export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
 
@@ -21,43 +22,50 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
     }
 
     protected async loadViewData(problem: ProblemView): Promise<void> {
-        const compiler: string = langCompilerMapping.get(ptaConfig.getDefaultLanguage()) ?? "GXX";
         await problem.fetch();
         this.data = {
             title: `${problem.label} ${problem.title}`,
-            ptaCode: {
-                pID: problem.id,
-                psID: problem.problemSetId,
-                psName: problem.problemSetName,
-                problemType: problem.type as ProblemType,
-                compiler: compiler,
-                title: `${problem.label} ${problem.title}`
-            },
+            ptaCode: ProblemView.toPtaNode(problem),
             problem: problem
         };
     }
 
     private formatMarkdown(str: string): string {
-        return str
-            .replace(/###\s(\u8F93\u5165\u6837|Sample\sIn)/g, '\n\n------\n\n### $1'); // \u8F93\u5165\u6837 -> 输入样例
+        // \u8F93\u5165\u6837 -> 输入样例
+        return str.replace(/###\s(\u8F93\u5165\u6837|Sample\sIn)/g, '\n\n------\n\n### $1');
     }
 
     protected getContent(): string {
         const problem = this.data.problem as ProblemView;
         const keyword: string = `${problem.label} ${problem.title}`.replace(/ /g, '+');
         const copyButtonScriptUri = this.getWebview()?.asWebviewUri(vscode.Uri.joinPath(getGlobalContext().extensionUri, "media", "main.js"));
+        const problemConfig = problem.problemConfig as IProblemConfig;
+        const { codeSizeLimit = "Unknown", timeLimit = "Unknown", memoryLimit, stackSizeLimit = "Unknown" } = problemConfig || {};
+        const performance = {
+            codeSizeLimit,
+            timeLimit,
+            memoryLimit: memoryLimit ? memoryLimit / 1024 : "Unknown",
+            stackSizeLimit
+        };
         return `
-            <div class="banner" >
-                <div class="banner-header">
-                    ${markdownEngine.render(`# [${problem.title}](${ptaApi.getProblemURL(problem.problemSetId, problem.id, problem.type)})`)}
-                </div>
-                <div class="ques-info">
-                    <div class="detail">分数 ${problem.score} &nbsp; 提交人数 ${problem.submitCount} &nbsp; 通过人数 ${problem.acceptCount} &nbsp; 通过率 ${problem.submitCount === 0 ? 0 : (problem.acceptCount / problem.submitCount * 100).toFixed(2)}%</div>
-                    <div class="department">作者 ${problem.author} &nbsp;&nbsp;&nbsp; 单位 ${problem.organization}</div>
-                </div>
-                <hr class="banner-line"></hr>
+        <div class="header">
+            <div class="problem-title">
+                ${markdownEngine.render(`# [${problem.title}](${ptaApi.getProblemURL(problem.problemSetId, problem.id, problem.type)})`)}
             </div>
+            <div class="problem-set-name">
+                <a href="${ptaApi.getProblemSetURL(problem.problemSetId)}" target="_blank">${problem.problemSetName}</a>
+            </div>
+        </div>
 
+        <div class="banner">
+            <div class="ques-info">
+                <div class="detail">分数 ${problem.score} &nbsp; 提交人数 ${problem.submitCount} &nbsp; 通过人数 ${problem.acceptCount} &nbsp; 通过率 ${problem.submitCount === 0 ? 0 : (problem.acceptCount / problem.submitCount * 100).toFixed(2)}%</div>
+                <div class="department">作者 ${problem.author} &nbsp;&nbsp;&nbsp; 单位 ${problem.organization}</div>
+            </div>
+            <hr class="banner-line"></hr>
+        </div>
+
+        <div class="content-container">
             ${markdownEngine.render(this.formatMarkdown(problem.content))}
 
             ${markdownEngine.render([
@@ -67,7 +75,8 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
                 `[Baidu](https://www.baidu.com/s?wd=${keyword})`,
                 `[Bing](https://cn.bing.com/search?q=${keyword})`,
                 `[Solution](https://github.com/jinzcdev/PTA/tree/main/${this.formatProblemSetName(problem.problemSetName)})`
-            ].join(" | ")].join("\n"))}
+            ].join(" | ")
+        ].join("\n"))}
 
             ${problem.problemNote ? `
                 <h3>我的笔记</h3>
@@ -76,6 +85,16 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
                 </div>
             ` : ""}
 
+            <details class="performance-details" open>
+                <summary><strong>性能指标要求</strong></summary>
+                <div class="performance-content">
+                    <div class="performance-item"><span class="key">代码长度限制</span><span class="value">${performance.codeSizeLimit} KB</span></div>
+                    <div class="performance-item"><span class="key">时间限制</span><span class="value">${performance.timeLimit} ms</span></div>
+                    <div class="performance-item"><span class="key">内存限制</span><span class="value">${performance.memoryLimit} MB</span></div>
+                    <div class="performance-item"><span class="key">栈限制</span><span class="value">${performance.stackSizeLimit} KB</span></div>
+                </div>
+            </details>
+
             ${problem.lastProgram.trim().length ?
                 markdownEngine.render([
                     `### 最后一次提交 ${problem.lastSubmittedLang.trim().length ? "(" + problem.lastSubmittedLang + ")" : ""}`,
@@ -83,13 +102,14 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
                     problem.lastProgram,
                     "```"
                 ].join("\n")) : ""}
+        </div>
 
-            <div class="button-container">
-                <button id="btnSolve">开始编程</button>
-                <button id="btnUpdate">刷新题目</button>
-            </div>
-            <script nonce="${getNonce()}" src="${copyButtonScriptUri}"></script>
-        `;
+        <div class="button-container">
+            <button id="btnUpdate">刷新题目</button>
+            <button id="btnSolve">开始编程</button>
+        </div>
+        <script nonce="${getNonce()}" src="${copyButtonScriptUri}"></script>
+    `;
     }
 
     protected async onDidReceiveMessage(msg: IWebViewMessage): Promise<void> {

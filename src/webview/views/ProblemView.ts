@@ -1,8 +1,9 @@
 
-import { IProblem } from '../../entity/IProblem';
+import { IProblem, IProblemConfig } from '../../entity/IProblem';
 import { IProblemInfo } from '../../entity/IProblemInfo';
+import { ptaConfig } from '../../ptaConfig';
 import { ptaManager } from "../../ptaManager";
-import { compilerLangMapping, ProblemType } from '../../shared';
+import { compilerLangMapping, IPtaCode, langCompilerMapping, ProblemType, problemTypeInfoMapping } from '../../shared';
 import { ptaApi } from '../../utils/api';
 
 
@@ -24,6 +25,7 @@ export class ProblemView {
     public submitCount: number = 0;
     public acceptCount: number = 0;
     public problemNote: string = "";
+    public problemConfig?: IProblemConfig;
 
     private problem!: IProblem;
     private instance?: ProblemView;
@@ -53,12 +55,18 @@ export class ProblemView {
         this.score = problem.score;
 
         this.problemSetName = await ptaApi.getProblemSetName(this.problemSetId);
+        this.problemConfig = ProblemView.parseProblemConfig(problem);
 
         this.acceptCount = problemInfo.acceptCount;
         this.submitCount = problemInfo.submitCount;
         [this.lastSubmittedLang, this.lastProgram] = await this.getLastSubmittedProgram();
         [this.problemNote, this.lastProgram] = this.parseProblemNote(this.lastProgram, "@pintia note=start", "@pintia note=end");
         return this.instance = this;
+    }
+
+    public static parseProblemConfig(problem: IProblem): IProblemConfig | undefined {
+        const prefix: string = problemTypeInfoMapping.get(problem.type)?.prefix ?? "";
+        return problem.problemConfig[`${prefix}ProblemConfig` as keyof typeof problem.problemConfig] as IProblemConfig;
     }
 
     private parseCompiler2Lang(compiler: string): string {
@@ -109,4 +117,16 @@ export class ProblemView {
         return [note, newData.replace(/^\s+|\s+$/g, "").replace(/```/g, "\\```")];
     }
 
+    public static toPtaNode(problem: ProblemView): IPtaCode {
+        const compiler: string = langCompilerMapping.get(ptaConfig.getDefaultLanguage()) ?? "GXX";
+        return {
+            pID: problem.id,
+            psID: problem.problemSetId,
+            psName: problem.problemSetName,
+            problemType: problem.type as ProblemType,
+            compiler: compiler,
+            title: `${problem.label} ${problem.title}`
+
+        };
+    }
 }

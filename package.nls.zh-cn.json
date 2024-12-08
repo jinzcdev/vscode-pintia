@@ -19,6 +19,7 @@
     "contributes.views.pintia.pintiaProblemHistory": "题目预览历史",
     "contributes.viewsWelcome.pintiaExplorer": "欢迎使用 Pintia 插件来练习拼题A习题。请查看使用手册以了解如何使用本插件。或者进入插件主页 [vscode-pintia](https://github.com/jinzcdev/vscode-pintia) 查看更详细的说明。\n[登录 PTA](command:pintia.signIn) \n[查看使用指南](command:pintia.welcome)",
     "configuration.pintia.workspaceFolder": "工作区文件夹的路径（存储题目源文件）。",
+    "configuration.pintia.previewProblemAndCodeIt": "指定是否在预览题目时自动打开代码编辑器。",
     "configuration.pintia.paging.pageSize": "指定当题目集较大时候，是否对题目列表分页。pageSize 为 0 表示不分页。",
     "configuration.pintia.codeColorTheme": "指定代码着色主题。",
     "configuration.pintia.showLocked": "指定是否显示未解锁的题集（一些教材题目集）。",

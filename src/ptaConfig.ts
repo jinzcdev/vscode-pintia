@@ -133,6 +133,14 @@ class PtaConfig {
     public setProblemHistoryListSize(problemHistoryListSize: number) {
         this.update("problemHistoryListSize", problemHistoryListSize);
     }
+
+    public getPreviewProblemAndCodeIt(): boolean {
+        return this.getConfiguration().get<boolean>("previewProblemAndCodeIt", true);
+    }
+
+    public setPreviewProblemAndCodeIt(previewProblemAndCodeIt: boolean) {
+        this.update("previewProblemAndCodeIt", previewProblemAndCodeIt);
+    }
 }
 
 export const ptaConfig: PtaConfig = new PtaConfig();

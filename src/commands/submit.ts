@@ -164,6 +164,7 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
         await ptaExecutor.testSolution(ptaCode.psID, ptaCode.pID, solution, (msg: string, data?: IProblemSubmissionResult) => {
             switch (msg) {
                 case "SUCCESS":
+                    data!.problem = problem;
                     PtaTestProvider.createOrUpdate(new TestView(data!, testOutput)).show();
                     break;
                 default:
@@ -185,9 +186,11 @@ export async function testCustomSample(ptaCode: IPtaCode, index: number): Promis
             code: ptaCode.code ?? "",
             testInput: ptaCode.customTests[index]
         };
+        const problem = await ptaApi.getProblem(ptaCode.psID, ptaCode.pID);
         await ptaExecutor.testSolution(ptaCode.psID, ptaCode.pID, solution, (msg: string, data?: IProblemSubmissionResult) => {
             switch (msg) {
                 case "SUCCESS":
+                    data!.problem = problem;
                     PtaTestProvider.createOrUpdate(new TestView(data!)).show();
                     break;
                 default:
