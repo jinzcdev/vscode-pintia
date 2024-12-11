@@ -43,11 +43,11 @@ export class CustomCodeLensProvider implements vscode.CodeLensProvider<PtaCodeLe
             if (!ptaCode) {
                 return codeLens;
             }
-            const code: ICodeBlock[] = this.parseCodeBlock(codeLens.codeContent, "@pintia code=start", "@pintia code=end");
+            const code: ICodeBlock[] = this.parseCodeBlock(codeLens.codeContent, "@pintia\\s+code=start", "\\n[^\\n]*@pintia\\s+code=end");
             if (code.length !== 0) {
                 ptaCode.code = code[0].code;
             }
-            const customTests: ICodeBlock[] = this.parseCodeBlock(codeLens.codeContent, "@pintia test=start", "@pintia test=end");
+            const customTests: ICodeBlock[] = this.parseCodeBlock(codeLens.codeContent, "@pintia\\s+test=start", "\\n[^\\n]*@pintia\\s+test=end");
             ptaCode.customTests = customTests.map((value, _) => value.code);
 
             if (command === "Submit") {
@@ -93,10 +93,10 @@ export class CustomCodeLensProvider implements vscode.CodeLensProvider<PtaCodeLe
 
     private parseCodeBlock(data: string, start: string, end: string): ICodeBlock[] {
         const codeblock: ICodeBlock[] = [];
-        const regex = new RegExp(`${start}[\\s\\S]*?${end}`, 'g');
+        const regex = new RegExp(`${start}([\\s\\S]*?)${end}`, 'g');
         let match;
         while ((match = regex.exec(data)) !== null) {
-            const code = match[0].replace(new RegExp(`(${start}|${end})`, 'g'), '').trim();
+            const code = match[1].trim();
             if (code.length > 0) {
                 const startLine = data.substring(0, match.index).split('\n').length;
                 codeblock.push({
