@@ -113,6 +113,7 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
                 return;
             }
         } else if (choice.value === ":direct") {
+            // TODO: Support multiple test cases simultaneously
             const testString: string | undefined = await vscode.window.showInputBox({
                 prompt: "Enter the test cases.",
                 validateInput: (s: string): string | undefined => s && s.trim() ? undefined : "Test case must not be empty.",
@@ -120,7 +121,7 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
                 ignoreFocusOut: true,
             });
             if (testString) {
-                testInput = testString;
+                testInput = testString.replace(/\\n/g, '\n');
             }
         } else if (choice.value === ":file") {
             const testFile: vscode.Uri[] | undefined = await showFileSelectDialog(ptaConfig.getWorkspaceFolder());
@@ -149,7 +150,7 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
                 }
                 testInput = customTests[testChoice.value];
             } else {
-                vscode.window.showErrorMessage("No custom test samples added.");
+                vscode.window.showErrorMessage("No custom test samples found. Please check the format of the test code blocks.");
                 return;
             }
         }
@@ -179,7 +180,7 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
 export async function testCustomSample(ptaCode: IPtaCode, index: number): Promise<void> {
     try {
         if (!ptaCode.customTests || ptaCode.customTests.length <= index) {
-            throw "There are no custom samples provided.";
+            throw new Error("No custom samples found. Please check the format of the test code blocks.");
         }
         const solution: { compiler: string, code: string, testInput: string } = {
             compiler: ptaCode.compiler,
