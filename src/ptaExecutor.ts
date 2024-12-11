@@ -120,7 +120,7 @@ class PtaExecutor extends EventEmitter implements Disposable {
                             callback("SUCCESS", data);
                         }
                         if (++cnt === 60) {
-                            throw "[ERROR] Submission timeout";
+                            throw new Error("Submission timeout");
                         }
                     }, 1000);
                 } catch (error: any) {
