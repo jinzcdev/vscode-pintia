@@ -43,11 +43,11 @@ export class CustomCodeLensProvider implements vscode.CodeLensProvider<PtaCodeLe
             if (!ptaCode) {
                 return codeLens;
             }
-            const code: ICodeBlock[] = this.parseCodeBlock(codeLens.codeContent, "@pintia\\s+code=start", "\\n[^\\n]*@pintia\\s+code=end");
+            const code: ICodeBlock[] = this.parseCodeBlock(codeLens.codeContent, "@pintia\\s+code=start\\s*?\\n", "\\n[^\\n]*?@pintia\\s+code=end");
             if (code.length !== 0) {
                 ptaCode.code = code[0].code;
             }
-            const customTests: ICodeBlock[] = this.parseCodeBlock(codeLens.codeContent, "@pintia\\s+test=start", "\\n[^\\n]*@pintia\\s+test=end");
+            const customTests: ICodeBlock[] = this.parseCodeBlock(codeLens.codeContent, "@pintia\\s+test=start\\s*?\\n", "\\n[^\\n]*?@pintia\\s+test=end");
             ptaCode.customTests = customTests.map((value, _) => value.code);
 
             if (command === "Submit") {
@@ -80,7 +80,7 @@ export class CustomCodeLensProvider implements vscode.CodeLensProvider<PtaCodeLe
     }
 
     private parseCodeInfo(data: string): IPtaCode | null {
-        const matchResult: RegExpMatchArray | null = data.match(/@pintia psid=(.*) pid=(.*) compiler=(.*)/);
+        const matchResult: RegExpMatchArray | null = data.match(/@pintia\s+psid=(\S+)\s+pid=(\S+)\s+compiler=(\S+)/);
         if (!matchResult) {
             return null;
         }
