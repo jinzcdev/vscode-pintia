@@ -41,8 +41,9 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
         }
         if (element.type === PtaNodeType.Dashboard) {
             return {
-                label: element.label,
-                collapsibleState: vscode.TreeItemCollapsibleState.None
+                label: `— ${element.label} —`,
+                collapsibleState: vscode.TreeItemCollapsibleState.None,
+                iconPath: new vscode.ThemeIcon('book')
             }
         }
         let contextValue: string;

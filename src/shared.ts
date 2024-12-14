@@ -39,7 +39,10 @@ export enum ProblemSubmissionState {
 export enum ProblemType {
     PROGRAMMING = "PROGRAMMING",
     CODE_COMPLETION = "CODE_COMPLETION",
-    MULTIPLE_FILE = "MULTIPLE_FILE"
+    MULTIPLE_FILE = "MULTIPLE_FILE",
+    TRUE_OR_FALSE = "TRUE_OR_FALSE",
+    MULTIPLE_CHOICE = "MULTIPLE_CHOICE",
+    FILL_IN_THE_BLANK_FOR_PROGRAMMING = "FILL_IN_THE_BLANK_FOR_PROGRAMMING"
 }
 
 export enum PtaNodeType {
@@ -52,7 +55,14 @@ export enum PtaNodeType {
 
 export enum ProblemPermissionEnum {
     UNKNOWN = -1,
-    LOCKED = 9
+    LOCKED = 9,
+    MY_PROBLEM_SET = 47
+}
+
+export enum ProblemSetEaxmStatus {
+    READY = "READY",            // 我的题集准备答题中
+    PROCESSING = "PROCESSING",  // 正在进行中
+    END = "END"                 // 已结束
 }
 
 export interface IPtaCode {
@@ -247,9 +257,17 @@ export const problemTypeInfoMapping: Map<string, {
     type: number,
     prefix: string
 }> = new Map([
+    ["TRUE_OR_FALSE", { name: "判断题", type: 1, prefix: "trueOrFalse" }],
+    ["MULTIPLE_CHOICE", { name: "单选题", type: 2, prefix: "multipleChoice" }],
+    ["FILL_IN_THE_BLANK_FOR_PROGRAMMING", { name: "程序填空题", type: 5, prefix: "fillInTheBlankForProgramming" }],
     ["PROGRAMMING", { name: "编程题", type: 7, prefix: "programming" }],
     ["CODE_COMPLETION", { name: "函数题", type: 6, prefix: "codeCompletion" }],
     ["MULTIPLE_FILE", { name: "多文件编程题", type: 9, prefix: "multipleFile" }],
+]);
+
+export const supportedProblemTypes: Set<string> = new Set([
+    "PROGRAMMING",
+    "CODE_COMPLETION"
 ]);
 
 export const colorThemeMapping: Map<string, string[]> = new Map([
