@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { OpenOptionEnum } from "./utils/workspaceUtils";
 
 class PtaConfig {
 
@@ -135,11 +136,19 @@ class PtaConfig {
     }
 
     public getPreviewProblemAndCodeIt(): boolean {
-        return this.getConfiguration().get<boolean>("previewProblemAndCodeIt", true);
+        return this.getConfiguration().get<boolean>("previewProblem.openAndCodeIt", true);
     }
 
     public setPreviewProblemAndCodeIt(previewProblemAndCodeIt: boolean) {
         this.update("previewProblemAndCodeIt", previewProblemAndCodeIt);
+    }
+
+    public getPreviewProblemDefaultOpenedMethod(): string {
+        return this.getConfiguration().get<string>("previewProblem.defaultOpenedMethod", OpenOptionEnum.alwaysAsk);
+    }
+
+    public setPreviewProblemDefaultOpenedMethod(previewProblemDefaultOpenedMethod: string) {
+        this.update("previewProblem.defaultOpenedMethod", previewProblemDefaultOpenedMethod);
     }
 }
 

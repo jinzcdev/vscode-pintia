@@ -66,9 +66,9 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand("pintia.clearCache", () => cache.clearCache()),
 		vscode.commands.registerCommand("pintia.signIn", () => ptaManager.signIn()),
 		vscode.commands.registerCommand("pintia.signOut", () => ptaManager.signOut()),
-		vscode.commands.registerCommand("pintia.previewProblem", async (psID: string, pID: string) => {
+		vscode.commands.registerCommand("pintia.previewProblem", async (psID: string, pID: string, codeIt: boolean = true) => {
 			const problem = await new ProblemView(psID, pID).fetch();
-			PtaPreviewProvider.createOrUpdate(problem).show().then(() => {
+			await PtaPreviewProvider.createOrUpdate(problem).show().then(() => {
 				historyManager.addProblem(historyManager.getCurrentUserId(), {
 					pID: problem.id,
 					psID: problem.problemSetId,
@@ -76,7 +76,7 @@ export async function activate(context: vscode.ExtensionContext) {
 					title: `${problem.label} ${problem.title}`
 				});
 				historyTreeDataProvider.refresh();
-				if (ptaConfig.getPreviewProblemAndCodeIt()) {
+				if (codeIt && ptaConfig.getPreviewProblemAndCodeIt()) {
 					show.showCodingEditor(ProblemView.toPtaNode(problem));
 				}
 			});
