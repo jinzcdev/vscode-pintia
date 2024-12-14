@@ -24,36 +24,49 @@ export async function selectWorkspaceFolder(): Promise<string> {
             needAsk = false;
         }
     }
-
-    if (needAsk) {
-        const choice: string | undefined = await vscode.window.showQuickPick(
-            [
-                OpenOption.justOpenFile,
-                OpenOption.openInCurrentWindow,
-                OpenOption.openInNewWindow,
-                OpenOption.addToWorkspace,
-            ],
-            { placeHolder: "The PTA workspace folder is not opened in VS Code, would you like to open it?" },
-        );
-
-        // Todo: generate file first
-        switch (choice) {
-            case OpenOption.justOpenFile:
-                return workspaceFolder;
-            case OpenOption.openInCurrentWindow:
-                await vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(workspaceFolder), false);
-                return "";
-            case OpenOption.openInNewWindow:
-                await vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(workspaceFolder), true);
-                return "";
-            case OpenOption.addToWorkspace:
-                vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders?.length ?? 0, 0, { uri: vscode.Uri.file(workspaceFolder) });
-                break;
-            default:
-                return "";
-        }
+    if (!needAsk) {
+        return workspaceFolder;
     }
-    // to do 
+
+    const defaultChoice = ptaConfig.getPreviewProblemDefaultOpenedMethod() as OpenOptionEnum;
+
+    if (defaultChoice != OpenOptionEnum.alwaysAsk) {
+        return await handleOpenOption(defaultChoice, workspaceFolder);
+    }
+
+    const choice: string | undefined = await vscode.window.showQuickPick(
+        [
+            OpenOptionEnum.justOpenFile,
+            OpenOptionEnum.openInCurrentWindow,
+            OpenOptionEnum.openInNewWindow,
+            OpenOptionEnum.addToWorkspace,
+        ],
+        { placeHolder: "The PTA workspace folder is not opened in VS Code, would you like to open it?" },
+    );
+
+    if (choice) {
+        return await handleOpenOption(choice as OpenOptionEnum, workspaceFolder);
+    }
+
+    return "";
+}
+
+async function handleOpenOption(option: OpenOptionEnum, workspaceFolder: string): Promise<string> {
+    switch (option) {
+        case OpenOptionEnum.justOpenFile:
+            return workspaceFolder;
+        case OpenOptionEnum.openInCurrentWindow:
+            await vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(workspaceFolder), false);
+            break;
+        case OpenOptionEnum.openInNewWindow:
+            await vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(workspaceFolder), true);
+            break;
+        case OpenOptionEnum.addToWorkspace:
+            vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders?.length ?? 0, 0, { uri: vscode.Uri.file(workspaceFolder) });
+            break;
+        default:
+            return "";
+    }
     return workspaceFolder;
 }
 
@@ -122,7 +135,8 @@ export async function determinePintiaFolder(): Promise<string> {
     return result;
 }
 
-enum OpenOption {
+export enum OpenOptionEnum {
+    alwaysAsk = "Always ask",
     justOpenFile = "Just open the problem file",
     openInCurrentWindow = "Open in current window",
     openInNewWindow = "Open in new window",

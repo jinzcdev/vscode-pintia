@@ -122,7 +122,7 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
                 if (msg.value === "pintia.codeProblem") {
                     await vscode.commands.executeCommand("pintia.codeProblem", this.data.ptaCode);
                 } else if (msg.value === "pintia.previewProblem") {
-                    await vscode.commands.executeCommand("pintia.previewProblem", this.data.ptaCode.psID, this.data.ptaCode.pID);
+                    await vscode.commands.executeCommand("pintia.previewProblem", this.data.ptaCode.psID, this.data.ptaCode.pID, false);
                 }
                 break;
             case "text":

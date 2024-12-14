@@ -245,6 +245,7 @@
             }
         ],
         "configuration": {
+            "id": "pintia",
             "title": "Pintia",
             "properties": {
                 "pintia.workspaceFolder": {
@@ -253,11 +254,24 @@
                     "description": "%configuration.pintia.workspaceFolder%",
                     "default": ""
                 },
-                "pintia.previewProblemAndCodeIt": {
+                "pintia.previewProblem.openAndCodeIt": {
                     "type": "boolean",
-                    "default": true,
+                    "default": false,
                     "scope": "application",
-                    "description": "%configuration.pintia.previewProblemAndCodeIt%"
+                    "description": "%configuration.pintia.previewProblem.openAndCodeIt%"
+                },
+                "pintia.previewProblem.defaultOpenedMethod": {
+                    "type": "string",
+                    "default": "Always ask",
+                    "enum": [
+                        "Always ask",
+                        "Just open the problem file",
+                        "Open in current window",
+                        "Open in new window",
+                        "Add to workspace"
+                    ],
+                    "scope": "application",
+                    "description": "%configuration.pintia.previewProblem.defaultOpenedMethod%"
                 },
                 "pintia.paging.pageSize": {
                     "type": "number",

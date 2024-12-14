@@ -72,7 +72,7 @@ export class CustomCodeLensProvider implements vscode.CodeLensProvider<PtaCodeLe
                 codeLens.command = {
                     title: "Preview",
                     command: "pintia.previewProblem",
-                    arguments: [ptaCode.psID, ptaCode.pID],
+                    arguments: [ptaCode.psID, ptaCode.pID, false],
                 };
             }
         }
