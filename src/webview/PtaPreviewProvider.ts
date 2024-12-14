@@ -73,15 +73,6 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
         <div class="content-container">
             ${markdownEngine.render(this.formatMarkdown(problem.content))}
 
-            ${markdownEngine.render([
-            "-----",
-            [
-                `[Google](https://www.google.com/search?q=${keyword})`,
-                `[Baidu](https://www.baidu.com/s?wd=${keyword})`,
-                `[Bing](https://cn.bing.com/search?q=${keyword})`,
-                `[Solution](https://github.com/jinzcdev/PTA/tree/main/${this.formatProblemSetName(problem.problemSetName)})`
-            ].join(" | ")
-        ].join("\n"))}
 
             ${problem.problemNote ? `
                 <h3>我的笔记</h3>
@@ -98,6 +89,16 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
                     </div>
                 </details>
             ` : ""}
+
+            ${markdownEngine.render([
+                "搜索一下: " + [
+                    `[Google](https://www.google.com/search?q=${keyword})`,
+                    `[Baidu](https://www.baidu.com/s?wd=${keyword})`,
+                    `[Bing](https://cn.bing.com/search?q=${keyword})`,
+                    `[Solution](https://github.com/jinzcdev/PTA/tree/main/${this.formatProblemSetName(problem.problemSetName)})`
+                ].join(" | "),
+                "<hr>"
+            ].join("\n"))}
 
             ${problem.lastProgram.trim().length ?
                 markdownEngine.render([
