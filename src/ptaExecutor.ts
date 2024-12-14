@@ -9,7 +9,7 @@ import { IProblemSubmissionDetail } from "./entity/problemSubmissionCode";
 import { IUserSession } from "./entity/userLoginSession";
 import { ptaChannel } from "./ptaChannel";
 import { ptaManager } from "./ptaManager";
-import { cacheDirPath, CallBack, ProblemType } from "./shared";
+import { cacheDirPath, CallBack, ProblemPermissionEnum, ProblemType } from "./shared";
 import { ptaApi } from "./utils/api";
 import { DialogType, promptForOpenOutputChannel } from "./utils/uiUtils";
 
@@ -41,12 +41,21 @@ class PtaExecutor extends EventEmitter implements Disposable {
                         program: solution.code
                     };
 
-                    const submission: IProblemSubmission = await ptaApi.getProblemSetExam(psID, cookie)
-                        .then(exam => exam.id)
-                        .then(id => ptaApi.submitSolution(id, cookie, {
-                            details: [detail],
-                            problemType: problemType
-                        }));
+                    const problemPermission = await ptaApi.getProblemSetPermission(psID, cookie) as ProblemPermissionEnum;
+
+                    const problemSetExam = await ptaApi.getProblemSetExam(psID, cookie);
+                    if (!problemSetExam.exam) {
+                        // 用户个人的题集, 不自动创建 exam
+                        if (problemPermission === ProblemPermissionEnum.MY_PROBLEM_SET) {
+                            throw new Error("My problem set does not have exam.");
+                        }
+                        problemSetExam.exam = await ptaApi.createProblemSetExamAndReturn(psID, cookie);
+                    }
+
+                    const submission: IProblemSubmission = await ptaApi.submitSolution(problemSetExam.exam.id, cookie, {
+                        details: [detail],
+                        problemType: problemType
+                    });
                     if (submission.error) {
                         throw JSON.stringify(submission.error);
                     }
@@ -100,13 +109,21 @@ class PtaExecutor extends EventEmitter implements Disposable {
                         program: solution.code
                     };
 
+                    const problemPermission = await ptaApi.getProblemSetPermission(psID, cookie) as ProblemPermissionEnum;
 
-                    const submission: IProblemSubmission = await ptaApi.getProblemSetExam(psID, cookie)
-                        .then(exam => exam.id)
-                        .then(id => ptaApi.submitSolution(id, cookie, {
-                            details: [detail],
-                            problemType: problemType
-                        }));
+                    const problemSetExam = await ptaApi.getProblemSetExam(psID, cookie);
+                    if (!problemSetExam.exam) {
+                        // 用户个人的题集, 不自动创建 exam
+                        if (problemPermission === ProblemPermissionEnum.MY_PROBLEM_SET) {
+                            throw new Error("My problem set does not have exam.");
+                        }
+                        problemSetExam.exam = await ptaApi.createProblemSetExamAndReturn(psID, cookie);
+                    }
+
+                    const submission: IProblemSubmission = await ptaApi.submitSolution(problemSetExam.exam.id, cookie, {
+                        details: [detail],
+                        problemType: problemType
+                    });
                     if (submission.error) {
                         throw JSON.stringify(submission.error);
                     }

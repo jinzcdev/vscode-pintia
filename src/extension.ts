@@ -42,6 +42,14 @@ export async function activate(context: vscode.ExtensionContext) {
 		ptaStatusBarController.updateStatusBar(ptaManager.getUserSession());
 	});
 
+	await fs.mkdirs(configPath).then(() => {
+		Promise.all([
+			ptaManager.fetchLoginStatus(),
+			cache.createProblemSearchIndex(context),
+			user.autoCheckInPTA()
+		]);
+	});
+
 	context.subscriptions.push(
 		ptaStatusBarController,
 		codeLensController,
@@ -91,13 +99,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand("pintia.addFavorite", (ptaNode: PtaNode) => star.addFavoriteProblem(ptaNode)),
 		vscode.commands.registerCommand("pintia.removeFavorite", (ptaNode: PtaNode) => star.removeFavoriteProblem(ptaNode.pID))
 	);
-
-	await fs.mkdirs(configPath);
-	await ptaManager.fetchLoginStatus();
-
-	user.autoCheckInPTA();
-
-	await cache.createProblemSearchIndex(context);
 }
 
 export function getGlobalContext(): vscode.ExtensionContext {

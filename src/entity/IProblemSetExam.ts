@@ -1,10 +1,15 @@
 
 export interface IProblemSetExam {
+    status: string;
+    exam?: IExam;
+}
+
+export interface IExam {
     id: string;
-    score: number,
+    score: number;
     startAt: string;
     endAt: string;
-    examConfig: {},
+    examConfig: {};
     problemSetId: string;
     userId: string;
     ended: boolean;

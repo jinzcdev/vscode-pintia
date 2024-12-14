@@ -45,11 +45,11 @@ export async function refreshProblemSearchIndex(): Promise<void> {
         cancellable: false
     }, async (p: vscode.Progress<{ message?: string; increment?: number }>) => {
         return new Promise<void>(async (resolve: () => void, reject: (e: Error) => void): Promise<void> => {
-            const ignoredLocked: boolean = ptaConfig.getSearchIndexIgnoreLockedProblemSets();
+            // const ignoredLocked: boolean = ptaConfig.getSearchIndexIgnoreLockedProblemSets();
             const ignoredZOJ: boolean = ptaConfig.getSearchIndexIgnoreZOJ();
             try {
 
-                const problemSets: IProblemSet[] = await ptaApi.getAllProblemSets(ptaManager.getUserSession()?.cookie);
+                const problemSets: IProblemSet[] = await ptaApi.getAlwaysAvailableProblemSets(ptaManager.getUserSession()?.cookie);
                 const problemSetAllowedIndex: string[] = [];
                 for (const pbs of problemSets) {
                     if (ignoredZOJ && pbs.id === ZOJ_PROBLEM_SET_ID) {
