@@ -20,6 +20,7 @@ import { IWechatAuth, IWechatAuthState, IWechatUserInfo, IWechatUserState } from
 import { ptaChannel } from "../ptaChannel";
 import { ILastSubmission } from "../entity/ILastSubmission";
 import { ptaManager } from "../ptaManager";
+import { AlwaysAvailableProblemSet } from "../entity/AlwaysAvailableProblemSet";
 
 class PtaAPI {
 
@@ -64,22 +65,21 @@ class PtaAPI {
             }
         }
 
-        const data: IProblemSet[] = await httpGet(`${this.problemUrl}/always-available`).then(json => json["problemSets"]);
-        const problemSet: IProblemSet[] = [];
-        for (const item of data) {
-            const summaries: IProblemSummary = await this.getProblemSummary(item.id);  // id: ProblemSetID
-            item.summaries = summaries;
+        const data: AlwaysAvailableProblemSet = await httpGet(`${this.problemUrl}/always-available`);
+        const problemSets: IProblemSet[] = Array.from(new Map(data.problemSets.map(item => [item.id, item])).values());
+        for (const item of problemSets) {
+            let summaries: IProblemSummary = data.problemSetSummaryByProblemSetId[item.id]?.summariesByPaperIndex[0].summaryByProblemType;
+            item.summaries = !summaries ? await this.getProblemSummary(item.id) : summaries;
             if (cookie) {
                 const permission: number | undefined = await this.getProblemSetPermission(item.id, cookie);
                 item.permission = {
                     permission: permission ?? 0
                 }
             }
-            problemSet.push(item);
         }
         await fs.createFile(filePath);
-        await fs.writeJson(filePath, problemSet);
-        return problemSet;
+        await fs.writeJson(filePath, problemSets);
+        return problemSets;
     }
 
 

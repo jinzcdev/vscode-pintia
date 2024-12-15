@@ -1,23 +1,8 @@
 // https://pintia.cn/api/problem-sets/{problemSet}/exams
 import { IProblemSummary } from "./IProblemSummary";
 
-export interface IProblemSet {
-    id: string;
-    name: string;
-    type: string;
-    timeType: string;
-    status: string;
-    organizationName: string;
-    ownerNickname: string;
-    manageable: boolean;
-    createAt: string;
-    updateAt: string;
-    scoringRule: string;
-    organizationType: string;
-    ownerId: string;
-    startAt: string;
-    endAt: string;
-    duration: number;
+export interface IProblemSet extends ProblemSet {
+
     problemSetConfig: {
         compilers: string[]; // all compilers to be allowed to use in this problem set
         multipleChoiceMoreThanOneAnswerProblemScoringMethod?: string;
@@ -51,8 +36,6 @@ export interface IProblemSet {
         enableXcpcContestService: boolean;
         collectionDerivedProblemSetId: string;
     };
-    ownerOrganizationId: string;
-    stage: string;
 
     // in exam
     description?: string;
@@ -66,4 +49,27 @@ export interface IProblemSet {
     // custom
     multiType: boolean;
     summaries: IProblemSummary;
+}
+
+interface ProblemSet {
+    id: string;
+    name: string;
+    type: string;
+    timeType: string;
+    status: string;
+    organizationName: string;
+    ownerNickname: string;
+    manageable: boolean;
+    createAt: string;
+    updateAt: string;
+    scoringRule: string;
+    organizationType: string;
+    ownerId: string;
+    startAt: string;
+    endAt: string;
+    duration: number;
+    ownerOrganizationId: string;
+    stage: string;
+    feature: string;
+    sourceProblemSetId: string;
 }
