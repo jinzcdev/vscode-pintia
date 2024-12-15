@@ -7,6 +7,7 @@ import { IQuickPickItem } from "../shared";
 import { ptaApi } from "../utils/api";
 import { DialogType, openUrl, promptForOpenOutputChannel } from "../utils/uiUtils";
 import { ptaConfig } from "../ptaConfig";
+import { l10n } from "vscode";
 
 
 export async function showUserManager(): Promise<void> {
@@ -61,14 +62,14 @@ export async function checkInPTA(): Promise<void> {
         if (userSession) {
             const response: ICheckIn = await ptaApi.checkin(userSession.cookie);
             if (response.rewards) {
-                vscode.window.showInformationMessage("Successfully, check in PTA.");
+                vscode.window.showInformationMessage(l10n.t("Successfully, check in PTA."));
             } else {
                 vscode.window.showInformationMessage(response.error.message);
             }
         }
     } catch (error: any) {
         ptaChannel.appendLine(error.toString());
-        promptForOpenOutputChannel("Failed to check in. Please open the output channel for details.", DialogType.error);
+        promptForOpenOutputChannel(l10n.t("Failed to check in. Please open the output channel for details."), DialogType.error);
     }
 }
 
@@ -91,7 +92,7 @@ export async function checkedInStatus(): Promise<boolean> {
         }
     } catch (error: any) {
         ptaChannel.appendLine(error.toString());
-        promptForOpenOutputChannel("Failed to get the status of checkin. Please open the output channel for details.", DialogType.error);
+        promptForOpenOutputChannel(l10n.t("Failed to get the status of checkin. Please open the output channel for details."), DialogType.error);
     }
     return false;
 }

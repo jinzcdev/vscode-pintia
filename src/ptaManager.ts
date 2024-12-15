@@ -10,6 +10,8 @@ import { ptaChannel } from "./ptaChannel";
 import { DialogType, promptForOpenOutputChannel } from "./utils/uiUtils";
 import { UserAuthProviderFactory } from "./auth/UserAuthProviderFactory";
 import * as cache from "./commands/cache";
+import { l10n } from "vscode";
+import { t } from "@vscode/l10n";
 
 
 class PtaManager extends EventEmitter {
@@ -27,7 +29,7 @@ class PtaManager extends EventEmitter {
         if (this.userStatus === UserStatus.SignedIn) {
             const choice: string | undefined = await vscode.window.showQuickPick(
                 ["Yes", "No"],
-                { placeHolder: "You are already logged in. Do you want to log out of the current account?" },
+                { placeHolder: l10n.t("You are already logged in. Do you want to log out of the current account?") },
             );
             if (!choice || choice === "No") {
                 return;
@@ -37,9 +39,14 @@ class PtaManager extends EventEmitter {
         const picks: IQuickPickItem<PtaLoginMethod>[] = [];
         picks.push(
             {
-                label: "$(device-camera) QR Code",
-                detail: "Use WeChat QRCode to login",
+                label: l10n.t("{0} QR Code", "$(device-camera)"),
+                detail: l10n.t("Use WeChat QRCode to login"),
                 value: PtaLoginMethod.WeChat
+            },
+            {
+                label: l10n.t("{0} Pintia Cookie", "$(key)"),
+                detail: l10n.t("Use Pintia cookie to login"),
+                value: PtaLoginMethod.Cookie
             }
         );
 
@@ -52,7 +59,7 @@ class PtaManager extends EventEmitter {
 
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
-            title: "Waiting for sign in...",
+            title: l10n.t("Sign in ..."),
             cancellable: false
         }, async (p: vscode.Progress<{ message?: string; increment?: number }>) => {
             return new Promise<void>(async (resolve: () => void, reject: (e: Error) => void): Promise<void> => {
@@ -67,16 +74,13 @@ class PtaManager extends EventEmitter {
                                 ptaChannel.appendLine(reason);
                                 reject(reason);
                             });
-                        vscode.window.showInformationMessage(`Successfully, ${choice.value}.`);
+                        vscode.window.showInformationMessage(l10n.t("Successfully logged in as {0}", userSession.user));
                         this.userSession = userSession;
                         this.userStatus = UserStatus.SignedIn;
 
                         ptaChannel.appendLine(`Login successfully and save \`user.json\` to ${path}`);
 
                         this.emit("statusChanged");
-                    } else {
-                        vscode.window.showErrorMessage("Login timed out!");
-                        ptaChannel.appendLine("Login timed out!");
                     }
 
                     resolve();
@@ -99,10 +103,10 @@ class PtaManager extends EventEmitter {
                 const userAuthProvider = UserAuthProviderFactory.createUserAuthProvider(loginSession.loginMethod as PtaLoginMethod);
 
                 await Promise.all([userAuthProvider.signOut(loginSession.cookie), fs.remove(userFilePath), cache.clearCache()]);
-                vscode.window.showInformationMessage("Successfully signed out.");
+                vscode.window.showInformationMessage(l10n.t("Successfully signed out."));
                 ptaChannel.appendLine(`[INFO] Logout the current user successfully and remove user information from ${userFilePath}.`);
             } else {
-                vscode.window.showInformationMessage("The user is not logged in.");
+                vscode.window.showInformationMessage(l10n.t("The user is not logged in."));
                 return;
             }
 
@@ -111,7 +115,7 @@ class PtaManager extends EventEmitter {
             this.emit("statusChanged");
         } catch (error: any) {
             ptaChannel.appendLine(error.toString());
-            promptForOpenOutputChannel("Signout failed. Please open the output channel for details.", DialogType.error)
+            promptForOpenOutputChannel(l10n.t("Signout failed. Please open the output channel for details."), DialogType.error)
         }
     }
 
@@ -131,12 +135,12 @@ class PtaManager extends EventEmitter {
 
                     fs.writeJson(filePath, loginSession).catch(async reason => {
                         ptaChannel.appendLine(`[ERROR]: ${reason.toString()}`);
-                        await promptForOpenOutputChannel("Update user profile failed. Please open the output channel for details.", DialogType.error);
+                        await promptForOpenOutputChannel(l10n.t("Update user profile failed. Please open the output channel for details."), DialogType.error);
                     });
                 } else {
                     this.userSession = undefined;
                     this.userStatus = UserStatus.SignedOut;
-                    vscode.window.showErrorMessage("Login session has expired! Please login again.");
+                    vscode.window.showErrorMessage(l10n.t("Login session has expired! Please login again."));
                 }
             }
         } catch (error) {

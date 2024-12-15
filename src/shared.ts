@@ -22,7 +22,8 @@ export enum UserStatus {
 
 export enum PtaLoginMethod {
     PTA = "PTA",
-    WeChat = "WeChat"
+    WeChat = "WeChat",
+    Cookie = "Cookie"
 }
 
 export enum PtaDashType {

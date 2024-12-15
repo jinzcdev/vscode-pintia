@@ -32,6 +32,7 @@
     ],
     "activationEvents": [],
     "main": "./out/extension",
+    "l10n": "./l10n",
     "contributes": {
         "viewsContainers": {
             "activitybar": [
@@ -603,10 +604,12 @@
         "@types/vscode": "^1.66.0",
         "@typescript-eslint/eslint-plugin": "^8.13.0",
         "@typescript-eslint/parser": "^8.13.0",
+        "@vscode/l10n-dev": "^0.0.35",
         "eslint": "^9.14.0",
         "vscode-test": "^1.5.0"
     },
     "dependencies": {
+        "@vscode/l10n": "^0.0.18",
         "@vscode/markdown-it-katex": "^1.1.0",
         "fs-extra": "11.2.0",
         "highlight.js": "^11.10.0",

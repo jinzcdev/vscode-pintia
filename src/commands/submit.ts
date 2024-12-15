@@ -14,11 +14,12 @@ import { DialogType, promptForOpenOutputChannel, showFileSelectDialog } from "..
 import { PtaSubmissionProvider } from "../webview/PtaSubmissionProvider";
 import { PtaTestProvider } from "../webview/PtaTestProvider";
 import { TestView } from "../webview/views/TestView";
+import { l10n } from "vscode";
 
 export async function submitSolution(ptaCode: IPtaCode): Promise<void> {
     try {
         if (!ptaCode.code) {
-            vscode.window.showInformationMessage("The code must be wrapped in `@pintia code=start` and `@pintia code=end`");
+            vscode.window.showInformationMessage(l10n.t("The code must be wrapped in `@pintia code=start` and `@pintia code=end`"));
             return;
         }
 
@@ -34,7 +35,7 @@ export async function submitSolution(ptaCode: IPtaCode): Promise<void> {
                     });
                     break;
                 default:
-                    vscode.window.showInformationMessage("submission failed!");
+                    vscode.window.showInformationMessage(l10n.t("submission failed!"));
             }
         });
     } catch (error) {
@@ -56,29 +57,29 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
         const picks: Array<IQuickPickItem<string>> = [];
         if (ptaCode.customTests && ptaCode.customTests.length !== 0) {
             picks.push({
-                label: "$(note) Custom test cases",
+                label: l10n.t("{0} Custom test cases", "$(note)"),
                 description: "",
-                detail: "Test with the custom cases",
+                detail: l10n.t("Test with the custom cases"),
                 value: ":custom",
             });
         }
         picks.push(
             {
-                label: "$(three-bars) Default test cases",
-                description: (exampleTestDatas?.length ?? 0) / 2 === 0 ? "No default test cases provided" : "",
-                detail: "Test with the default cases",
+                label: l10n.t("{0} Default test cases", "$(three-bars)"),
+                description: (exampleTestDatas?.length ?? 0) / 2 === 0 ? l10n.t("No default test cases provided") : "",
+                detail: l10n.t("Test with the default cases"),
                 value: ":default",
             },
             {
-                label: "$(pencil) Write directly...",
+                label: l10n.t("{0} Write directly...", "$(pencil)"),
                 description: "",
-                detail: "Write test cases in input box",
+                detail: l10n.t("Write test cases in input box"),
                 value: ":direct",
             },
             {
-                label: "$(file-text) Browse...",
+                label: l10n.t("{0} Browse...", "$(file-text)"),
                 description: "",
-                detail: "Test with the written cases in file",
+                detail: l10n.t("Test with the written cases in file"),
                 value: ":file",
             },
         );
@@ -96,7 +97,7 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
             if (exampleTestDatas) {
                 for (let i = 0; i < exampleTestDatas.length / 2; i++) {
                     testPicks.push({
-                        label: `Sample ${i + 1}`,
+                        label: l10n.t("Sample {0}", i + 1),
                         detail: exampleTestDatas[i].input,
                         value: i
                     });
@@ -109,15 +110,15 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
                 testInput = exampleTestDatas![caseID].input;
                 testOutput = exampleTestDatas![caseID].output;
             } else {
-                vscode.window.showErrorMessage("There is no default test sample for this problem.");
+                vscode.window.showErrorMessage(l10n.t("There is no default test sample for this problem."));
                 return;
             }
         } else if (choice.value === ":direct") {
             // TODO: Support multiple test cases simultaneously
             const testString: string | undefined = await vscode.window.showInputBox({
-                prompt: "Enter the test cases.",
+                prompt: l10n.t("Enter the test cases."),
                 validateInput: (s: string): string | undefined => s && s.trim() ? undefined : "Test case must not be empty.",
-                placeHolder: "Example: 1 2 3\\n4 5 6",
+                placeHolder: `${l10n.t("Example")}: 1 2 3\\n4 5 6`,
                 ignoreFocusOut: true,
             });
             if (testString) {
@@ -130,7 +131,7 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
                 if (input) {
                     testInput = input;
                 } else {
-                    vscode.window.showErrorMessage("The selected test file must not be empty.");
+                    vscode.window.showErrorMessage(l10n.t("The selected test file must not be empty."));
                 }
             }
         } else if (choice.value === ":custom") {
@@ -139,7 +140,7 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
             if (customTests && customTests.length !== 0) {
                 for (let i = 0; i < customTests.length; i++) {
                     testPicks.push({
-                        label: `Sample ${i + 1}`,
+                        label: l10n.t("Sample {0}", i + 1),
                         detail: customTests[i],
                         value: i
                     });
@@ -150,7 +151,7 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
                 }
                 testInput = customTests[testChoice.value];
             } else {
-                vscode.window.showErrorMessage("No custom test samples found. Please check the format of the test code blocks.");
+                vscode.window.showErrorMessage(l10n.t("No custom test samples found. Please check the format of the test code blocks."));
                 return;
             }
         }
@@ -173,7 +174,7 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
         });
     } catch (error: any) {
         ptaChannel.appendLine(error.toString());
-        await promptForOpenOutputChannel("Testing sample failed. Please open output channel for details.", DialogType.error);
+        await promptForOpenOutputChannel(l10n.t("Testing sample failed. Please open output channel for details."), DialogType.error);
     }
 }
 
@@ -199,6 +200,6 @@ export async function testCustomSample(ptaCode: IPtaCode, index: number): Promis
         });
     } catch (error: any) {
         ptaChannel.appendLine(error.toString());
-        await promptForOpenOutputChannel("Testing sample failed. Please open output channel for details.", DialogType.error);
+        await promptForOpenOutputChannel(l10n.t("Testing sample failed. Please open output channel for details."), DialogType.error);
     }
 }

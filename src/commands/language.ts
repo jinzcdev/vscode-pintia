@@ -1,4 +1,4 @@
-import { QuickPickItem, window } from "vscode";
+import { l10n, QuickPickItem, window } from "vscode";
 import { ptaConfig } from "../ptaConfig";
 import { langCompilerMapping } from "../shared";
 
@@ -26,7 +26,7 @@ export async function changeDefaultLanguage(): Promise<void> {
     });
 
     const selectedItem: QuickPickItem | undefined = await window.showQuickPick(languageItems, {
-        placeHolder: "Please the default language",
+        placeHolder: l10n.t("Please the default language"),
         ignoreFocusOut: true,
     });
 
@@ -35,5 +35,5 @@ export async function changeDefaultLanguage(): Promise<void> {
     }
 
     ptaConfig.update("defaultLanguage", selectedItem.label);
-    window.showInformationMessage(`Successfully set the default language to ${selectedItem.label}`);
+    window.showInformationMessage(l10n.t("Successfully set the default language to {0}", selectedItem.label));
 }

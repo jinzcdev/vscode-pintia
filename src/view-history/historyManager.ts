@@ -1,7 +1,7 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as vscode from "vscode";
-import { Disposable } from 'vscode';
+import { Disposable, l10n } from 'vscode';
 import { ptaChannel } from '../ptaChannel';
 
 import { ProblemBasicInfo } from '../entity/ProblemBasicInfo';
@@ -63,7 +63,7 @@ class HistoryManager implements Disposable {
             }
         } catch (error: any) {
             ptaChannel.appendLine(error.toString());
-            await promptForOpenOutputChannel("Failed to load viewed problems. Please check the output channel for details.", DialogType.error);
+            await promptForOpenOutputChannel(l10n.t("Failed to load viewed problems. Please check the output channel for details."), DialogType.error);
         }
     }
 
@@ -73,7 +73,7 @@ class HistoryManager implements Disposable {
             fs.writeFileSync(this.filePath, JSON.stringify(this.viewedProblems));
         } catch (error: any) {
             ptaChannel.appendLine(error.toString());
-            await promptForOpenOutputChannel("Failed to save viewed problems. Please check the output channel for details.", DialogType.error);
+            await promptForOpenOutputChannel(l10n.t("Failed to save viewed problems. Please check the output channel for details."), DialogType.error);
         }
     }
 
