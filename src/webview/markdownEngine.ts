@@ -17,7 +17,6 @@ const markdownEngine = require('markdown-it')({
 })
     .use(require('@vscode/markdown-it-katex').default)
     .use(require('markdown-it-replace-link'), {
-        processHTML: true,
         replaceLink: function (link: string, env: any) {
             return processLink(link);
         }
@@ -39,9 +38,10 @@ function processLink(link: string): string {
  * @returns 
  */
 export function render(markdown: string): string {
-    markdown = markdown.replace(/\${2}(.+?)\${2}/g, (_, p1) => `\$${p1}\$`);
+    markdown = markdown.replace(/\${2}(.+?)\${2}/g,
+        (match: string, p1: string) => require("katex").renderToString(p1, { throwOnError: false })
+    );
     return markdownEngine.render(markdown)
-        .replace(/\$(.+?)\$/g, (match: string, p1: string) => require("katex").renderToString(p1, { throwOnError: false }))
         .replace(/!\[([^\]]*)\]\((.*?)\)/g, (_: string, alt: string, link: string) => {
             return `<img alt="${alt}" src="${processLink(link)}">`;
         });
