@@ -1,3 +1,4 @@
+import { l10n } from "vscode";
 import { AuthStatus, IUserSession, IWechatAuth, IWechatUserInfo, IWechatUserState } from "../entity/userLoginSession";
 import { ptaChannel } from "../ptaChannel";
 import { PtaLoginMethod } from "../shared";
@@ -44,7 +45,7 @@ class WeChatAuthProvider implements IUserAuthProvider {
                 });
             } catch (error: any) {
                 ptaChannel.append(error.toString());
-                await promptForOpenOutputChannel("Failed to login PTA. Please open the output channel for details.", DialogType.error);
+                await promptForOpenOutputChannel(l10n.t("Failed to login PTA. Please open the output channel for details."), DialogType.error);
                 resolve(undefined);
             }
         });

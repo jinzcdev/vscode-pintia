@@ -12,6 +12,7 @@ import { IProblem } from "../entity/IProblem";
 import { ptaManager } from "../ptaManager";
 import { IUserSession } from "../entity/userLoginSession";
 import { IProblemSearchItem } from "../entity/IProblemSearchItem";
+import { l10n } from "vscode";
 
 
 export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
@@ -32,7 +33,7 @@ export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
         // const availableLangs: string[] = availableCompilers.map<string>((value, _) => { return compilerLangMapping.get(value) ?? "" });
 
         if (problemCompiler !== "NO_COMPILER" && defaultCompiler !== problemCompiler) {
-            vscode.window.showInformationMessage(`Only ${compilerLangMapping.get(problemCompiler)} is allowed in this problem.`);
+            vscode.window.showInformationMessage(l10n.t("Only {0} is allowed in this problem.", compilerLangMapping.get(problemCompiler) ?? "unknown"));
             defaultCompiler = problemCompiler;
         } else if (availableCompilers.indexOf(defaultCompiler) === -1) {
             const picks: IQuickPickItem<string>[] = availableCompilers.map<IQuickPickItem<string>>((value, _) => {
@@ -44,7 +45,7 @@ export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
             });
             const choice: IQuickPickItem<string> | undefined = await vscode.window.showQuickPick(
                 picks,
-                { placeHolder: "The default language is not allowed to use. Please select another one." },
+                { placeHolder: l10n.t("The default language is not allowed to use. Please select another one.") },
             );
             if (!choice) {
                 return;
@@ -89,14 +90,14 @@ export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
         await vscode.window.showTextDocument(vscode.Uri.file(finalPath), { preview: false, viewColumn: vscode.ViewColumn.Two });
     } catch (error: any) {
         ptaChannel.appendLine(error.toString());
-        await promptForOpenOutputChannel("Coding the problem failed. Please open the output channel for details.", DialogType.error);
+        await promptForOpenOutputChannel(l10n.t("Coding the problem failed. Please open the output channel for details."), DialogType.error);
     }
 }
 
 export async function searchProblem(): Promise<void> {
     const userSession: IUserSession | undefined = ptaManager.getUserSession();
     if (!userSession) {
-        vscode.window.showInformationMessage("User is not logged in or the login session has expired!");
+        vscode.window.showInformationMessage(l10n.t("User is not logged in or the login session has expired!"));
         return;
     }
     const items = await parseProblemsToPicks(fetchProblemIndex());
@@ -104,7 +105,7 @@ export async function searchProblem(): Promise<void> {
         items,
         {
             matchOnDetail: true,
-            placeHolder: `Select one problem (total: ${items.length})`,
+            placeHolder: l10n.t("Select one problem (total: {0})", items.length),
         },
     );
     if (!choice) {
@@ -140,7 +141,7 @@ async function fetchProblemIndex(): Promise<Array<IProblemSearchItem>> {
         }
     } catch (e: any) {
         ptaChannel.appendLine(e.toString());
-        await promptForOpenOutputChannel("Failed to fetch the problem search index. Please open the output channel for details.", DialogType.error);
+        await promptForOpenOutputChannel(l10n.t("Failed to fetch the problem search index. Please open the output channel for details."), DialogType.error);
     }
 
     return problems;

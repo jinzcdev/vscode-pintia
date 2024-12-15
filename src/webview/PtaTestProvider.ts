@@ -1,3 +1,4 @@
+import { l10n } from "vscode";
 import { ptaChannel } from "../ptaChannel";
 import { ptaApi } from "../utils/api";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
@@ -41,7 +42,7 @@ export class PtaTestProvider extends PtaWebview<TestView> {
             };
         } catch (error: any) {
             ptaChannel.appendLine(error.toString());
-            promptForOpenOutputChannel("Failed to test!", DialogType.error);
+            promptForOpenOutputChannel(l10n.t("Failed to test!"), DialogType.error);
         }
     }
 

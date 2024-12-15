@@ -8,6 +8,7 @@ import * as vscode from "vscode";
 import { ptaConfig } from "../ptaConfig";
 import { IQuickPickItem } from "../shared";
 import { showDirectorySelectDialog } from "./uiUtils";
+import { l10n } from "vscode";
 
 export async function selectWorkspaceFolder(): Promise<string> {
     let workspaceFolder: string = ptaConfig.getWorkspaceFolder();
@@ -41,7 +42,7 @@ export async function selectWorkspaceFolder(): Promise<string> {
             OpenOptionEnum.openInNewWindow,
             OpenOptionEnum.addToWorkspace,
         ],
-        { placeHolder: "The PTA workspace folder is not opened in VS Code, would you like to open it?" },
+        { placeHolder: l10n.t("The PTA workspace folder is not opened in VS Code, would you like to open it?") },
     );
 
     if (choice) {
@@ -104,18 +105,18 @@ export async function determinePintiaFolder(): Promise<string> {
     const picks: Array<IQuickPickItem<string>> = [];
     picks.push(
         {
-            label: `Default location`,
+            label: l10n.t("Default location"),
             detail: `${path.join(os.homedir(), ".pintia", "codes")}`,
             value: `${path.join(os.homedir(), ".pintia", "codes")}`,
         },
         {
-            label: "$(file-directory) Browse...",
+            label: l10n.t("{0} Browse...", "$(file-directory)"),
             value: ":browse",
         },
     );
     const choice: IQuickPickItem<string> | undefined = await vscode.window.showQuickPick(
         picks,
-        { placeHolder: "Select where you would like to save your Pintia files" },
+        { placeHolder: l10n.t("Select where you would like to save your Pintia files") },
     );
     if (!choice) {
         result = "";

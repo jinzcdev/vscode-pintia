@@ -1,7 +1,7 @@
 
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { Disposable } from 'vscode';
+import { Disposable, l10n } from 'vscode';
 import { ptaChannel } from '../ptaChannel';
 
 import { favoriteProblemsPath } from '../shared';
@@ -68,7 +68,7 @@ class FavoriteProblemsManager implements Disposable {
             }
         } catch (error: any) {
             ptaChannel.appendLine(error.toString());
-            await promptForOpenOutputChannel("Failed to load favorite problems. Please open the output channel for details.", DialogType.error);
+            await promptForOpenOutputChannel(l10n.t("Failed to load favorite problems. Please open the output channel for details."), DialogType.error);
         }
     }
 
@@ -79,7 +79,7 @@ class FavoriteProblemsManager implements Disposable {
             fs.writeFileSync(this.filePath, JSON.stringify(this.favoriteProblems));
         } catch (error: any) {
             ptaChannel.appendLine(error.toString());
-            await promptForOpenOutputChannel("Failed to save favorite problems. Please open the output channel for details.", DialogType.error);
+            await promptForOpenOutputChannel(l10n.t("Failed to save favorite problems. Please open the output channel for details."), DialogType.error);
         }
     }
 

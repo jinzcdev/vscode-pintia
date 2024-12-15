@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { Disposable } from "vscode";
+import { Disposable, l10n } from "vscode";
 import { IDashSection } from "../entity/IDashSection";
 import { IExamProblemStatus } from "../entity/IExamProblemStatus";
 import { IProblemInfo } from "../entity/IProblemInfo";
@@ -25,11 +25,12 @@ class ExplorerNodeManager implements Disposable {
         const showLocked: boolean = ptaConfig.getShowLocked();
 
         const pbs2dash = new Map<string, string>();
-        const dashes = new Map<string, Array<any>>([[PtaDashType.Others, []]]);
+        const dashes = new Map<string, Array<any>>();
         for (const section of sections) {
             section.displayConfigs.forEach(e => pbs2dash.set(e.problemSetId, section.title));
             dashes.set(section.title, []);
         }
+        dashes.set(PtaDashType.Others, []);
         for (const item of publicProblemSetList) {
             if ((item.permission?.permission ?? ProblemPermissionEnum.UNKNOWN) === ProblemPermissionEnum.LOCKED && !showLocked) {
                 continue;
@@ -151,7 +152,7 @@ class ExplorerNodeManager implements Disposable {
             return ptaNodeList;
         } catch (error: any) {
             ptaChannel.appendLine(error.toString());
-            promptForOpenOutputChannel("Failed to fetch the problem list. Please open the output channel for details.", DialogType.error);
+            promptForOpenOutputChannel(l10n.t("Failed to fetch the problem list. Please open the output channel for details."), DialogType.error);
             return [];
         }
     }

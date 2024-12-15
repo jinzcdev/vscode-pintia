@@ -27,7 +27,7 @@ export async function openWorkspace() {
             OpenOption.openInCurrentWindow,
             OpenOption.openInNewWindow
         ],
-        { placeHolder: "How would you like to open it?" },
+        { placeHolder: vscode.l10n.t("How would you like to open it?") }
     );
 
     switch (choice) {
