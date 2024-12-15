@@ -14,6 +14,8 @@
     "contributes.commands.pintia.openWorkspace": "打开 Pintia 工作区",
     "contributes.commands.pintia.welcome": "查看插件使用指南",
     "contributes.commands.pintia.openExtensionRepo": "打开插件仓库",
+    "contributes.commands.pintia.clearViewedProblems": "清除题目预览历史",
+    "contributes.commands.pintia.clearFavoriteProblems": "清除我的收藏夹",
     "contributes.views.pintia.pintiaExplorer": "题目集",
     "contributes.views.pintia.pintiaMyFavorites": "我的收藏夹",
     "contributes.views.pintia.pintiaProblemHistory": "题目预览历史",

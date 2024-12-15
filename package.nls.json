@@ -14,6 +14,8 @@
     "contributes.commands.pintia.openWorkspace": "Open the Pintia Workspace",
     "contributes.commands.pintia.welcome": "Open Tutorial",
     "contributes.commands.pintia.openExtensionRepo": "Open PTA Repo",
+    "contributes.commands.pintia.clearViewedProblems": "Clear Problem Preview History",
+    "contributes.commands.pintia.clearFavoriteProblems": "Clear My Favorites",
     "contributes.views.pintia.pintiaExplorer": "Problems",
     "contributes.views.pintia.pintiaMyFavorites": "My Favorites",
     "contributes.views.pintia.pintiaProblemHistory": "Problem Preview History",

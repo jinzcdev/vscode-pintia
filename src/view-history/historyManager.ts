@@ -97,6 +97,11 @@ class HistoryManager implements Disposable {
     public async dispose() {
         await this.save();
     }
+
+    public async clearViewedProblems() {
+        this.viewedProblems[this.getCurrentUserId()] = [];
+        await this.save().then(() => historyTreeDataProvider.refresh());
+    }
 }
 
 export const historyManager = HistoryManager.getInstance();

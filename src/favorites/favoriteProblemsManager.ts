@@ -8,6 +8,7 @@ import { favoriteProblemsPath } from '../shared';
 import { DialogType, promptForOpenOutputChannel } from '../utils/uiUtils';
 import { ptaManager } from '../ptaManager';
 import { ProblemBasicInfo } from '../entity/ProblemBasicInfo';
+import { favoritesTreeDataProvider } from './favoritesTreeDataProvider';
 
 
 class FavoriteProblemsManager implements Disposable {
@@ -89,6 +90,11 @@ class FavoriteProblemsManager implements Disposable {
 
     public async dispose() {
         await this.save();
+    }
+
+    public async clearFavoriteProblems(): Promise<void> {
+        this.favoriteProblems[this.getCurrentUserId()] = [];
+        await this.save().then(() => favoritesTreeDataProvider.refresh());
     }
 }
 

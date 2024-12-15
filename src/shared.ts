@@ -25,6 +25,11 @@ export enum PtaLoginMethod {
     WeChat = "WeChat"
 }
 
+export enum PtaDashType {
+    MyProblemSet = "我的题目集",
+    Others = "其他"
+}
+
 export interface IQuickPickItem<T> extends vscode.QuickPickItem {
     value: T;
 }

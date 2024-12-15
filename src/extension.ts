@@ -97,7 +97,9 @@ export async function activate(context: vscode.ExtensionContext) {
 			vscode.commands.executeCommand(`workbench.action.openWalkthrough`, `jinzcdev.vscode-pintia#pintia`, false);
 		}),
 		vscode.commands.registerCommand("pintia.addFavorite", (ptaNode: PtaNode) => star.addFavoriteProblem(ptaNode)),
-		vscode.commands.registerCommand("pintia.removeFavorite", (ptaNode: PtaNode) => star.removeFavoriteProblem(ptaNode.pID))
+		vscode.commands.registerCommand("pintia.removeFavorite", (ptaNode: PtaNode) => star.removeFavoriteProblem(ptaNode.pID)),
+		vscode.commands.registerCommand("pintia.clearViewedProblems", () => historyManager.clearViewedProblems()),
+		vscode.commands.registerCommand("pintia.clearFavoriteProblems", () => favoriteProblemsManager.clearFavoriteProblems()),
 	);
 }
 
