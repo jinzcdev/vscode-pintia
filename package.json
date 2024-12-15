@@ -108,6 +108,16 @@
                     "command": "pintia.openExtensionRepo",
                     "when": "view == pintiaExplorer",
                     "group": "overflow@2"
+                },
+                {
+                    "command": "pintia.clearViewedProblems",
+                    "when": "view == pintiaProblemHistory",
+                    "group": "navigation@0"
+                },
+                {
+                    "command": "pintia.clearFavoriteProblems",
+                    "when": "view == pintiaMyFavorites",
+                    "group": "navigation@0"
                 }
             ],
             "view/item/context": [
@@ -224,6 +234,18 @@
                 "command": "pintia.openExtensionRepo",
                 "title": "%contributes.commands.pintia.openExtensionRepo%",
                 "category": "Pintia"
+            },
+            {
+                "command": "pintia.clearViewedProblems",
+                "title": "%contributes.commands.pintia.clearViewedProblems%",
+                "category": "Pintia",
+                "icon": "$(trash)"
+            },
+            {
+                "command": "pintia.clearFavoriteProblems",
+                "title": "%contributes.commands.pintia.clearFavoriteProblems%",
+                "category": "Pintia",
+                "icon": "$(trash)"
             },
             {
                 "command": "pintia.addFavorite",

@@ -10,7 +10,7 @@ import { favoriteProblemsManager } from "../favorites/favoriteProblemsManager";
 import { ptaChannel } from "../ptaChannel";
 import { ptaConfig } from "../ptaConfig";
 import { ptaManager } from "../ptaManager";
-import { defaultPtaNode, IPtaNodeValue, ProblemPermissionEnum, ProblemSetEaxmStatus, ProblemSubmissionState, ProblemType, problemTypeInfoMapping, PtaNodeType, supportedProblemTypes } from "../shared";
+import { defaultPtaNode, IPtaNodeValue, ProblemPermissionEnum, ProblemSetEaxmStatus, ProblemSubmissionState, ProblemType, problemTypeInfoMapping, PtaDashType, PtaNodeType, supportedProblemTypes } from "../shared";
 import { ptaApi } from "../utils/api";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import { PtaNode } from "./PtaNode";
@@ -23,11 +23,9 @@ class ExplorerNodeManager implements Disposable {
         const publicProblemSetList: IProblemSet[] = await ptaApi.getAlwaysAvailableProblemSets(ptaManager.getUserSession()?.cookie);
         const myProblemSetList: IProblemSet[] = await ptaApi.getMyProblemSets(ptaManager.getUserSession()?.cookie ?? "");
         const showLocked: boolean = ptaConfig.getShowLocked();
-        const OTHER_SECTION: string = "Others";
-        const MY_PROBLEM_SET_SECTION: string = "我的题目集";
 
         const pbs2dash = new Map<string, string>();
-        const dashes = new Map<string, Array<any>>([[OTHER_SECTION, []]]);
+        const dashes = new Map<string, Array<any>>([[PtaDashType.Others, []]]);
         for (const section of sections) {
             section.displayConfigs.forEach(e => pbs2dash.set(e.problemSetId, section.title));
             dashes.set(section.title, []);
@@ -36,9 +34,9 @@ class ExplorerNodeManager implements Disposable {
             if ((item.permission?.permission ?? ProblemPermissionEnum.UNKNOWN) === ProblemPermissionEnum.LOCKED && !showLocked) {
                 continue;
             }
-            dashes.get(pbs2dash.get(item.id) ?? OTHER_SECTION)?.push(item);
+            dashes.get(pbs2dash.get(item.id) ?? PtaDashType.Others)?.push(item);
         }
-        dashes.set(MY_PROBLEM_SET_SECTION, myProblemSetList);
+        dashes.set(PtaDashType.MyProblemSet, myProblemSetList);
         for (const [sectionTitle, pbsList] of dashes) {
             if (pbsList.length === 0) {
                 continue;

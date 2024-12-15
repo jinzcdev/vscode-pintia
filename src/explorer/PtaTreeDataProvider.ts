@@ -2,7 +2,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import { PtaNode } from "./PtaNode";
-import { defaultPtaNode, IPtaNodeValue, ProblemSubmissionState, ProblemType, PtaNodeType } from "../shared";
+import { defaultPtaNode, IPtaNodeValue, ProblemSubmissionState, ProblemType, PtaDashType, PtaNodeType } from "../shared";
 import { ptaManager } from "../ptaManager";
 import { explorerNodeManager } from "./explorerNodeManager";
 import { ptaConfig } from "../ptaConfig";
@@ -43,7 +43,7 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
             return {
                 label: `— ${element.label} —`,
                 collapsibleState: vscode.TreeItemCollapsibleState.None,
-                iconPath: new vscode.ThemeIcon('book')
+                iconPath: element.label === PtaDashType.MyProblemSet ? new vscode.ThemeIcon("smiley") : new vscode.ThemeIcon('book')
             }
         }
         let contextValue: string;
