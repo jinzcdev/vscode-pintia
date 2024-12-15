@@ -119,15 +119,18 @@ export const defaultPtaNode: IPtaNode = {
         summaries: {
             PROGRAMMING: {
                 total: 0,
-                totalScore: 0
+                totalScore: 0,
+                totalInPools: 0
             },
             CODE_COMPLETION: {
                 total: 0,
-                totalScore: 0
+                totalScore: 0,
+                totalInPools: 0
             },
             MULTIPLE_FILE: {
                 total: 0,
-                totalScore: 0
+                totalScore: 0,
+                totalInPools: 0
             }
         },
         total: 0,

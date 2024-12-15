@@ -7,6 +7,7 @@ import { ptaManager } from "../ptaManager";
 import { explorerNodeManager } from "./explorerNodeManager";
 import { ptaConfig } from "../ptaConfig";
 import { IProblemSummary } from "../entity/IProblemSummary";
+import { ptaApi } from "../utils/api";
 
 
 export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vscode.Disposable {
@@ -29,14 +30,10 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
     }
 
     getTreeItem(element: PtaNode): vscode.TreeItem | Thenable<vscode.TreeItem> {
-        if (element.pID === "notSignIn") {
+        if (!element) {
             return {
-                label: element.label,
-                collapsibleState: vscode.TreeItemCollapsibleState.None,
-                command: {
-                    title: "Sign in to Pintia",
-                    command: "pintia.signIn"
-                }
+                label: "",
+                collapsibleState: vscode.TreeItemCollapsibleState.None
             };
         }
         if (element.type === PtaNodeType.Dashboard) {
@@ -71,12 +68,7 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
         const paged: boolean = limit !== 0;
 
         if (!ptaManager.getUserSession()) {
-            return [
-                new PtaNode(Object.assign({}, defaultPtaNode, {
-                    pID: "notSignIn",
-                    label: "Sign in to Pintia"
-                }))
-            ];
+            return null;
         }
         if (!element) {
             // root directory
@@ -84,6 +76,16 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
         }
 
         const value: IPtaNodeValue = element.value;
+        if (!value) {
+            return null;
+        }
+        if (!value.summaries) {
+            // 可能由于网络访问过快，summaries 为空
+            return ptaApi.getProblemSummary(element.psID).then((summaries) => {
+                value.summaries = summaries;
+                return this.getChildren(element);
+            });
+        }
         if (element.type === PtaNodeType.ProblemSet) {
             if (Object.keys(value.summaries).length > 1) {
                 return explorerNodeManager.getSubProblemSet(element);
