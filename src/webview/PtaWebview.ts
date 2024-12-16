@@ -17,6 +17,9 @@ export abstract class PtaWebview<T> implements Disposable {
 
     public async show(focused: boolean = true): Promise<void> {
         await this.loadViewData(this.view);
+        if (!focused && !this.currentPanel) {
+            return;
+        }
         if (this.currentPanel) {
             this.currentPanel.title = `PTA: ${this.data.title}`;
             this.currentPanel.webview.html = await this.getWebviewContent();
