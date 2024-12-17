@@ -16,7 +16,9 @@ class PtaCookieAuthProvider implements IUserAuthProvider {
                     resolve(undefined);
                     return;
                 }
-                cookie = "PTASession=" + cookie;
+                if (!cookie.startsWith("PTASession=")) {
+                    cookie = "PTASession=" + cookie;
+                }
                 let userSession: IUserSession | undefined;
                 let logged: boolean = false;
                 const user = await ptaApi.getCurrentUser(cookie);
