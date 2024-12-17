@@ -95,6 +95,7 @@ export interface IPtaNode {
     tag: string[];
     value: IPtaNodeValue;
     locked: boolean;
+    isMyProblemSet: boolean;
 }
 
 export interface IPtaNodeValue {
@@ -115,6 +116,7 @@ export const defaultPtaNode: IPtaNode = {
     title: "",
     label: "",
     type: PtaNodeType.ProblemSet,
+    isMyProblemSet: false,
     value: {
         summaries: {
             PROGRAMMING: {

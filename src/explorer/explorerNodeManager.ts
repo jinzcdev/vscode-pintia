@@ -12,8 +12,9 @@ import { ptaConfig } from "../ptaConfig";
 import { ptaManager } from "../ptaManager";
 import { defaultPtaNode, IPtaNodeValue, ProblemPermissionEnum, ProblemSetEaxmStatus, ProblemSubmissionState, ProblemType, problemTypeInfoMapping, PtaDashType, PtaNodeType, supportedProblemTypes } from "../shared";
 import { ptaApi } from "../utils/api";
-import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
+import { DialogType, promptForOpenOutputChannel, showYesOrNoPick } from "../utils/uiUtils";
 import { PtaNode } from "./PtaNode";
+import { IProblemSetExam } from "../entity/IProblemSetExam";
 
 class ExplorerNodeManager implements Disposable {
 
@@ -56,7 +57,8 @@ class ExplorerNodeManager implements Disposable {
                         value: {
                             problemSet: item.name,
                             summaries: item.summaries
-                        }
+                        },
+                        isMyProblemSet: sectionTitle === PtaDashType.MyProblemSet
                     }))
                 );
             });
@@ -88,8 +90,30 @@ class ExplorerNodeManager implements Disposable {
         return nodeList;
     }
 
-    public async getProblemNodes(psID: string, psName: string, problemType: ProblemType, page?: number, limit?: number): Promise<PtaNode[]> {
+    public async getProblemNodes(element: PtaNode, page?: number, limit?: number): Promise<PtaNode[]> {
         try {
+            const [psID, psName, problemType] = [element.psID, element.value.problemSet, element.value.problemType as ProblemType];
+            const userSession: IUserSession | undefined = ptaManager.getUserSession();
+            if (!userSession) {
+                return [];
+            }
+
+            if (element.isMyProblemSet) {
+                const exams: IProblemSetExam = await ptaApi.getProblemSetExam(psID, userSession.cookie);
+                if (exams && !exams.exam && exams.status === ProblemSetEaxmStatus.READY) {
+                    // 私有题目集不应自动创建 exam, 询问用户是否创建
+                    await showYesOrNoPick(l10n.t("The exam is not started yet. Do you want to start the exam now?")).then(created => {
+                        created && vscode.window.withProgress({
+                            location: vscode.ProgressLocation.Notification,
+                            title: l10n.t("Creating exam for {0}...", psName),
+                            cancellable: false
+                        }, async (p: vscode.Progress<{ message?: string; increment?: number }>) => {
+                            ptaApi.createProblemSetExam(psID);
+                        });
+                    });
+                }
+            }
+            await ptaApi.checkAndCreateProblemSetExam(psID, userSession.cookie);
             let problemList: IProblemInfo[], startIndex = 1;
             if (page !== undefined && limit !== undefined) {
                 problemList = await ptaApi.getProblemInfoListByPage(psID, problemType, page, limit);
@@ -98,36 +122,29 @@ class ExplorerNodeManager implements Disposable {
                 problemList = await ptaApi.getAllProblemInfoList(psID, problemType);
             }
 
-            const userSession: IUserSession | undefined = ptaManager.getUserSession();
-            let examStatus: IExamProblemStatus[] | undefined;
+            let examProblemStatus: IExamProblemStatus[] | undefined;
             let problemExamMapping: Map<string, ProblemSubmissionState> = new Map();
-            if (userSession) {
-                const problemSetStatus = (await ptaApi.getProblemSetExam(psID, userSession.cookie)).status as ProblemSetEaxmStatus;
-                if (problemSetStatus === ProblemSetEaxmStatus.READY) {
-                    throw new Error("The exam is not started yet.");
-                    // todo 是否需要自动创建 exam
-                    // await ptaApi.createProblemSetExamAndReturn(psID, userSession.cookie);
-                }
-                await vscode.window.withProgress({
-                    location: vscode.ProgressLocation.Notification,
-                    title: `Fetching user's exams for ${psName}...`,
-                    cancellable: false
-                }, async (p: vscode.Progress<{ message?: string; increment?: number }>) => {
-                    return new Promise<void>(async (resolve: () => void, reject: (e: Error) => void): Promise<void> => {
 
-                        ptaChannel.appendLine("[INFO] Refetching user's exams");
-                        examStatus = await ptaApi.getExamProblemStatus(psID, userSession.cookie);
-                        if (examStatus) {
-                            for (const e of examStatus!) {
-                                problemExamMapping.set(e.id, e.problemSubmissionStatus as ProblemSubmissionState);
-                            }
-                            resolve();
-                        } else {
-                            reject(Error("examStatus is undefined"));
+            await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: l10n.t("Fetching user's exams for {0}...", psName),
+                cancellable: false
+            }, async (p: vscode.Progress<{ message?: string; increment?: number }>) => {
+                return new Promise<void>(async (resolve: () => void, reject: (e: Error) => void): Promise<void> => {
+
+                    ptaChannel.appendLine("[INFO] Refetching user's exams");
+                    examProblemStatus = await ptaApi.getExamProblemStatus(psID, userSession.cookie);
+                    if (examProblemStatus) {
+                        for (const e of examProblemStatus!) {
+                            problemExamMapping.set(e.id, e.problemSubmissionStatus as ProblemSubmissionState);
                         }
-                    });
+                        resolve();
+                    } else {
+                        reject(Error(`The examStatus is undefined. ProblemSetID is ${psID}`));
+                    }
                 });
-            }
+            });
+
             const ptaNodeList: PtaNode[] = [];
             for (let i = 0; i < problemList.length; i++) {
                 const pb: IProblemInfo = problemList[i];
@@ -158,14 +175,13 @@ class ExplorerNodeManager implements Disposable {
     }
 
 
-    public async getProblemSetPageNodes(psID: string, psName: string, problemType: ProblemType, total: number, limit?: number): Promise<PtaNode[]> {
+    public async getProblemSetPageNodes(element: PtaNode, total: number, limit?: number): Promise<PtaNode[]> {
         if (limit === undefined) {
             limit = 100;
         }
+        const [psID, psName, problemType] = [element.psID, element.value.problemSet, element.value.problemType as ProblemType];
 
-        // const summaries = ptaNode.value;
-        let nodeList: PtaNode[] = [];
-        // const total = summaries[ProblemType.PROGRAMMING]["total"];
+        const nodeList: PtaNode[] = [];
         const pageNum: number = Math.ceil(total / limit);
 
         for (let i = 0; i < pageNum; i++) {
@@ -187,7 +203,6 @@ class ExplorerNodeManager implements Disposable {
 
 
     dispose() {
-        throw new Error("Method not implemented.");
     }
 
 }

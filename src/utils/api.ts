@@ -123,7 +123,7 @@ class PtaAPI {
         return problemSet;
     }
 
-    public async getProblemSetPermission(psID: string, cookie: string): Promise<number | undefined> {
+    public async getProblemSetPermission(psID: string, cookie?: string): Promise<number | undefined> {
         const permission = await httpGet(`https://pintia.cn/api/problem-sets/${psID}/exams`, cookie)
             .then(json => json["permission"]);
         return permission?.permission ?? -1;
@@ -201,6 +201,10 @@ class PtaAPI {
         return problemList;
     }
 
+    public async isMyProblemSet(psID: string): Promise<boolean> {
+        return await this.getProblemSetPermission(psID) === ProblemPermissionEnum.MY_PROBLEM_SET;
+    }
+
     public async getProblemInfoByID(psID: string, pID: string, problemType?: ProblemType): Promise<IProblemInfo> {
         if (!problemType) {
             const problem: IProblem = await this.getProblem(psID, pID);
@@ -273,7 +277,12 @@ class PtaAPI {
             .then(json => json["submission"]);
     }
 
-    public async getExamProblemStatus(psID: string, cookie: string): Promise<IExamProblemStatus[] | undefined> {
+
+    /**
+     * @param [autoCreate=false] If the exam is not created, create it automatically.
+     */
+    public async getExamProblemStatus(psID: string, cookie: string, autoCreate: boolean = false): Promise<IExamProblemStatus[] | undefined> {
+        autoCreate && await this.createProblemSetExam(psID, cookie);
         return await httpGet(`https://pintia.cn/api/problem-sets/${psID}/exam-problem-status`, cookie).then(json => json["problemStatus"]);
     }
 
@@ -295,13 +304,23 @@ class PtaAPI {
      * @param psID 
      * @returns 
      */
-    public async getProblemSetExam(psID: string, cookie: string): Promise<IProblemSetExam> {
+    public async getProblemSetExam(psID: string, cookie?: string): Promise<IProblemSetExam> {
         return await httpGet(`${this.problemUrl}/${psID}/exams`, cookie);
     }
 
     public async createProblemSetExamAndReturn(psID: string, cookie: string): Promise<IExam> {
-        await httpPost(`${this.problemUrl}/${psID}/exams`, cookie);
+        await this.createProblemSetExam(psID, cookie);
         return await httpGet(`${this.problemUrl}/${psID}/exams`, cookie).then(json => json["exam"]);
+    }
+
+    public async createProblemSetExam(psID: string, cookie?: string): Promise<void> {
+        ptaChannel.appendLine(`[INFO] Try to create the exam of problem set ${psID}`);
+        await httpPost(`${this.problemUrl}/${psID}/exams`, cookie);
+    }
+
+    public async checkAndCreateProblemSetExam(psID: string, cookie?: string): Promise<void> {
+        const exam = await httpGet(`${this.problemUrl}/${psID}/exams`, cookie).then(json => json["exam"]);
+        !exam && await this.createProblemSetExam(psID, cookie);
     }
 
     public async getPronlemSetStatus(psID: string, cookie: string): Promise<string> {

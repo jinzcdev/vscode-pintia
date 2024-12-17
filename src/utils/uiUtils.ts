@@ -79,6 +79,10 @@ export async function openUrl(url: string): Promise<void> {
     vscode.commands.executeCommand("vscode.open", vscode.Uri.parse(url));
 }
 
+export async function showYesOrNoPick(message: string): Promise<boolean> {
+    return await vscode.window.showInformationMessage(message, DialogOptions.yes, DialogOptions.no) === DialogOptions.yes;
+}
+
 export enum DialogType {
     info = "info",
     warning = "warning",

@@ -61,5 +61,18 @@
   "Enter the test cases.": "输入你的测试用例",
   "Submitting to PTA...": "正在提交到拼题A ...",
   "Testing the sample...": "正在测试样例 ...",
-  "Sample {0}": "样例 {0}"
+  "Sample {0}": "样例 {0}",
+  "The exam is not started yet. Do you want to start the exam now?": "考试尚未开启，您要现在开启考试吗？",
+  "Fetching user's exams for {0}..." : "正在获取 {0} 的考试结果 ...",
+  "Creating exam for {0}..." : "正在创建习题 {0} 的考试 ...",
+  "{0} Home": "{0} 主页",
+  "Open the user's home in browser": "在浏览器中打开用户主页",
+  "{0} Check In": "{0} 签到",
+  "Check in the education store of PTA": "在拼题A教育商店签到",
+  "{0} Sign Out": "{0} 登出",
+  "Sign out your account": "登出您的账户",
+  "{0} Sign In": "{0} 登录",
+  "Sign in your PTA account": "登录您的拼题A账户",
+  "{0} Register": "{0} 注册",
+  "Register a new account": "注册一个新账户"
 }
