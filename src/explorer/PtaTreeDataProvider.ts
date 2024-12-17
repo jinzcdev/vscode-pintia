@@ -95,12 +95,13 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
             }
             const problemType: string = Object.keys(value.summaries)[0];
             const total: number = value.summaries[problemType as keyof IProblemSummary]?.total ?? 0;
+            element.value.problemType = problemType as ProblemType;
 
             if (!paged || total < limit) {
                 // 1-200, 201-400
-                return explorerNodeManager.getProblemNodes(element.psID, element.value.problemSet, problemType as ProblemType);
+                return explorerNodeManager.getProblemNodes(element);
             } else {
-                return explorerNodeManager.getProblemSetPageNodes(element.psID, element.value.problemSet, problemType as ProblemType, total, limit);
+                return explorerNodeManager.getProblemSetPageNodes(element, total, limit);
             }
         }
 
@@ -108,14 +109,14 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
             const total: number = value.summaries[value.problemType]?.total ?? 0;
             // node.type === PtaNodeType.ProblemType
             if (!paged || total < limit) {
-                return explorerNodeManager.getProblemNodes(element.psID, element.value.problemSet, value.problemType);
+                return explorerNodeManager.getProblemNodes(element);
             } else {
-                return explorerNodeManager.getProblemSetPageNodes(element.psID, element.value.problemSet, value.problemType, total, limit);
+                return explorerNodeManager.getProblemSetPageNodes(element, total, limit);
             }
         }
 
         if (element.type === PtaNodeType.ProblemPage) {
-            return explorerNodeManager.getProblemNodes(element.psID, element.value.problemSet, value.problemType, value.page, limit);
+            return explorerNodeManager.getProblemNodes(element, value.page, limit);
         }
 
         return null;

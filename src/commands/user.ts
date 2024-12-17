@@ -16,30 +16,30 @@ export async function showUserManager(): Promise<void> {
     if (userSession) {
         picks.push(
             {
-                label: "$(home) Home",
-                detail: "Open the user's home in browser",
+                label: l10n.t("{0} Home", "$(home)"),
+                detail: l10n.t("Open the user's home in browser"),
                 value: "HOME"
             },
             {
-                label: "$(log-in) Check In",
-                detail: "Check in the education store of PTA",
+                label: l10n.t("{0} Check In", "$(log-in)"),
+                detail: l10n.t("Check in the education store of PTA"),
                 value: "CHECKIN"
             },
             {
-                label: "$(log-out) Sign Out",
-                detail: "Sign out your account",
+                label: l10n.t("{0} Sign Out", "$(log-out)"),
+                detail: l10n.t("Sign out your account"),
                 value: "SIGNOUT"
             });
     } else {
         picks.push(
             {
-                label: "$(log-in) Sign In",
-                detail: "Sign in your PTA account",
+                label: l10n.t("{0} Sign In", "$(log-in)"),
+                detail: l10n.t("Sign in your PTA account"),
                 value: "SIGNIN"
             },
             {
-                label: "$(person-add) Register",
-                detail: "Register a new account",
+                label: l10n.t("{0} Register", "$(person-add)"),
+                detail: l10n.t("Register a new account"),
                 value: "REGISTER"
             });
     }
