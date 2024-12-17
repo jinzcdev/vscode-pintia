@@ -82,6 +82,9 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
         if (!value.summaries) {
             // 可能由于网络访问过快，summaries 为空
             return ptaApi.getProblemSummary(element.psID).then((summaries) => {
+                if (!summaries) {
+                    return [];
+                }
                 value.summaries = summaries;
                 return this.getChildren(element);
             });
