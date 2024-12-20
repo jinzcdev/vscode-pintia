@@ -104,7 +104,7 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
                 markdownEngine.render([
                     `### 最后一次提交 ${problem.lastSubmittedLang.trim().length ? "(" + problem.lastSubmittedLang + ")" : ""}`,
                     "```" + problem.lastSubmittedLang,
-                    problem.lastProgram,
+                    problem.lastProgram.replace(/```/g, '\\```'),
                     "```"
                 ].join("\n")) : ""}
         </div>

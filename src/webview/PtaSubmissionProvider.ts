@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import { IProblem, IProblemConfig } from "../entity/IProblem";
+import { IProblem } from "../entity/IProblem";
 import { IProblemSubmissionResult } from "../entity/IProblemSubmissionResult";
 import { IProblemSubmissionDetail } from "../entity/problemSubmissionCode";
-import { ProblemType, problemTypeInfoMapping, ptaCompiler, solutionStatusMapping } from "../shared";
+import { ProblemJudgingStatus, ProblemType, problemTypeInfoMapping, ptaCompiler, solutionStatusMapping, UNKNOWN } from "../shared";
 import { ptaApi } from "../utils/api";
 import { PtaWebviewWithCodeStyle } from "./PtaWebviewWithCodeStyle";
 import * as markdownEngine from "./markdownEngine";
@@ -42,8 +42,8 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
             isHint: isHint,
             content: {
                 totalScore: problem.score,
-                timeLimit: problemConfig?.timeLimit ?? "Unknown",
-                memoryLimit: problemConfig?.memoryLimit ?? "Unknown",
+                timeLimit: problemConfig?.timeLimit ?? UNKNOWN,
+                memoryLimit: problemConfig?.memoryLimit ?? UNKNOWN,
                 nickname: result.examMember.user.nickname,
                 submitAt: result.submission.submitAt,
                 status: judgeResponseContent.status,
@@ -111,7 +111,7 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
                         <td>${this.formatDate(new Date(content.submitAt))}</td>
                         ${solutionStatusMapping.get(content.status)}
                         <td>${scoreText}</td>
-                        <td>${problemTypeInfoMapping.get(content.problemType)?.name ?? "Unknown"}</td>
+                        <td>${problemTypeInfoMapping.get(content.problemType)?.name ?? UNKNOWN}</td>
                         <td>${compiler.language} (${compiler.displayName})</td>
                         <td>${timeText}</td>
                         <td>${content.nickname}</td>
@@ -120,7 +120,7 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
             </table>
         </div>
 
-        <div ${content.status === "COMPILE_ERROR" ? "style='display: none;'" : ""}" >
+        <div ${content.status === ProblemJudgingStatus.COMPILE_ERROR ? "style='display: none;'" : ""}" >
             <h2>单点测试得分</h2>
             <table>
                 <thead>
@@ -146,7 +146,7 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
 
         <h2>代码</h2>
         <div class="code-block code-preview">
-            ${markdownEngine.render(["```" + compiler.language, content.program, "```"].join("\n"))}
+            ${markdownEngine.render(["```" + compiler.language, content.program.replace(/```/g, '\\```'), "```"].join("\n"))}
         </div>
 
         <script nonce="${getNonce()}" src="${copyButtonScriptUri}"></script>

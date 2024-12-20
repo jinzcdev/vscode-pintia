@@ -188,18 +188,33 @@ export async function testCustomSample(ptaCode: IPtaCode, index: number): Promis
             code: ptaCode.code ?? "",
             testInput: ptaCode.customTests[index]
         };
-        const problem = await ptaApi.getProblem(ptaCode.psID, ptaCode.pID);
+        const problem: IProblem = await ptaApi.getProblem(ptaCode.psID, ptaCode.pID);
+        // TODO 支持多种题型
+        const exampleTestDatas = (problem.problemConfig.programmingProblemConfig ?? problem.problemConfig.codeCompletionProblemConfig)?.exampleTestDatas;
+        let testOutput = getTestInputAnswerFromExampleTestDatas(exampleTestDatas, solution.testInput) ?? ""
         await ptaExecutor.testSolution(ptaCode.psID, ptaCode.pID, solution, (msg: string, data?: IProblemSubmissionResult) => {
-            switch (msg) {
-                case "SUCCESS":
-                    data!.problem = problem;
-                    PtaTestProvider.createOrUpdate(new TestView(data!)).show();
-                    break;
-                default:
+            if (msg === "SUCCESS") {
+                data!.problem = problem;
+                PtaTestProvider.createOrUpdate(new TestView(data!, testOutput)).show();
             }
         });
     } catch (error: any) {
         ptaChannel.appendLine(error.toString());
         await promptForOpenOutputChannel(l10n.t("Testing sample failed. Please open output channel for details."), DialogType.error);
     }
+}
+
+/**
+ * Get the answer of the test input from the example test data if the test input matches the example test input.
+ */
+function getTestInputAnswerFromExampleTestDatas(exampleTestDatas: [{ name: string; input: string; output: string; }] | undefined, customTestInput: string = "") {
+    if (exampleTestDatas) {
+        for (let i = 0; i < exampleTestDatas.length / 2; i++) {
+            const input = exampleTestDatas[i]?.input ?? "";
+            if (input.trim() === customTestInput.trim()) {
+                return exampleTestDatas[i].output;
+            }
+        }
+    }
+    return "";
 }

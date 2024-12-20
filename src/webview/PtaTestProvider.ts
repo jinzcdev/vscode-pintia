@@ -1,9 +1,9 @@
 import { l10n } from "vscode";
 import { ptaChannel } from "../ptaChannel";
-import { ptaApi } from "../utils/api";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import { PtaWebview } from "./PtaWebview";
 import { TestView } from "./views/TestView";
+import { NO_OFFICIAL_SOLUTION, ProblemJudgingStatus, problemJudgingStatusMapping, UNKNOWN } from "../shared";
 
 export class PtaTestProvider extends PtaWebview<TestView> {
 
@@ -28,11 +28,12 @@ export class PtaTestProvider extends PtaWebview<TestView> {
             const testcaseJudgeResults = codeJudgeResponseContent!.testcaseJudgeResults;
 
             this.data = {
-                title: `测试结果 | ${result.problem?.title ?? "Unknown"}`,
+                title: `测试结果 | ${result.problem?.title ?? UNKNOWN}`,
                 testResult: {
                     testCase: result.submission.submissionDetails[0].customTestData?.content,
-                    answer: answer ?? "",
-                    myAnswer: judgeResponseContent.status === "COMPILE_ERROR" ? "COMPILE_ERROR" : testcaseJudgeResults?.custom.stdout ?? "",
+                    answer: !answer ? NO_OFFICIAL_SOLUTION : answer,
+                    myAnswer: judgeResponseContent.status !== ProblemJudgingStatus.NEUTRAL
+                        ? problemJudgingStatusMapping.get(judgeResponseContent.status) : (testcaseJudgeResults?.custom.stdout ?? ""),
                     problemType: result.submission.problemType,
                     compiler: result.submission.compiler,
                     time: result.submission.time,

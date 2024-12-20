@@ -15,6 +15,9 @@ export const ZOJ_PROBLEM_SET_ID: string = "91827364500";
 
 export import ptaCache = require('memory-cache');
 
+export const UNKNOWN = "Unknown";
+export const NO_OFFICIAL_SOLUTION = "该测试样例无官方答案"
+
 export enum UserStatus {
     SignedIn = 1,
     SignedOut = 2
@@ -30,6 +33,17 @@ export enum PtaDashType {
     MyProblemSet = "我的题目集",
     Others = "其他"
 }
+
+export enum ProblemJudgingStatus {
+    TIME_LIMIT_EXCEEDED = "TIME_LIMIT_EXCEEDED",
+    COMPILE_ERROR = "COMPILE_ERROR",
+    NEUTRAL = "NEUTRAL"
+}
+
+export const problemJudgingStatusMapping: Map<string, string> = new Map<string, string>([
+    ["TIME_LIMIT_EXCEEDED", "运行超时"],
+    ["COMPILE_ERROR", "编译错误"]]
+);
 
 export interface IQuickPickItem<T> extends vscode.QuickPickItem {
     value: T;
@@ -65,7 +79,7 @@ export enum ProblemPermissionEnum {
     MY_PROBLEM_SET = 47
 }
 
-export enum ProblemSetEaxmStatus {
+export enum ProblemSetExamStatus {
     READY = "READY",            // 我的题集准备答题中
     PROCESSING = "PROCESSING",  // 正在进行中
     END = "END"                 // 已结束
@@ -263,18 +277,21 @@ export const commentFormatMapping: Map<string, { single: string, start: string, 
     ["Bash (bash)", { single: "# ", start: "# ", middle: "# ", end: "" }],
 ]);
 
-export const problemTypeInfoMapping: Map<string, {
+export const problemTypeInfoMapping: Map<string, ProblemTypeInfo> = new Map([
+    ["TRUE_OR_FALSE", { name: "判断题", type: 1, prefix: "trueOrFalse", problemConfigKey: "trueOrFalseProblemConfig" }],
+    ["MULTIPLE_CHOICE", { name: "单选题", type: 2, prefix: "multipleChoice", problemConfigKey: "multipleChoiceProblemConfig" }],
+    ["FILL_IN_THE_BLANK_FOR_PROGRAMMING", { name: "程序填空题", type: 5, prefix: "fillInTheBlankForProgramming", problemConfigKey: "fillInTheBlankForProgrammingProblemConfig" }],
+    ["PROGRAMMING", { name: "编程题", type: 7, prefix: "programming", problemConfigKey: "programmingProblemConfig" }],
+    ["CODE_COMPLETION", { name: "函数题", type: 6, prefix: "codeCompletion", problemConfigKey: "codeCompletionProblemConfig" }],
+    ["MULTIPLE_FILE", { name: "多文件编程题", type: 9, prefix: "multipleFile", problemConfigKey: "multipleFileProblemConfig" }],
+]);
+
+export interface ProblemTypeInfo {
     name: string,
     type: number,
-    prefix: string
-}> = new Map([
-    ["TRUE_OR_FALSE", { name: "判断题", type: 1, prefix: "trueOrFalse" }],
-    ["MULTIPLE_CHOICE", { name: "单选题", type: 2, prefix: "multipleChoice" }],
-    ["FILL_IN_THE_BLANK_FOR_PROGRAMMING", { name: "程序填空题", type: 5, prefix: "fillInTheBlankForProgramming" }],
-    ["PROGRAMMING", { name: "编程题", type: 7, prefix: "programming" }],
-    ["CODE_COMPLETION", { name: "函数题", type: 6, prefix: "codeCompletion" }],
-    ["MULTIPLE_FILE", { name: "多文件编程题", type: 9, prefix: "multipleFile" }],
-]);
+    prefix: string,
+    problemConfigKey: string
+}
 
 export const supportedProblemTypes: Set<string> = new Set([
     "PROGRAMMING",

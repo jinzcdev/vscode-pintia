@@ -3,7 +3,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import * as fs from "fs-extra";
 import { selectWorkspaceFolder } from "../utils/workspaceUtils";
-import { commentFormatMapping, compilerLangMapping, configPath, IPtaCode, IQuickPickItem, langCompilerMapping, ProblemType, problemTypeInfoMapping, ptaCompiler, searchIndexPath, ZOJ_PROBLEM_SET_ID } from "../shared";
+import { commentFormatMapping, compilerLangMapping, IPtaCode, IQuickPickItem, langCompilerMapping, ProblemType, problemTypeInfoMapping, ptaCompiler, searchIndexPath, UNKNOWN, ZOJ_PROBLEM_SET_ID } from "../shared";
 import { ptaChannel } from "../ptaChannel";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import { ptaConfig } from "../ptaConfig";
@@ -30,10 +30,9 @@ export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
             problemCompiler = "VERILOG";
         }
         const availableCompilers: string[] = await ptaApi.getProblemSetCompilers(ptaCode.psID);
-        // const availableLangs: string[] = availableCompilers.map<string>((value, _) => { return compilerLangMapping.get(value) ?? "" });
 
         if (problemCompiler !== "NO_COMPILER" && defaultCompiler !== problemCompiler) {
-            vscode.window.showInformationMessage(l10n.t("Only {0} is allowed in this problem.", compilerLangMapping.get(problemCompiler) ?? "unknown"));
+            vscode.window.showInformationMessage(l10n.t("Only {0} is allowed in this problem.", compilerLangMapping.get(problemCompiler) ?? UNKNOWN));
             defaultCompiler = problemCompiler;
         } else if (availableCompilers.indexOf(defaultCompiler) === -1) {
             const picks: IQuickPickItem<string>[] = availableCompilers.map<IQuickPickItem<string>>((value, _) => {
@@ -153,7 +152,7 @@ async function parseProblemsToPicks(p: Promise<IProblemSearchItem[]>): Promise<A
         const picks: Array<IQuickPickItem<IProblemSearchItem>> = (await p).map((problem: IProblemSearchItem) => Object.assign({}, {
             label: `[${++cnt}] ${problem.label} ${problem.title}`,
             description: "",
-            detail: `Score: ${problem.score}, Type: ${problemTypeInfoMapping.get(problem.type)?.name ?? "Unknown"}, PS: ${problem.psName}`,
+            detail: `Score: ${problem.score}, Type: ${problemTypeInfoMapping.get(problem.type)?.name ?? UNKNOWN}, PS: ${problem.psName}`,
             value: problem,
         }));
         resolve(picks);

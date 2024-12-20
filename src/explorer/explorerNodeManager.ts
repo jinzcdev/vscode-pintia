@@ -10,7 +10,7 @@ import { favoriteProblemsManager } from "../favorites/favoriteProblemsManager";
 import { ptaChannel } from "../ptaChannel";
 import { ptaConfig } from "../ptaConfig";
 import { ptaManager } from "../ptaManager";
-import { defaultPtaNode, IPtaNodeValue, ProblemPermissionEnum, ProblemSetEaxmStatus, ProblemSubmissionState, ProblemType, problemTypeInfoMapping, PtaDashType, PtaNodeType, supportedProblemTypes } from "../shared";
+import { defaultPtaNode, IPtaNodeValue, ProblemPermissionEnum, ProblemSetExamStatus, ProblemSubmissionState, ProblemType, problemTypeInfoMapping, PtaDashType, PtaNodeType, supportedProblemTypes, UNKNOWN } from "../shared";
 import { ptaApi } from "../utils/api";
 import { DialogType, promptForOpenOutputChannel, showYesOrNoPick } from "../utils/uiUtils";
 import { PtaNode } from "./PtaNode";
@@ -80,7 +80,7 @@ class ExplorerNodeManager implements Disposable {
                 nodeList.push(new PtaNode(Object.assign({}, defaultPtaNode, {
                     psID: node.psID,
                     type: PtaNodeType.ProblemSubSet,
-                    label: problemTypeInfoMapping.get(problemType)?.name ?? "Unknown",
+                    label: problemTypeInfoMapping.get(problemType)?.name ?? UNKNOWN,
                     value: Object.assign({}, value, {
                         problemType: problemType as ProblemType,
                     })
@@ -100,7 +100,7 @@ class ExplorerNodeManager implements Disposable {
 
             if (element.isMyProblemSet) {
                 const exams: IProblemSetExam = await ptaApi.getProblemSetExam(psID, userSession.cookie);
-                if (exams && !exams.exam && exams.status === ProblemSetEaxmStatus.READY) {
+                if (exams && !exams.exam && exams.status === ProblemSetExamStatus.READY) {
                     // 私有题目集不应自动创建 exam, 询问用户是否创建
                     await showYesOrNoPick(l10n.t("The exam is not started yet. Do you want to start the exam now?")).then(created => {
                         created && vscode.window.withProgress({
