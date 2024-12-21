@@ -74,5 +74,9 @@
   "{0} Sign In": "{0} 登录",
   "Sign in your PTA account": "登录您的拼题A账户",
   "{0} Register": "{0} 注册",
-  "Register a new account": "注册一个新账户"
+  "Register a new account": "注册一个新账户",
+  "Submit": "提交",
+  "Test": "测试",
+  "Preview": "预览题目",
+  "Test custom sample {0}": "测试自定义样例 {0}"
 }

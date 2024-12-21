@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { ptaConfig } from "../ptaConfig";
 import { IPtaCode } from "../shared";
+import { l10n } from "vscode";
 
 export class CustomCodeLensProvider implements vscode.CodeLensProvider<PtaCodeLens> {
 
@@ -52,25 +53,25 @@ export class CustomCodeLensProvider implements vscode.CodeLensProvider<PtaCodeLe
 
             if (command === "Submit") {
                 codeLens.command = {
-                    title: "Submit",
+                    title: vscode.l10n.t("Submit"),
                     command: "pintia.submitSolution",
                     arguments: [ptaCode],
                 };
             } else if (command === "Test") {
                 codeLens.command = {
-                    title: "Test",
+                    title: l10n.t("Test"),
                     command: "pintia.testSolution",
                     arguments: [ptaCode],
                 };
             } else if (command === "customTest") {
                 codeLens.command = {
-                    title: `Test custom sample ${codeLens.customTestIndex! + 1}`,
+                    title: l10n.t("Test custom sample {0}", codeLens.customTestIndex! + 1),
                     command: "pintia.testCustomSample",
                     arguments: [ptaCode, codeLens.customTestIndex],
                 };
             } else if (command === "Preview") {
                 codeLens.command = {
-                    title: "Preview",
+                    title: l10n.t("Preview"),
                     command: "pintia.previewProblem",
                     arguments: [ptaCode.psID, ptaCode.pID, false],
                 };
@@ -101,7 +102,7 @@ export class CustomCodeLensProvider implements vscode.CodeLensProvider<PtaCodeLe
                 const startLine = data.substring(0, match.index).split('\n').length;
                 codeblock.push({
                     lineNum: startLine,
-                    code: code
+                    code: code + '\n'
                 });
             }
         }
