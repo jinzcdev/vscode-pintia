@@ -35,18 +35,30 @@ export async function selectWorkspaceFolder(): Promise<string> {
         return await handleOpenOption(defaultChoice, workspaceFolder);
     }
 
-    const choice: string | undefined = await vscode.window.showQuickPick(
+    const choice: PtaQuickPickItem | undefined = await vscode.window.showQuickPick(
         [
-            OpenOptionEnum.justOpenFile,
-            OpenOptionEnum.openInCurrentWindow,
-            OpenOptionEnum.openInNewWindow,
-            OpenOptionEnum.addToWorkspace,
+            {
+                label: l10n.t(OpenOptionEnum.justOpenFile),
+                value: OpenOptionEnum.justOpenFile
+            },
+            {
+                label: l10n.t(OpenOptionEnum.openInCurrentWindow),
+                value: OpenOptionEnum.openInCurrentWindow,
+            },
+            {
+                label: l10n.t(OpenOptionEnum.openInNewWindow),
+                value: OpenOptionEnum.openInNewWindow
+            },
+            {
+                label: l10n.t(OpenOptionEnum.addToWorkspace),
+                value: OpenOptionEnum.addToWorkspace
+            }
         ],
-        { placeHolder: l10n.t("The PTA workspace folder is not opened in VS Code, would you like to open it?") },
+        { placeHolder: l10n.t("The PTA workspace folder is not opened in VS Code, would you like to open it? (You can configure the default opening method in the settings)") },
     );
 
-    if (choice) {
-        return await handleOpenOption(choice as OpenOptionEnum, workspaceFolder);
+    if (choice && choice.value) {
+        return await handleOpenOption(choice.value, workspaceFolder);
     }
 
     return "";
@@ -142,4 +154,9 @@ export enum OpenOptionEnum {
     openInCurrentWindow = "Open in current window",
     openInNewWindow = "Open in new window",
     addToWorkspace = "Add to workspace",
+}
+
+
+interface PtaQuickPickItem extends vscode.QuickPickItem {
+    value?: OpenOptionEnum;
 }
