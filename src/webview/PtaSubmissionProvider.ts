@@ -141,7 +141,7 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
 
         <h2>编译器输出</h2>
         <div class="code-block build-output">
-            <pre><code>${content.compilationOutput}</code></pre>
+            <pre><code>${escapeHtml(content.compilationOutput)}</code></pre>
         </div>
 
         <h2>代码</h2>
@@ -172,4 +172,17 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
         const f = (e: number) => e < 10 ? '0' + e : e;
         return `${year}/${month}/${day} ${f(hour)}:${f(minute)}:${f(second)}`;
     }
+}
+
+function escapeHtml(unsafe: string): string {
+    return unsafe.replace(/[&<"'>]/g, function (match) {
+        const escapeMap = new Map<string, string>([
+            ['&', '&amp;'],
+            ['<', '&lt;'],
+            ['>', '&gt;'],
+            ['"', '&quot;'],
+            ["'", '&#039;']
+        ]);
+        return escapeMap.get(match) ?? match;
+    });
 }

@@ -63,11 +63,21 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
                 value: ":custom",
             });
         }
+        // todo 增加从题目内容中检测出的测试样例
+        const problemContent = problem.content;
+        if (problemContent.indexOf("```in") !== -1) {
+            picks.push({
+                label: l10n.t("{0} Test cases in the problem", "$(book)"),
+                description: "",
+                detail: l10n.t("Test with the input cases in the problem"),
+                value: ":problem",
+            });
+        }
         picks.push(
             {
                 label: l10n.t("{0} Default test cases", "$(three-bars)"),
                 description: (exampleTestDatas?.length ?? 0) / 2 === 0 ? l10n.t("No default test cases provided") : "",
-                detail: l10n.t("Test with the default cases"),
+                detail: l10n.t("Test with the default cases (usually includes official test answers)"),
                 value: ":default",
             },
             {
@@ -154,6 +164,31 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
                 vscode.window.showErrorMessage(l10n.t("No custom test samples found. Please check the format of the test code blocks."));
                 return;
             }
+        } else if (choice.value === ":problem") {
+            let testPicks: IQuickPickItem<number>[] = [];
+            const codeBlockRegex = /```in([\s\S]*?)```/g;
+            const matches = problemContent.matchAll(codeBlockRegex);
+            const testCases: string[] = [];
+            for (const match of matches) {
+                const codeBlockContent = match[1].trim();
+                testCases.push(codeBlockContent);
+            }
+            if (testCases.length === 0) {
+                return;
+            }
+            for (let i = 0; i < testCases.length; i++) {
+                testPicks.push({
+                    label: l10n.t("Sample {0}", i + 1),
+                    detail: testCases[i],
+                    value: i
+                });
+            }
+            const testChoice: IQuickPickItem<number> | undefined = await vscode.window.showQuickPick(testPicks);
+            if (!testChoice) {
+                return;
+            }
+            testInput = testCases[testChoice.value];
+            testOutput = getTestInputAnswerFromExampleTestDatas(problem, testInput) ?? ""
         }
         if (!testInput) {
             return;
@@ -189,9 +224,7 @@ export async function testCustomSample(ptaCode: IPtaCode, index: number): Promis
             testInput: ptaCode.customTests[index]
         };
         const problem: IProblem = await ptaApi.getProblem(ptaCode.psID, ptaCode.pID);
-        // TODO 支持多种题型
-        const exampleTestDatas = (problem.problemConfig.programmingProblemConfig ?? problem.problemConfig.codeCompletionProblemConfig)?.exampleTestDatas;
-        let testOutput = getTestInputAnswerFromExampleTestDatas(exampleTestDatas, solution.testInput) ?? ""
+        let testOutput = getTestInputAnswerFromExampleTestDatas(problem, solution.testInput) ?? ""
         await ptaExecutor.testSolution(ptaCode.psID, ptaCode.pID, solution, (msg: string, data?: IProblemSubmissionResult) => {
             if (msg === "SUCCESS") {
                 data!.problem = problem;
@@ -207,7 +240,9 @@ export async function testCustomSample(ptaCode: IPtaCode, index: number): Promis
 /**
  * Get the answer of the test input from the example test data if the test input matches the example test input.
  */
-function getTestInputAnswerFromExampleTestDatas(exampleTestDatas: [{ name: string; input: string; output: string; }] | undefined, customTestInput: string = "") {
+function getTestInputAnswerFromExampleTestDatas(problem: IProblem, customTestInput: string = "") {
+    // TODO 支持多种题型
+    const exampleTestDatas = (problem.problemConfig.programmingProblemConfig ?? problem.problemConfig.codeCompletionProblemConfig)?.exampleTestDatas;
     if (exampleTestDatas) {
         for (let i = 0; i < exampleTestDatas.length / 2; i++) {
             const input = exampleTestDatas[i]?.input ?? "";

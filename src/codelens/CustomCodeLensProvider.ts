@@ -102,7 +102,7 @@ export class CustomCodeLensProvider implements vscode.CodeLensProvider<PtaCodeLe
                 const startLine = data.substring(0, match.index).split('\n').length;
                 codeblock.push({
                     lineNum: startLine,
-                    code: code + '\n'
+                    code: code
                 });
             }
         }

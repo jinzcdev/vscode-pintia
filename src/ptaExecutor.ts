@@ -98,7 +98,7 @@ class PtaExecutor extends EventEmitter implements Disposable {
                         problemSetProblemId: pID,
                         customTestData: {
                             hasCustomTestData: true,
-                            content: solution.testInput
+                            content: solution.testInput.endsWith("\n") ? solution.testInput : solution.testInput + "\n"
                         }
                     };
 
