@@ -3,6 +3,14 @@
 (function () {
     const vscode = acquireVsCodeApi();
     let button;
+    if (button = document.getElementById('btnCheckLastSubmission')) {
+        button.onclick = () => {
+            vscode.postMessage({
+                type: 'command',
+                value: 'pintia.checkLastSubmission'
+            });
+        };
+    }
     if (button = document.getElementById('btnSolve')) {
         button.onclick = () => {
             vscode.postMessage({

@@ -22,6 +22,8 @@ import { ProblemView } from "./webview/views/ProblemView";
 import { historyTreeDataProvider } from "./view-history/historyTreeDataProvider";
 import { historyManager } from "./view-history/historyManager";
 import { ptaConfig } from "./ptaConfig";
+import { PtaSubmissionProvider } from "./webview/PtaSubmissionProvider";
+import { ptaApi } from "./utils/api";
 
 
 let globalContext: vscode.ExtensionContext;
@@ -100,6 +102,16 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand("pintia.removeFavorite", (ptaNode: PtaNode) => star.removeFavoriteProblem(ptaNode.pID)),
 		vscode.commands.registerCommand("pintia.clearViewedProblems", () => historyManager.clearViewedProblems()),
 		vscode.commands.registerCommand("pintia.clearFavoriteProblems", () => favoriteProblemsManager.clearFavoriteProblems()),
+		vscode.commands.registerCommand("pintia.checkLastSubmission", async (ptaCode: IPtaCode) => {
+			const cookie = ptaManager.getUserSession()?.cookie ?? "";
+			const submissionId = (await ptaApi.getLastSubmissions(ptaCode.psID, ptaCode.pID, cookie))?.id;
+			if (submissionId) {
+				const data = await ptaApi.getProblemSubmissionResult(submissionId, cookie);
+				if (data && data.queued === -1 && data.submission.status !== "WAITING" && data.submission.status !== "JUDGING") {
+					PtaSubmissionProvider.createOrUpdate(data).show();
+				}
+			}
+		})
 	);
 }
 
