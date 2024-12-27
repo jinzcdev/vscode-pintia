@@ -85,5 +85,6 @@
   "Just open the problem file": "仅打开题目文件",
   "Open in current window": "在当前窗口中打开",
   "Open in new window": "在新窗口中打开",
-  "Add to workspace": "添加到工作区"
+  "Add to workspace": "添加到工作区",
+  "Please save the solution file first.": "请先保存代码源文件。"
 }

@@ -282,7 +282,7 @@
                     "type": "boolean",
                     "default": false,
                     "scope": "window",
-                    "description": "%configuration.pintia.previewProblem.openAndCodeIt%",
+                    "markdownDescription": "%configuration.pintia.previewProblem.openAndCodeIt%",
                     "order": 2
                 },
                 "pintia.previewProblem.defaultOpenedMethod": {
@@ -295,7 +295,7 @@
                         "Open in new window",
                         "Add to workspace"
                     ],
-                    "enumDescriptions": [
+                    "enumItemLabels": [
                         "%configuration.pintia.previewProblem.defaultOpenedMethod.alwaysAsk%",
                         "%configuration.pintia.previewProblem.defaultOpenedMethod.justOpenProblemFile%",
                         "%configuration.pintia.previewProblem.defaultOpenedMethod.openInCurrentWindow%",
@@ -303,7 +303,7 @@
                         "%configuration.pintia.previewProblem.defaultOpenedMethod.addToWorkspace%"
                     ],
                     "scope": "window",
-                    "description": "%configuration.pintia.previewProblem.defaultOpenedMethod%",
+                    "markdownDescription": "%configuration.pintia.previewProblem.defaultOpenedMethod%",
                     "order": 3
                 },
                 "pintia.paging.pageSize": {

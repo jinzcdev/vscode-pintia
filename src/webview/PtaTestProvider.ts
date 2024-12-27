@@ -3,7 +3,8 @@ import { ptaChannel } from "../ptaChannel";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import { PtaWebview } from "./PtaWebview";
 import { TestView } from "./views/TestView";
-import { NO_OFFICIAL_SOLUTION, ProblemJudgingStatus, problemJudgingStatusMapping, UNKNOWN } from "../shared";
+import { NO_OFFICIAL_SOLUTION, NONE, ProblemJudgingStatusEnum, problemJudgingStatusMapping, UNKNOWN } from "../shared";
+import { defaultIfBlank } from "../utils/stringUtils";
 
 export class PtaTestProvider extends PtaWebview<TestView> {
 
@@ -32,13 +33,13 @@ export class PtaTestProvider extends PtaWebview<TestView> {
                 testResult: {
                     testCase: result.submission.submissionDetails[0].customTestData?.content,
                     answer: !answer ? NO_OFFICIAL_SOLUTION : answer,
-                    myAnswer: judgeResponseContent.status !== ProblemJudgingStatus.NEUTRAL
-                        ? problemJudgingStatusMapping.get(judgeResponseContent.status) : (testcaseJudgeResults?.custom.stdout ?? ""),
+                    myAnswer: judgeResponseContent.status !== ProblemJudgingStatusEnum.NEUTRAL
+                        ? (problemJudgingStatusMapping.get(judgeResponseContent.status)?.text ?? judgeResponseContent.status) : (testcaseJudgeResults?.custom.stdout ?? ""),
                     problemType: result.submission.problemType,
                     compiler: result.submission.compiler,
                     time: result.submission.time,
                     memory: result.submission.memory,
-                    compilationOutput: codeJudgeResponseContent!.compilationResult.log
+                    compilationOutput: defaultIfBlank(codeJudgeResponseContent?.compilationResult?.log, NONE)
                 }
             };
         } catch (error: any) {

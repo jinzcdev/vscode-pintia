@@ -257,7 +257,8 @@ pre:hover .copy-button {
     color: inherit;
 }
 
-.header a:hover {
+.header a:hover,
+.content-container a:hover {
     color: var(--vscode-textLink-activeForeground);
     text-decoration: underline;
 }

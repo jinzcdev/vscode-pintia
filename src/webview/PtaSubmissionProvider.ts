@@ -2,13 +2,14 @@ import * as vscode from "vscode";
 import { IProblem } from "../entity/IProblem";
 import { IProblemSubmissionResult } from "../entity/IProblemSubmissionResult";
 import { IProblemSubmissionDetail } from "../entity/problemSubmissionCode";
-import { ProblemJudgingStatus, ProblemType, problemTypeInfoMapping, ptaCompiler, solutionStatusMapping, UNKNOWN } from "../shared";
+import { ProblemJudgingStatusEnum, ProblemType, problemTypeInfoMapping, ptaCompiler, problemJudgingStatusMapping, UNKNOWN, NONE } from "../shared";
 import { ptaApi } from "../utils/api";
 import { PtaWebviewWithCodeStyle } from "./PtaWebviewWithCodeStyle";
 import * as markdownEngine from "./markdownEngine";
 import { getNonce, IWebViewMessage } from "./PtaWebview";
 import { getGlobalContext } from "../extension";
 import { ProblemView } from "./views/ProblemView";
+import { defaultIfBlank } from "../utils/stringUtils";
 
 export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmissionResult> {
 
@@ -55,7 +56,7 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
                 compiler: result.submission.compiler,
                 time: result.submission.time,
                 memory: result.submission.memory,
-                compilationOutput: codeJudgeResponseContent!.compilationResult.log,
+                compilationOutput: defaultIfBlank(codeJudgeResponseContent?.compilationResult?.log, NONE),
                 program: result.submission.problemType === ProblemType.PROGRAMMING ?
                     submissionDetail.programmingSubmissionDetail!.program :
                     submissionDetail.codeCompletionSubmissionDetail!.program
@@ -75,11 +76,12 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
             const testcaseJudgeResult = content.testcaseJudgeResults[i];
             const testCase = content.testCases[i];
             const scoreText = testCase !== undefined ? `${testcaseJudgeResult.testcaseScore} / ${testCase.score}` : testcaseJudgeResult.testcaseScore;
+            const testcaseJudgingStatus = problemJudgingStatusMapping.get(testcaseJudgeResult.result)
             cases += `
             <tr>
                 <td>${i}</td>
                 <td class="visible">${content.hints[i]}</td>
-                ${solutionStatusMapping.get(testcaseJudgeResult.result)}
+                <td style="color: ${testcaseJudgingStatus?.color ?? "inherit"};">${testcaseJudgingStatus?.text ?? testcaseJudgeResult.result}</td>
                 <td>${scoreText}</td>
                 <td>${(testcaseJudgeResult.time * 1000).toFixed()}ms</td>
                 <td>${testcaseJudgeResult.memory / 1024}KB</td>
@@ -91,9 +93,8 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
         const timeText = content.timeLimit ? `${(content.time * 1000).toFixed()} / ${content.timeLimit}ms` : `${(content.time * 1000).toFixed()}ms`;
 
         const copyButtonScriptUri = this.getWebview()?.asWebviewUri(vscode.Uri.joinPath(getGlobalContext().extensionUri, "media", "main.js"));
-
+        const problemJudgingStatus = problemJudgingStatusMapping.get(content.status);
         return `
-
         <div>
             <h2>总评</h2>
             <table>
@@ -109,7 +110,7 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
                 <tbody>
                     <tr>
                         <td>${this.formatDate(new Date(content.submitAt))}</td>
-                        ${solutionStatusMapping.get(content.status)}
+                        <td style="color: ${problemJudgingStatus?.color ?? "inherit"};">${problemJudgingStatus?.text ?? content.status}</td>
                         <td>${scoreText}</td>
                         <td>${problemTypeInfoMapping.get(content.problemType)?.name ?? UNKNOWN}</td>
                         <td>${compiler.language} (${compiler.displayName})</td>
@@ -120,7 +121,7 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
             </table>
         </div>
 
-        <div ${content.status === ProblemJudgingStatus.COMPILE_ERROR ? "style='display: none;'" : ""}" >
+        <div ${content.status === ProblemJudgingStatusEnum.COMPILE_ERROR ? "style='display: none;'" : ""}" >
             <h2>单点测试得分</h2>
             <table>
                 <thead>

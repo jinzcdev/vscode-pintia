@@ -97,7 +97,7 @@ export async function getActiveFilePath(uri?: vscode.Uri): Promise<string | unde
         return undefined;
     }
     if (textEditor.document.isDirty && !await textEditor.document.save()) {
-        vscode.window.showWarningMessage("Please save the solution file first.");
+        vscode.window.showWarningMessage(l10n.t("Please save the solution file first."));
         return undefined;
     }
     return textEditor.document.uri.fsPath;

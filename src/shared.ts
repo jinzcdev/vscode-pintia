@@ -17,6 +17,7 @@ export import ptaCache = require('memory-cache');
 
 export const UNKNOWN = "Unknown";
 export const NO_OFFICIAL_SOLUTION = "该测试样例无官方答案"
+export const NONE = "无";
 
 export enum UserStatus {
     SignedIn = 1,
@@ -34,16 +35,11 @@ export enum PtaDashType {
     Others = "其他"
 }
 
-export enum ProblemJudgingStatus {
+export enum ProblemJudgingStatusEnum {
     TIME_LIMIT_EXCEEDED = "TIME_LIMIT_EXCEEDED",
     COMPILE_ERROR = "COMPILE_ERROR",
     NEUTRAL = "NEUTRAL"
 }
-
-export const problemJudgingStatusMapping: Map<string, string> = new Map<string, string>([
-    ["TIME_LIMIT_EXCEEDED", "运行超时"],
-    ["COMPILE_ERROR", "编译错误"]]
-);
 
 export interface IQuickPickItem<T> extends vscode.QuickPickItem {
     value: T;
@@ -166,24 +162,29 @@ export const defaultPtaNode: IPtaNode = {
 
 export type CallBack<T> = (msg: string, data?: T) => void;
 
-export const solutionStatusMapping: Map<string, string> = new Map([
-    ["OVERRIDDEN", "<td>已被覆盖</td>"],
-    ["WAITING", "<td>等待评测</td>"],
-    ["JUDGING", "<td style='color: orange;'>正在评测</td>"],
-    ["COMPILE_ERROR", "<td style='color: #237aff;'>编译错误</td>"],
-    ["ACCEPTED", "<td style='color: #ff5555;'>答案正确</td>"],
-    ["PARTIAL_ACCEPTED", "<td style='color: #00b000;'>部分正确</td>"],
-    ["PRESENTATION_ERROR", "<td style='color: #00b000;'>格式错误</td>"],
-    ["WRONG_ANSWER", "<td style='color: #00b000;'>答案错误</td>"],
-    ["MULTIPLE_ERROR", "<td style='color: #00b000;'>多种错误</td>"],
-    ["TIME_LIMIT_EXCEEDED", "<td style='color: #00b000;'>运行超时</td>"],
-    ["MEMORY_LIMIT_EXCEEDED", "<td style='color: #00b000;'>内存超限</td>"],
-    ["NON_ZERO_EXIT_CODE", "<td style='color: #00b000;'>非零返回</td>"],
-    ["SEGMENTATION_FAULT", "<td style='color: #00b000;'>段错误</td>"],
-    ["FLOAT_POINT_EXCEPTION", "<td style='color: #00b000;'>浮点错误</td>"],
-    ["OUTPUT_LIMIT_EXCEEDED", "<td style='color: #00b000;'>输出超限</td>"],
-    ["INTERNAL_ERROR", "<td>内部错误</td>"],
-    ["RUNTIME_ERROR", "<td style='color: #00b000;'>运行时错误</td>"],
+export interface ProblemJudgingStatus {
+    color: string;
+    text: string;
+}
+
+export const problemJudgingStatusMapping: Map<string, ProblemJudgingStatus> = new Map([
+    ["OVERRIDDEN", { color: "", text: "已被覆盖" }],
+    ["WAITING", { color: "", text: "等待评测" }],
+    ["JUDGING", { color: "orange", text: "正在评测" }],
+    ["COMPILE_ERROR", { color: "#237aff", text: "编译错误" }],
+    ["ACCEPTED", { color: "#ff5555", text: "答案正确" }],
+    ["PARTIAL_ACCEPTED", { color: "#00b000", text: "部分正确" }],
+    ["PRESENTATION_ERROR", { color: "#00b000", text: "格式错误" }],
+    ["WRONG_ANSWER", { color: "#00b000", text: "答案错误" }],
+    ["MULTIPLE_ERROR", { color: "#00b000", text: "多种错误" }],
+    ["TIME_LIMIT_EXCEEDED", { color: "#00b000", text: "运行超时" }],
+    ["MEMORY_LIMIT_EXCEEDED", { color: "#00b000", text: "内存超限" }],
+    ["NON_ZERO_EXIT_CODE", { color: "#00b000", text: "非零返回" }],
+    ["SEGMENTATION_FAULT", { color: "#00b000", text: "段错误" }],
+    ["FLOAT_POINT_EXCEPTION", { color: "#00b000", text: "浮点错误" }],
+    ["OUTPUT_LIMIT_EXCEEDED", { color: "#00b000", text: "输出超限" }],
+    ["INTERNAL_ERROR", { color: "", text: "内部错误" }],
+    ["RUNTIME_ERROR", { color: "#00b000", text: "运行时错误" }],
 ]);
 
 export const langCompilerMapping: Map<string, string> = new Map([
