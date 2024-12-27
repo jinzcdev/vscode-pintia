@@ -58,35 +58,35 @@ export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
             finalPath = path.join(workspaceFolder, ptaCode.psName, `${ptaCode.title!}.${ext}`);
         }
 
+        const fileUri = vscode.Uri.file(finalPath);
 
         if (!await fs.pathExists(finalPath)) {
             await fs.createFile(finalPath);
 
             const problem: IProblem = await ptaApi.getProblem(ptaCode.psID, ptaCode.pID, ptaManager.getUserSession()?.cookie);
 
-            const content: string[] = [
-                `@pintia psid=${ptaCode.psID} pid=${ptaCode.pID} compiler=${defaultCompiler}`,
-                `ProblemSet: ${ptaCode.psName ?? "None"}`,
-                `Title: ${ptaCode.title!}`,
-                ptaApi.getProblemURL(ptaCode.psID, ptaCode.pID, problem.type),
-            ];
-
-            const format = commentFormatMapping.get(compilerLangMapping.get(defaultCompiler) ?? "") ?? commentFormatMapping.get("C++ (g++)")!;
-            let comment: string[] = [];
-            comment.push(format.start);
-            for (const e of content) {
-                comment.push(format.middle + e);
-                comment.push(format.middle);
-            }
-            comment.push(format.end);
-
             const lastSubmissionDetail = (await ptaApi.getLastSubmissions(ptaCode.psID, ptaCode.pID, ptaManager.getUserSession()?.cookie ?? ""))?.submissionDetails[0];
             const lastSubmittedCompiler: string = (lastSubmissionDetail?.programmingSubmissionDetail ?? lastSubmissionDetail?.codeCompletionSubmissionDetail)?.compiler ?? problemCompiler;
             const lastProgram: string | undefined = (lastSubmissionDetail && defaultCompiler === lastSubmittedCompiler)
                 ? (lastSubmissionDetail.programmingSubmissionDetail?.program ?? lastSubmissionDetail.codeCompletionSubmissionDetail?.program) : "";
-            await fs.writeFile(finalPath, comment.join('\n') + `\n${format.single}@pintia code=start\n${lastProgram ?? ""}\n${format.single}@pintia code=end`);
+
+            const content: string[] = [
+                "$BLOCK_COMMENT_START",
+                `  @pintia psid=${ptaCode.psID} pid=${ptaCode.pID} compiler=${defaultCompiler}`,
+                `  ProblemSet: ${ptaCode.psName ?? "None"}`,
+                `  Title: ${ptaCode.title!}`,
+                `  ${ptaApi.getProblemURL(ptaCode.psID, ptaCode.pID, problem.type)}`,
+                "$BLOCK_COMMENT_END",
+                "$LINE_COMMENT @pintia code=start",
+                `\${0}${lastProgram ?? ""}`,
+                "$LINE_COMMENT @pintia code=end",
+            ];
+            const editor = await vscode.window.showTextDocument(fileUri, { preview: false, viewColumn: vscode.ViewColumn.Two });
+            await editor.insertSnippet(new vscode.SnippetString(content.join("\n")));
+            await vscode.workspace.save(fileUri);
+        } else {
+            await vscode.window.showTextDocument(fileUri, { preview: false, viewColumn: vscode.ViewColumn.Two });
         }
-        await vscode.window.showTextDocument(vscode.Uri.file(finalPath), { preview: false, viewColumn: vscode.ViewColumn.Two });
     } catch (error: any) {
         ptaChannel.appendLine(error.toString());
         await promptForOpenOutputChannel(l10n.t("Coding the problem failed. Please open the output channel for details."), DialogType.error);
