@@ -55,6 +55,12 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
         const exampleTestDatas = (problem.problemConfig.programmingProblemConfig ?? problem.problemConfig.codeCompletionProblemConfig)?.exampleTestDatas;
 
         const picks: Array<IQuickPickItem<string>> = [];
+        picks.push({
+            label: l10n.t("{0} Default test cases", "$(three-bars)"),
+            description: (exampleTestDatas?.length ?? 0) / 2 === 0 ? l10n.t("No default test cases provided") : "",
+            detail: l10n.t("Test with the default cases (usually includes official test answers)"),
+            value: ":default"
+        });
         if (ptaCode.customTests && ptaCode.customTests.length !== 0) {
             picks.push({
                 label: l10n.t("{0} Custom test cases", "$(note)"),
@@ -63,7 +69,6 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
                 value: ":custom",
             });
         }
-        // todo 增加从题目内容中检测出的测试样例
         const problemContent = problem.content;
         if (problemContent.indexOf("```in") !== -1) {
             picks.push({
@@ -74,12 +79,6 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
             });
         }
         picks.push(
-            {
-                label: l10n.t("{0} Default test cases", "$(three-bars)"),
-                description: (exampleTestDatas?.length ?? 0) / 2 === 0 ? l10n.t("No default test cases provided") : "",
-                detail: l10n.t("Test with the default cases (usually includes official test answers)"),
-                value: ":default",
-            },
             {
                 label: l10n.t("{0} Write directly...", "$(pencil)"),
                 description: "",
