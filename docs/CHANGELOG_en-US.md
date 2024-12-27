@@ -4,6 +4,47 @@
 
 ---
 
+## [0.7.0] - 2024/12/27
+
+### Features
+
+- **Problem Sets**
+    - Support for "My Problem Sets" ([Issue #4](https://github.com/jinzcdev/vscode-pintia/issues/4))
+
+- **Authentication**
+    - Added Cookie login method, allowing users to log in using a Cookie with the key PTASession
+
+- **Custom Testing**
+    - Automatically detect input samples in problems and quickly submit tests
+
+- **User Interface**
+    - Updated and optimized the styles of the problem preview page, submission page, and test page
+    - Added **Refresh Problem** and **View Last Submission** buttons on the problem preview page
+    - Display code performance requirements in the problem preview
+
+- **Code Editing**
+    - Optimized the format of the header comments when creating new source code
+
+- **Command Palette**
+    - Added commands to clear problem view history and favorite problems
+
+- **History View**
+    - Added a button to favorite problems
+
+- **Internationalization**
+    - Support for switching between Chinese and English languages
+
+### Fixes
+
+- **Problem Sets**
+    - Automatically create problem sets without corresponding exams ([Issue #6](https://github.com/jinzcdev/vscode-pintia/issues/6))
+    - Automatically filter out non-programming problem sets
+
+- **User Interface**
+    - Fixed style issues on the submission page when there are markdown notes in the source code
+
+---
+
 ## [0.6.1] - 2024/12/05
 
 ### Fixed

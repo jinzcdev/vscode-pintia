@@ -2,6 +2,16 @@
 
 ![VSCode Pintia Logo](../imgs/vscode-pintia-logo.png)
 
+## Features
+
+1. Automatically create source files
+2. Detect input samples in the problem and submit tests quickly
+3. Support adding notes using Markdown syntax
+4. One-click search for solutions or view the author's reference code
+5. Automatically sign in to the Pintia Education Store
+
+## Detailed Features
+
 1. Sign in Pinta (PTA) in VS Code
 2. Preview problems, create source files automatically
 3. Submit and test your code quickly
