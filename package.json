@@ -2,7 +2,7 @@
     "name": "vscode-pintia",
     "displayName": "Pintia (拼题A)",
     "description": "%description%",
-    "version": "0.7.0",
+    "version": "0.7.1",
     "author": "Zhichao Jin",
     "publisher": "jinzcdev",
     "license": "MIT",
@@ -414,6 +414,12 @@
                             "Test",
                             "Preview"
                         ],
+                        "uniqueItems": true,
+                        "enumItemLabels": [
+                            "%configuration.pintia.editor.shortcuts.label.submit%",
+                            "%configuration.pintia.editor.shortcuts.label.test%",
+                            "%configuration.pintia.editor.shortcuts.label.preview%"
+                        ],
                         "enumDescriptions": [
                             "%configuration.pintia.editor.shortcuts.submit%",
                             "%configuration.pintia.editor.shortcuts.test%",
@@ -519,7 +525,7 @@
                         "title": "%walkthroughs.signIn.title%",
                         "description": "%walkthroughs.signIn.description%",
                         "media": {
-                            "image": "docs/imgs/signin-whole.jpg",
+                            "image": "docs/imgs/signin.png",
                             "altText": "%walkthroughs.signIn.media.altText%"
                         },
                         "completionEvents": [
@@ -531,7 +537,7 @@
                         "title": "%walkthroughs.previewProblem.title%",
                         "description": "%walkthroughs.previewProblem.description%",
                         "media": {
-                            "image": "docs/imgs/preview.jpg",
+                            "image": "docs/imgs/preview.png",
                             "altText": "%walkthroughs.previewProblem.media.altText%"
                         }
                     },
@@ -579,7 +585,7 @@
                         "title": "%walkthroughs.addTemplates.title%",
                         "description": "%walkthroughs.addTemplates.description%",
                         "media": {
-                            "image": "docs/imgs/snippets.jpg",
+                            "image": "docs/imgs/snippets.png",
                             "altText": "%walkthroughs.addTemplates.media.altText%"
                         }
                     },
