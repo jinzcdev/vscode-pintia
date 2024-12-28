@@ -37,7 +37,7 @@
   "Use WeChat QRCode to login": "使用微信二维码登录",
   "{0} Pintia Cookie": "{0} Cookie 登录",
   "Use Pintia cookie to login": "使用拼题A Cookie 登录",
-  "Sign in ...": "登录中...",
+  "Waiting for signin...": "等待登录中...",
   "Successfully logged in as {0}": "成功登录账户 {0}",
   "The PTA workspace folder is not opened in VS Code, would you like to open it? (You can configure the default opening method in the settings)": "VS Code 中未打开 PTA 工作区文件夹，您要打开它吗？(可在设置中配置默认打开方式)",
   "Default location": "默认位置",

@@ -59,7 +59,7 @@ class PtaManager extends EventEmitter {
 
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
-            title: l10n.t("Sign in ..."),
+            title: l10n.t("Waiting for signin..."),
             cancellable: false
         }, async (p: vscode.Progress<{ message?: string; increment?: number }>) => {
             return new Promise<void>(async (resolve: () => void, reject: (e: Error) => void): Promise<void> => {

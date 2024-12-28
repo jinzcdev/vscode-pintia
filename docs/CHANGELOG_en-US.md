@@ -1,6 +1,6 @@
 # Change Log
 
-[中文文档](https://github.com/jinzcdev/vscode-pintia/blob/main/CHANGELOG.md)
+[中文文档](../CHANGELOG.md)
 
 ---
 

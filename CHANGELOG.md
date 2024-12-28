@@ -1,6 +1,6 @@
 # 更新日志
 
-[English Docs](https://github.com/jinzcdev/vscode-pintia/blob/main/docs/CHANGELOG_en-US.md)
+[English Docs](./docs/CHANGELOG_en-US.md)
 
 ---
 
