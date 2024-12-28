@@ -10,7 +10,7 @@
   <a href="https://marketplace.visualstudio.com/items?itemName=jinzcdev.vscode-pintia">
     <img src="https://img.shields.io/visual-studio-marketplace/d/jinzcdev.vscode-pintia?style=flat-square" alt="">
   </a>
-  <a href="https://github.com/jinzcdev/vscode-pintia/blob/main/LICENSE">
+  <a href="../LICENSE">
     <img src="https://img.shields.io/github/license/jinzcdev/vscode-pintia?style=flat-square" alt="">
   </a>
 </p>
@@ -173,7 +173,7 @@ If your problem still cannot be addressed, feel free to [file an issue](https://
 
 ## 5. Release Notes
 
-Refer to [CHANGELOG](https://github.com/jinzcdev/vscode-pintia/blob/main/CHANGELOG.md) | [中文文档](https://github.com/jinzcdev/vscode-pintia/blob/main/docs/CHANGELOG_en-US.md)
+Refer to [CHANGELOG](./CHANGELOG_en-US.md) | [中文文档](../CHANGELOG.md)
 
 ## 6. Acknowledgement
 

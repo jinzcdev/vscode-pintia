@@ -10,7 +10,7 @@
   <a href="https://marketplace.visualstudio.com/items?itemName=jinzcdev.vscode-pintia">
     <img src="https://img.shields.io/visual-studio-marketplace/d/jinzcdev.vscode-pintia?style=flat-square" alt="">
   </a>
-  <a href="https://github.com/jinzcdev/vscode-pintia/blob/main/LICENSE">
+  <a href="./LICENSE">
     <img src="https://img.shields.io/github/license/jinzcdev/vscode-pintia?style=flat-square" alt="">
   </a>
 </p>
@@ -174,7 +174,7 @@
 
 ## 5. 更新日志
 
-请参考 [CHANGELOG](https://github.com/jinzcdev/vscode-pintia/blob/main/CHANGELOG.md) | [英文文档](https://github.com/jinzcdev/vscode-pintia/blob/main/docs/CHANGELOG_en-US.md)
+请参考 [CHANGELOG](./CHANGELOG.md) | [英文文档](./docs/CHANGELOG_en-US.md)
 
 ## 6. 鸣谢
 
