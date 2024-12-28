@@ -30,7 +30,7 @@
 ### 1.1 Sign In/Out
 
 <p align="center">
-  <img style="width: 40%;" src="./imgs/signin.png" alt="Sign in" />
+  <img style="width: 50%;" src="./imgs/signin.png" alt="Sign in" />
 </p>
 
 - Simply click `Sign in PTA` in the `Pintia Explorer` will let you **sign in** with your Pintia account. (Currently, only **WeChat QR** codes are supported for signin)
@@ -57,7 +57,7 @@
 ### 1.3 Editor Shortcuts
 
 <p align="center">
-  <img style="width: 40%;" src="./imgs/shortcuts.png" alt="Editor Shortcuts" />
+  <img style="width: 50%;" src="./imgs/shortcuts.png" alt="Editor Shortcuts" />
 </p>
 
 - The extension supports 3 editor shortcuts (aka Code Lens):

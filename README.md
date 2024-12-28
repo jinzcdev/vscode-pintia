@@ -30,7 +30,7 @@
 ### 1.1 登录/登出
 
 <p align="center">
-  <img style="width: 40%;" src="./docs/imgs/signin.png" alt="登录" />
+  <img style="width: 50%;" src="./docs/imgs/signin.png" alt="登录" />
 </p>
 
 - 只需在 `Pintia Explorer` 中点击 `登录拼题A/Sign in PTA` ，即可登录拼题A。(目前，支持 **微信二维码**、**Cookie** 登录）。
@@ -58,7 +58,7 @@
 ### 1.3 编辑器快捷键
 
 <p align="center">
-  <img style="width: 40%;" src="./docs/imgs/shortcuts.png" alt="编辑器快捷键" />
+  <img style="width: 50%;" src="./docs/imgs/shortcuts.png" alt="编辑器快捷键" />
 </p>
 
 - 该插件支持 3 个编辑器快捷键
