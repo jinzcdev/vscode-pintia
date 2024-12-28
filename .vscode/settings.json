@@ -10,5 +10,8 @@
     "typescript.tsc.autoDetect": "off",
     "cSpell.words": [
         "qrcode"
-    ]
+    ],
+    "files.associations": {
+        "iostream": "cpp"
+    }
 }
