@@ -3,7 +3,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import * as fs from "fs-extra";
 import { selectWorkspaceFolder } from "../utils/workspaceUtils";
-import { commentFormatMapping, compilerLangMapping, configPath, IPtaCode, IQuickPickItem, langCompilerMapping, ProblemType, problemTypeInfoMapping, ptaCompiler, searchIndexPath, ZOJ_PROBLEM_SET_ID } from "../shared";
+import { commentFormatMapping, compilerLangMapping, IPtaCode, IQuickPickItem, langCompilerMapping, ProblemType, problemTypeInfoMapping, ptaCompiler, searchIndexPath, UNKNOWN, ZOJ_PROBLEM_SET_ID } from "../shared";
 import { ptaChannel } from "../ptaChannel";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import { ptaConfig } from "../ptaConfig";
@@ -12,8 +12,7 @@ import { IProblem } from "../entity/IProblem";
 import { ptaManager } from "../ptaManager";
 import { IUserSession } from "../entity/userLoginSession";
 import { IProblemSearchItem } from "../entity/IProblemSearchItem";
-import { PtaPreviewProvider } from "../webview/PtaPreviewProvider";
-import { ProblemView } from "../webview/views/ProblemView";
+import { l10n } from "vscode";
 
 
 export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
@@ -31,10 +30,9 @@ export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
             problemCompiler = "VERILOG";
         }
         const availableCompilers: string[] = await ptaApi.getProblemSetCompilers(ptaCode.psID);
-        // const availableLangs: string[] = availableCompilers.map<string>((value, _) => { return compilerLangMapping.get(value) ?? "" });
 
         if (problemCompiler !== "NO_COMPILER" && defaultCompiler !== problemCompiler) {
-            vscode.window.showInformationMessage(`Only ${compilerLangMapping.get(problemCompiler)} is allowed in this problem.`);
+            vscode.window.showInformationMessage(l10n.t("Only {0} is allowed in this problem.", compilerLangMapping.get(problemCompiler) ?? UNKNOWN));
             defaultCompiler = problemCompiler;
         } else if (availableCompilers.indexOf(defaultCompiler) === -1) {
             const picks: IQuickPickItem<string>[] = availableCompilers.map<IQuickPickItem<string>>((value, _) => {
@@ -46,7 +44,7 @@ export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
             });
             const choice: IQuickPickItem<string> | undefined = await vscode.window.showQuickPick(
                 picks,
-                { placeHolder: "The default language is not allowed to use. Please select another one." },
+                { placeHolder: l10n.t("The default language is not allowed to use. Please select another one.") },
             );
             if (!choice) {
                 return;
@@ -60,45 +58,45 @@ export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
             finalPath = path.join(workspaceFolder, ptaCode.psName, `${ptaCode.title!}.${ext}`);
         }
 
+        const fileUri = vscode.Uri.file(finalPath);
 
         if (!await fs.pathExists(finalPath)) {
             await fs.createFile(finalPath);
 
             const problem: IProblem = await ptaApi.getProblem(ptaCode.psID, ptaCode.pID, ptaManager.getUserSession()?.cookie);
 
-            const content: string[] = [
-                `@pintia psid=${ptaCode.psID} pid=${ptaCode.pID} compiler=${defaultCompiler}`,
-                `ProblemSet: ${ptaCode.psName ?? "None"}`,
-                `Title: ${ptaCode.title!}`,
-                ptaApi.getProblemURL(ptaCode.psID, ptaCode.pID, problem.type),
-            ];
-
-            const format = commentFormatMapping.get(compilerLangMapping.get(defaultCompiler) ?? "") ?? commentFormatMapping.get("C++ (g++)")!;
-            let comment: string[] = [];
-            comment.push(format.start);
-            for (const e of content) {
-                comment.push(format.middle + e);
-                comment.push(format.middle);
-            }
-            comment.push(format.end);
-
             const lastSubmissionDetail = (await ptaApi.getLastSubmissions(ptaCode.psID, ptaCode.pID, ptaManager.getUserSession()?.cookie ?? ""))?.submissionDetails[0];
             const lastSubmittedCompiler: string = (lastSubmissionDetail?.programmingSubmissionDetail ?? lastSubmissionDetail?.codeCompletionSubmissionDetail)?.compiler ?? problemCompiler;
             const lastProgram: string | undefined = (lastSubmissionDetail && defaultCompiler === lastSubmittedCompiler)
                 ? (lastSubmissionDetail.programmingSubmissionDetail?.program ?? lastSubmissionDetail.codeCompletionSubmissionDetail?.program) : "";
-            await fs.writeFile(finalPath, comment.join('\n') + `\n${format.single}@pintia code=start\n${lastProgram ?? ""}\n${format.single}@pintia code=end`);
+
+            const content: string[] = [
+                "$BLOCK_COMMENT_START",
+                `  @pintia psid=${ptaCode.psID} pid=${ptaCode.pID} compiler=${defaultCompiler}`,
+                `  ProblemSet: ${ptaCode.psName ?? "None"}`,
+                `  Title: ${ptaCode.title!}`,
+                `  ${ptaApi.getProblemURL(ptaCode.psID, ptaCode.pID, problem.type)}`,
+                "$BLOCK_COMMENT_END",
+                "$LINE_COMMENT @pintia code=start",
+                `\${0}${lastProgram ?? ""}`,
+                "$LINE_COMMENT @pintia code=end",
+            ];
+            const editor = await vscode.window.showTextDocument(fileUri, { preview: false, viewColumn: vscode.ViewColumn.Two });
+            await editor.insertSnippet(new vscode.SnippetString(content.join("\n")));
+            await vscode.workspace.save(fileUri);
+        } else {
+            await vscode.window.showTextDocument(fileUri, { preview: false, viewColumn: vscode.ViewColumn.Two });
         }
-        await vscode.window.showTextDocument(vscode.Uri.file(finalPath), { preview: false, viewColumn: vscode.ViewColumn.Two });
     } catch (error: any) {
         ptaChannel.appendLine(error.toString());
-        await promptForOpenOutputChannel("Coding the problem failed. Please open the output channel for details.", DialogType.error);
+        await promptForOpenOutputChannel(l10n.t("Coding the problem failed. Please open the output channel for details."), DialogType.error);
     }
 }
 
 export async function searchProblem(): Promise<void> {
     const userSession: IUserSession | undefined = ptaManager.getUserSession();
     if (!userSession) {
-        vscode.window.showInformationMessage("User is not logged in or the login session has expired!");
+        vscode.window.showInformationMessage(l10n.t("User is not logged in or the login session has expired!"));
         return;
     }
     const items = await parseProblemsToPicks(fetchProblemIndex());
@@ -106,13 +104,13 @@ export async function searchProblem(): Promise<void> {
         items,
         {
             matchOnDetail: true,
-            placeHolder: `Select one problem (total: ${items.length})`,
+            placeHolder: l10n.t("Select one problem (total: {0})", items.length),
         },
     );
     if (!choice) {
         return;
     }
-    PtaPreviewProvider.createOrUpdate(new ProblemView(choice.value.psID, choice.value.pID)).show();
+    vscode.commands.executeCommand('pintia.previewProblem', choice.value.psID, choice.value.pID);
 }
 
 async function fetchProblemIndex(): Promise<Array<IProblemSearchItem>> {
@@ -142,7 +140,7 @@ async function fetchProblemIndex(): Promise<Array<IProblemSearchItem>> {
         }
     } catch (e: any) {
         ptaChannel.appendLine(e.toString());
-        await promptForOpenOutputChannel("Failed to fetch the problem search index. Please open the output channel for details.", DialogType.error);
+        await promptForOpenOutputChannel(l10n.t("Failed to fetch the problem search index. Please open the output channel for details."), DialogType.error);
     }
 
     return problems;
@@ -154,7 +152,7 @@ async function parseProblemsToPicks(p: Promise<IProblemSearchItem[]>): Promise<A
         const picks: Array<IQuickPickItem<IProblemSearchItem>> = (await p).map((problem: IProblemSearchItem) => Object.assign({}, {
             label: `[${++cnt}] ${problem.label} ${problem.title}`,
             description: "",
-            detail: `Score: ${problem.score}, Type: ${problemTypeInfoMapping.get(problem.type)?.name ?? "Unknown"}, PS: ${problem.psName}`,
+            detail: `Score: ${problem.score}, Type: ${problemTypeInfoMapping.get(problem.type)?.name ?? UNKNOWN}, PS: ${problem.psName}`,
             value: problem,
         }));
         resolve(picks);

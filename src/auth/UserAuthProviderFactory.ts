@@ -1,6 +1,7 @@
 import { PtaLoginMethod } from "../shared";
 import { accountAuthProvider } from "./accountAuthProvider";
 import { IUserAuthProvider } from "./IUserAuthProvider";
+import { ptaCookieAuthProvider } from "./ptaCookieAuthProvider";
 import { weChatAuthProvider } from "./weChatAuthProvider";
 
 export class UserAuthProviderFactory {
@@ -10,6 +11,8 @@ export class UserAuthProviderFactory {
                 return weChatAuthProvider;
             case PtaLoginMethod.PTA:
                 return accountAuthProvider;
+            case PtaLoginMethod.Cookie:
+                return ptaCookieAuthProvider;
             default:
                 throw new Error(`Unsupported login method: ${loginMethod}`);
         }

@@ -1,8 +1,8 @@
 
-export interface HistoryProblem {
+export interface ProblemBasicInfo {
     pID: string;
     psID: string;
     psName: string;
-    label: string;
     title: string;
+    displayTitle?: string;
 }

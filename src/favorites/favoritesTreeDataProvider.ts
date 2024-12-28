@@ -1,25 +1,25 @@
 
 import * as vscode from "vscode";
 import { ptaManager } from "../ptaManager";
-import { IFavoriteProblem } from "./IFavoriteProblem";
+import { ProblemBasicInfo } from "../entity/ProblemBasicInfo";
 import { favoriteProblemsManager } from "./favoriteProblemsManager";
 
 
-export class FavoritesTreeDataProvider implements vscode.TreeDataProvider<IFavoriteProblem>, vscode.Disposable {
+export class FavoritesTreeDataProvider implements vscode.TreeDataProvider<ProblemBasicInfo>, vscode.Disposable {
 
-    private onDidChangeTreeDataEvent: vscode.EventEmitter<IFavoriteProblem | undefined | null> = new vscode.EventEmitter<IFavoriteProblem | undefined | null>();
+    private onDidChangeTreeDataEvent: vscode.EventEmitter<ProblemBasicInfo | undefined | null> = new vscode.EventEmitter<ProblemBasicInfo | undefined | null>();
 
     public readonly onDidChangeTreeData: vscode.Event<any> = this.onDidChangeTreeDataEvent.event;
 
-    getTreeItem(element: IFavoriteProblem): vscode.TreeItem | Thenable<vscode.TreeItem> {
-        if (element.pID === "-1") {
+    getTreeItem(element: ProblemBasicInfo): vscode.TreeItem | Thenable<vscode.TreeItem> {
+        if (!element) {
             return {
                 label: "",
                 collapsibleState: vscode.TreeItemCollapsibleState.None
             };
         }
         return {
-            label: element.title,
+            label: element.displayTitle ?? "",
             collapsibleState: vscode.TreeItemCollapsibleState.None,
             command: {
                 title: "Preview Problem",
@@ -31,17 +31,16 @@ export class FavoritesTreeDataProvider implements vscode.TreeDataProvider<IFavor
         };
     }
 
-    getChildren(element?: IFavoriteProblem): vscode.ProviderResult<IFavoriteProblem[]> {
-
+    getChildren(element?: ProblemBasicInfo): vscode.ProviderResult<ProblemBasicInfo[]> {
         if (!ptaManager.getUserSession()) {
-            return [{ pID: "-1", psID: "-1", psName: "", title: "" }];
+            return null;
         }
         if (!element) {
             // root directory
             const favoriteProblems = favoriteProblemsManager.getFavoriteProblems(favoriteProblemsManager.getCurrentUserId());
             const modifiedProblems = favoriteProblems.map((problem, index) => ({
                 ...problem,
-                title: `[${index + 1}] ${problem.title}`
+                displayTitle: `[${index + 1}] ${problem.title}`
             }));
             return modifiedProblems;
 

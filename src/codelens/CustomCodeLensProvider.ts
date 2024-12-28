@@ -1,9 +1,9 @@
-
 import * as vscode from "vscode";
 import { ptaConfig } from "../ptaConfig";
 import { IPtaCode } from "../shared";
+import { l10n } from "vscode";
 
-export class CustomCodeLensProvider implements vscode.CodeLensProvider {
+export class CustomCodeLensProvider implements vscode.CodeLensProvider<PtaCodeLens> {
 
     private onDidChangeCodeLensesEmitter: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
 
@@ -15,8 +15,7 @@ export class CustomCodeLensProvider implements vscode.CodeLensProvider {
         this.onDidChangeCodeLensesEmitter.fire();
     }
 
-    public provideCodeLenses(document: vscode.TextDocument): vscode.ProviderResult<vscode.CodeLens[]> {
-
+    public provideCodeLenses(document: vscode.TextDocument): vscode.ProviderResult<PtaCodeLens[]> {
         const shortcuts: string[] = ptaConfig.getEditorShortcuts();
         if (!shortcuts || shortcuts.length === 0) {
             return undefined;
@@ -28,77 +27,61 @@ export class CustomCodeLensProvider implements vscode.CodeLensProvider {
             return undefined;
         }
 
-        const code: ICodeBlock[] = this.parseCodeBlock(content, "@pintia code=start", "@pintia code=end");
-        if (code.length !== 0) {
-            ptaCode.code = code[0].code;
-        }
-        const customTestDatas: ICodeBlock[] = this.parseCodeBlock(content, "@pintia test=start", "@pintia test=end");
-        ptaCode.customTests = customTestDatas.map((value, _) => value.code);
+        const range: vscode.Range = this.getCodeLensRange(document, /@pintia\s+code=end/g)[0];
+        const codeLens: PtaCodeLens[] = shortcuts.map(shortcut => new PtaCodeLens(range, document.uri.fsPath, content, shortcut));
 
-        let codeLensLine: number = document.lineCount - 1;
-        for (let i: number = document.lineCount - 1; i >= 0; i--) {
-            const lineContent: string = document.lineAt(i).text;
-            if (lineContent.indexOf("@pintia code=end") >= 0) {
-                codeLensLine = i;
-                break;
+        const customTestRanges: vscode.Range[] = this.getCodeLensRange(document, /@pintia\s+test=start/g);
+        for (let i = 0; i < customTestRanges.length; i++) {
+            codeLens.push(new PtaCodeLens(customTestRanges[i], document.uri.fsPath, content, "customTest", i));
+        }
+        return codeLens;
+    }
+
+    public resolveCodeLens(codeLens: PtaCodeLens, token: vscode.CancellationToken): vscode.ProviderResult<PtaCodeLens> {
+        if (codeLens instanceof PtaCodeLens) {
+            const command = codeLens.commandTitle;
+            const ptaCode: IPtaCode | null = this.parseCodeInfo(codeLens.codeContent);
+            if (!ptaCode) {
+                return codeLens;
+            }
+            const code: ICodeBlock[] = this.parseCodeBlock(codeLens.codeContent, "@pintia\\s+code=start\\s*?\\n", "\\n[^\\n]*?@pintia\\s+code=end");
+            if (code.length !== 0) {
+                ptaCode.code = code[0].code;
+            }
+            const customTests: ICodeBlock[] = this.parseCodeBlock(codeLens.codeContent, "@pintia\\s+test=start\\s*?\\n", "\\n[^\\n]*?@pintia\\s+test=end");
+            ptaCode.customTests = customTests.map((value, _) => value.code);
+
+            if (command === "Submit") {
+                codeLens.command = {
+                    title: vscode.l10n.t("Submit"),
+                    command: "pintia.submitSolution",
+                    arguments: [ptaCode],
+                };
+            } else if (command === "Test") {
+                codeLens.command = {
+                    title: l10n.t("Test"),
+                    command: "pintia.testSolution",
+                    arguments: [ptaCode],
+                };
+            } else if (command === "customTest") {
+                codeLens.command = {
+                    title: l10n.t("Test custom sample {0}", codeLens.customTestIndex! + 1),
+                    command: "pintia.testCustomSample",
+                    arguments: [ptaCode, codeLens.customTestIndex],
+                };
+            } else if (command === "Preview") {
+                codeLens.command = {
+                    title: l10n.t("Preview"),
+                    command: "pintia.previewProblem",
+                    arguments: [ptaCode.psID, ptaCode.pID, false],
+                };
             }
         }
-
-        // default: add codelens in the end of the file
-        // if "@pintia code=end" is not in the end, codelens will be put in the next line of it.
-        const range: vscode.Range = new vscode.Range(codeLensLine, 0, codeLensLine, 0);
-        const codeLens: vscode.CodeLens[] = [];
-
-        if (shortcuts.indexOf("Submit") >= 0) {
-            codeLens.push(new vscode.CodeLens(range, {
-                title: "Submit",
-                command: "pintia.submitSolution",
-                arguments: [ptaCode],  // passed to the calling function
-            }));
-        }
-
-        if (shortcuts.indexOf("Test") >= 0) {
-            codeLens.push(new vscode.CodeLens(range, {
-                title: "Test",
-                command: "pintia.testSolution",
-                arguments: [ptaCode],
-            }));
-        }
-
-        for (let i = 0; i < customTestDatas.length; i++) {
-            const testCase = customTestDatas[i];
-            codeLens.push(new vscode.CodeLens(
-                new vscode.Range(testCase.lineNum, 0, testCase.lineNum, 0), {
-                title: `Test custom sample ${i + 1}`,
-                command: "pintia.testCustomSample",
-                arguments: [ptaCode, i]
-            }
-            ));
-        }
-        if (shortcuts.indexOf("Preview") >= 0) {
-            // add the button of problem preview
-            let codeTitleIndex: number = document.lineCount - 1;
-            for (let i: number = 0; i < document.lineCount; i++) {
-                const lineContent: string = document.lineAt(i).text;
-                if (lineContent.indexOf("@pintia psid") >= 0) {
-                    codeTitleIndex = i;
-                    break;
-                }
-            }
-
-            codeLens.push(new vscode.CodeLens(
-                range, {
-                title: "Preview",
-                command: "pintia.previewProblem",
-                arguments: [ptaCode.psID, ptaCode.pID]
-            }));
-        }
-
         return codeLens;
     }
 
     private parseCodeInfo(data: string): IPtaCode | null {
-        const matchResult: RegExpMatchArray | null = data.match(/@pintia psid=(.*) pid=(.*) compiler=(.*)/);
+        const matchResult: RegExpMatchArray | null = data.match(/@pintia\s+psid=(\S+)\s+pid=(\S+)\s+compiler=(\S+)/);
         if (!matchResult) {
             return null;
         }
@@ -110,24 +93,44 @@ export class CustomCodeLensProvider implements vscode.CodeLensProvider {
     }
 
     private parseCodeBlock(data: string, start: string, end: string): ICodeBlock[] {
-        const codeblock: ICodeBlock[] = [], lines: string[] = data.split('\n');
-        let startLine: number = -1;
-        for (let i = 0; i < lines.length; i++) {
-            if (lines[i].indexOf(start) != -1) {
-                startLine = i + 1;
-            } else if (lines[i].indexOf(end) != -1 && startLine != -1 && startLine < i) {
-                const code: string = lines.slice(startLine, i).join("\n");
-                if (!code.trim().length) continue;
+        const codeblock: ICodeBlock[] = [];
+        const regex = new RegExp(`${start}([\\s\\S]*?)${end}`, 'g');
+        let match;
+        while ((match = regex.exec(data)) !== null) {
+            const code = match[1].trim();
+            if (code.length > 0) {
+                const startLine = data.substring(0, match.index).split('\n').length;
                 codeblock.push({
                     lineNum: startLine,
-                    code: lines.slice(startLine, i).join("\n")
+                    code: code
                 });
-                startLine = -1;
             }
         }
         return codeblock;
     }
 
+    private getCodeLensRange(document: vscode.TextDocument, regex: RegExp): vscode.Range[] {
+        const text = document.getText();
+        const ranges = [];
+        let matches, textLine = document.lineAt(document.lineCount - 1);
+        while ((matches = regex.exec(text)) !== null) {
+            textLine = document.lineAt(document.positionAt(matches.index).line);
+            textLine?.range && ranges.push(textLine.range);
+        }
+        return ranges;
+    }
+}
+
+class PtaCodeLens extends vscode.CodeLens {
+    constructor(
+        range: vscode.Range,
+        public filePath: string,
+        public codeContent: string,
+        public commandTitle: string,
+        public customTestIndex?: number
+    ) {
+        super(range);
+    }
 }
 
 interface ICodeBlock {

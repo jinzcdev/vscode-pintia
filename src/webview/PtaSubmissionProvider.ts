@@ -1,13 +1,15 @@
 import * as vscode from "vscode";
-import { IProblem, IProblemConfig } from "../entity/IProblem";
+import { IProblem } from "../entity/IProblem";
 import { IProblemSubmissionResult } from "../entity/IProblemSubmissionResult";
 import { IProblemSubmissionDetail } from "../entity/problemSubmissionCode";
-import { ProblemType, problemTypeInfoMapping, ptaCompiler, solutionStatusMapping } from "../shared";
+import { ProblemJudgingStatusEnum, ProblemType, problemTypeInfoMapping, ptaCompiler, problemJudgingStatusMapping, UNKNOWN, NONE } from "../shared";
 import { ptaApi } from "../utils/api";
 import { PtaWebviewWithCodeStyle } from "./PtaWebviewWithCodeStyle";
-import { markdownEngine } from "./markdownEngine";
+import * as markdownEngine from "./markdownEngine";
 import { getNonce, IWebViewMessage } from "./PtaWebview";
 import { getGlobalContext } from "../extension";
+import { ProblemView } from "./views/ProblemView";
+import { defaultIfBlank } from "../utils/stringUtils";
 
 export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmissionResult> {
 
@@ -31,8 +33,7 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
         const psID = result.submission.problemSetId, pID = result.submission.problemSetProblemId;
         const problem: IProblem = await ptaApi.getProblem(psID, pID);
 
-        const prefix: string = problemTypeInfoMapping.get(result.submission.problemType)?.prefix ?? "";
-        const problemConfig: IProblemConfig = problem.problemConfig[`${prefix}ProblemConfig` as keyof typeof problem.problemConfig] as IProblemConfig;
+        const problemConfig = ProblemView.parseProblemConfig(problem);
         const testCases = problemConfig && typeof problemConfig === 'object' ? problemConfig.cases : [];
 
         const hints = result.submission.hints;
@@ -42,8 +43,8 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
             isHint: isHint,
             content: {
                 totalScore: problem.score,
-                timeLimit: problemConfig.timeLimit,
-                memoryLimit: problemConfig.memoryLimit,
+                timeLimit: problemConfig?.timeLimit ?? UNKNOWN,
+                memoryLimit: problemConfig?.memoryLimit ?? UNKNOWN,
                 nickname: result.examMember.user.nickname,
                 submitAt: result.submission.submitAt,
                 status: judgeResponseContent.status,
@@ -55,7 +56,7 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
                 compiler: result.submission.compiler,
                 time: result.submission.time,
                 memory: result.submission.memory,
-                compilationOutput: codeJudgeResponseContent!.compilationResult.log,
+                compilationOutput: defaultIfBlank(codeJudgeResponseContent?.compilationResult?.log, NONE),
                 program: result.submission.problemType === ProblemType.PROGRAMMING ?
                     submissionDetail.programmingSubmissionDetail!.program :
                     submissionDetail.codeCompletionSubmissionDetail!.program
@@ -75,11 +76,12 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
             const testcaseJudgeResult = content.testcaseJudgeResults[i];
             const testCase = content.testCases[i];
             const scoreText = testCase !== undefined ? `${testcaseJudgeResult.testcaseScore} / ${testCase.score}` : testcaseJudgeResult.testcaseScore;
+            const testcaseJudgingStatus = problemJudgingStatusMapping.get(testcaseJudgeResult.result)
             cases += `
             <tr>
                 <td>${i}</td>
                 <td class="visible">${content.hints[i]}</td>
-                ${solutionStatusMapping.get(testcaseJudgeResult.result)}
+                <td style="color: ${testcaseJudgingStatus?.color ?? "inherit"};">${testcaseJudgingStatus?.text ?? testcaseJudgeResult.result}</td>
                 <td>${scoreText}</td>
                 <td>${(testcaseJudgeResult.time * 1000).toFixed()}ms</td>
                 <td>${testcaseJudgeResult.memory / 1024}KB</td>
@@ -91,9 +93,8 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
         const timeText = content.timeLimit ? `${(content.time * 1000).toFixed()} / ${content.timeLimit}ms` : `${(content.time * 1000).toFixed()}ms`;
 
         const copyButtonScriptUri = this.getWebview()?.asWebviewUri(vscode.Uri.joinPath(getGlobalContext().extensionUri, "media", "main.js"));
-
+        const problemJudgingStatus = problemJudgingStatusMapping.get(content.status);
         return `
-
         <div>
             <h2>总评</h2>
             <table>
@@ -109,9 +110,9 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
                 <tbody>
                     <tr>
                         <td>${this.formatDate(new Date(content.submitAt))}</td>
-                        ${solutionStatusMapping.get(content.status)}
+                        <td style="color: ${problemJudgingStatus?.color ?? "inherit"};">${problemJudgingStatus?.text ?? content.status}</td>
                         <td>${scoreText}</td>
-                        <td>${problemTypeInfoMapping.get(content.problemType)?.name ?? "Unknown"}</td>
+                        <td>${problemTypeInfoMapping.get(content.problemType)?.name ?? UNKNOWN}</td>
                         <td>${compiler.language} (${compiler.displayName})</td>
                         <td>${timeText}</td>
                         <td>${content.nickname}</td>
@@ -120,7 +121,7 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
             </table>
         </div>
 
-        <div ${content.status === "COMPILE_ERROR" ? "style='display: none;'" : ""}" >
+        <div ${content.status === ProblemJudgingStatusEnum.COMPILE_ERROR ? "style='display: none;'" : ""}" >
             <h2>单点测试得分</h2>
             <table>
                 <thead>
@@ -141,12 +142,12 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
 
         <h2>编译器输出</h2>
         <div class="code-block build-output">
-            <pre><code>${content.compilationOutput}</code></pre>
+            <pre><code>${escapeHtml(content.compilationOutput)}</code></pre>
         </div>
 
         <h2>代码</h2>
         <div class="code-block code-preview">
-            ${markdownEngine.render(["```" + compiler.language, content.program, "```"].join("\n"))}
+            ${markdownEngine.render(["```" + compiler.language, content.program.replace(/```/g, '\\```'), "```"].join("\n"))}
         </div>
 
         <script nonce="${getNonce()}" src="${copyButtonScriptUri}"></script>
@@ -172,4 +173,17 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
         const f = (e: number) => e < 10 ? '0' + e : e;
         return `${year}/${month}/${day} ${f(hour)}:${f(minute)}:${f(second)}`;
     }
+}
+
+function escapeHtml(unsafe: string): string {
+    return unsafe.replace(/[&<"'>]/g, function (match) {
+        const escapeMap = new Map<string, string>([
+            ['&', '&amp;'],
+            ['<', '&lt;'],
+            ['>', '&gt;'],
+            ['"', '&quot;'],
+            ["'", '&#039;']
+        ]);
+        return escapeMap.get(match) ?? match;
+    });
 }

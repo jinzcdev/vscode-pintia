@@ -2,12 +2,28 @@
 
 (function () {
     const vscode = acquireVsCodeApi();
-    const button = document.getElementById('solve');
-    if (button) {
+    let button;
+    if (button = document.getElementById('btnCheckLastSubmission')) {
+        button.onclick = () => {
+            vscode.postMessage({
+                type: 'command',
+                value: 'pintia.checkLastSubmission'
+            });
+        };
+    }
+    if (button = document.getElementById('btnSolve')) {
         button.onclick = () => {
             vscode.postMessage({
                 type: 'command',
                 value: 'pintia.codeProblem'
+            });
+        };
+    }
+    if (button = document.getElementById('btnUpdate')) {
+        button.onclick = () => {
+            vscode.postMessage({
+                type: 'command',
+                value: 'pintia.previewProblem'
             });
         };
     }

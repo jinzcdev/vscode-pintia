@@ -1,13 +1,13 @@
 import { IProblem } from "../entity/IProblem";
 import { IProblemInfo } from "../entity/IProblemInfo";
 import { IProblemSet } from "../entity/IProblemSet";
-import { IProblemSetExam } from "../entity/IProblemSetExam";
+import { IExam, IProblemSetExam } from "../entity/IProblemSetExam";
 import { IProblemSubmission } from "../entity/IProblemSubmission";
 import { IProblemSubmissionResult } from "../entity/IProblemSubmissionResult";
 import { IProblemSummary } from "../entity/IProblemSummary";
 import { IProblemCode } from "../entity/problemSubmissionCode";
-import { cacheDirPath, ProblemPermissionEnum, ProblemType, problemTypeInfoMapping, ptaCache } from "../shared";
-import { httpGet, httpPost } from "./httpUtils";
+import { cacheDirPath, ProblemPermissionEnum, ProblemType, problemTypeInfoMapping, ptaCache, supportedProblemTypes } from "../shared";
+import { addUrlParams, httpGet, httpPost } from "./httpUtils";
 
 import * as fs from "fs-extra";
 import fetch from "node-fetch";
@@ -19,6 +19,8 @@ import { IPtaUser } from "../entity/IPtaUser";
 import { IWechatAuth, IWechatAuthState, IWechatUserInfo, IWechatUserState } from "../entity/userLoginSession";
 import { ptaChannel } from "../ptaChannel";
 import { ILastSubmission } from "../entity/ILastSubmission";
+import { ptaManager } from "../ptaManager";
+import { AlwaysAvailableProblemSet } from "../entity/AlwaysAvailableProblemSet";
 
 class PtaAPI {
 
@@ -48,28 +50,75 @@ class PtaAPI {
 
 
     /**
-     * 
      * https://pintia.cn/api/problem-sets/always-available
      * 
-     * @returns 
+     * @param [onlyProgrammingProblem=true] whether only return the programming problem sets.
      */
-    public async getAllProblemSets(cookie?: string): Promise<IProblemSet[]> {
-        const filePath = path.join(cacheDirPath, "problemSets.json");
+    public async getAlwaysAvailableProblemSets(cookie?: string, onlyProgrammingProblem: boolean = true): Promise<IProblemSet[]> {
+        const filePath = path.join(cacheDirPath, "always_available_problem_sets.json");
         if (await fs.pathExists(filePath)) {
-            ptaChannel.appendLine(`[INFO] Read the cache of problem sets from the "${filePath}"`);
-            return await fs.readJSON(filePath);
+            ptaChannel.appendLine(`[INFO] Read the cache of always available problem sets from the "${filePath}"`);
+            const problemSets: IProblemSet[] = await fs.readJSON(filePath) ?? [];
+            if (problemSets.length > 0) {
+                return problemSets;
+            }
         }
 
-        const data: IProblemSet[] = await httpGet(`${this.problemUrl}/always-available`).then(json => json["problemSets"]);
+        const data: AlwaysAvailableProblemSet = await httpGet(`${this.problemUrl}/always-available`);
+        const problemSets: IProblemSet[] = Array.from(new Map(data.problemSets.map(item => [item.id, item])).values());
+        const supportedProblemSets: IProblemSet[] = [];
+        for (const item of problemSets) {
+            let summaries: IProblemSummary = data.problemSetSummaryByProblemSetId[item.id]?.summariesByPaperIndex[0].summaryByProblemType;
+            let hasProgrammingProblem = false;
+            for (const type of Object.keys(summaries)) {
+                if (supportedProblemTypes.has(type)) {
+                    hasProgrammingProblem = true;
+                    break;
+                }
+            }
+            if (onlyProgrammingProblem && !hasProgrammingProblem) {
+                continue;
+            }
+            item.summaries = !summaries ? await this.getProblemSummary(item.id) : summaries;
+            const permission: number | undefined = await this.getProblemSetPermission(item.id, cookie);
+            item.permission = {
+                permission: permission ?? 0
+            }
+            supportedProblemSets.push(item);
+        }
+        await fs.createFile(filePath);
+        await fs.writeJson(filePath, supportedProblemSets);
+        return supportedProblemSets;
+    }
+
+
+    /**
+     * Get the problem sets that the user has joined.
+     * @param cookie necessary for the user to get the their problem sets.
+     * @returns 
+     */
+    public async getMyProblemSets(cookie?: string, onlyActive: boolean = true): Promise<IProblemSet[]> {
+        const filePath = path.join(cacheDirPath, onlyActive ? "my_problem_sets_active.json" : "my_problem_sets_all.json");
+        if (await fs.pathExists(filePath)) {
+            ptaChannel.appendLine(`[INFO] Read the cache of my problem sets from the "${filePath}"`);
+            const problemSets: IProblemSet[] = await fs.readJSON(filePath) ?? [];
+            if (problemSets.length > 0) {
+                return problemSets;
+            }
+        }
+
+        const url = addUrlParams(this.problemUrl, onlyActive ?
+            { "filter": `{\"endAtAfter\":\"${new Date().toISOString()}\"}` } :
+            { "filter": "{}" }
+        );
+        const data: IProblemSet[] = await httpGet(url, cookie).then(json => json["problemSets"]) ?? [];
         const problemSet: IProblemSet[] = [];
         for (const item of data) {
-            const summaries: IProblemSummary = await this.getProblemSummary(item.id);  // id: ProblemSetID
+            const summaries: IProblemSummary = await this.getProblemSummary(item.id, cookie);  // id: ProblemSetID
             item.summaries = summaries;
-            if (cookie) {
-                const permission: number | undefined = await this.getProblemPermission(item.id, cookie);
-                item.permission = {
-                    permission: permission ?? 0
-                }
+            const permission: number | undefined = await this.getProblemSetPermission(item.id, cookie);
+            item.permission = {
+                permission: permission ?? 0
             }
             problemSet.push(item);
         }
@@ -78,7 +127,7 @@ class PtaAPI {
         return problemSet;
     }
 
-    public async getProblemPermission(psID: string, cookie: string): Promise<number | undefined> {
+    public async getProblemSetPermission(psID: string, cookie?: string): Promise<number | undefined> {
         const permission = await httpGet(`https://pintia.cn/api/problem-sets/${psID}/exams`, cookie)
             .then(json => json["permission"]);
         return permission?.permission ?? -1;
@@ -104,8 +153,9 @@ class PtaAPI {
      * @param psID ProblemSetID
      * @returns 
      */
-    public async getProblemSummary(psID: string): Promise<IProblemSummary> {
-        return await httpGet(`${this.problemUrl}/${psID}/problem-summaries`)
+    public async getProblemSummary(psID: string, cookie?: string): Promise<IProblemSummary> {
+        cookie = ptaManager.getUserSession()?.cookie ?? cookie;
+        return await httpGet(`${this.problemUrl}/${psID}/problem-summaries`, cookie)
             .then(json => json["summaries"]);
     }
 
@@ -134,7 +184,10 @@ class PtaAPI {
         const filePath = path.join(cacheDirPath, psID, problemType + ".json");
         if (await fs.pathExists(filePath)) {
             ptaChannel.appendLine(`[INFO] Read the problem list from the "${filePath}"`);
-            return await fs.readJSON(filePath);
+            const problemInfoList: IProblemInfo[] = await fs.readJSON(filePath) ?? [];
+            if (problemInfoList.length > 0) {
+                return problemInfoList;
+            }
         }
 
         const total = await this.getProblemNum(psID, problemType), limit = 200;
@@ -144,12 +197,16 @@ class PtaAPI {
         for (let page = 0; page < pageNum; page++) {
             const data = await httpGet(`${this.problemUrl}/${psID}/exam-problem-list?problem_type=${problemType}&page=${page}&limit=${limit}`)
                 .then(json => json["problemSetProblems"]);
-            data.forEach((e: IProblemInfo) => problemList.push(e));
+            data?.forEach((e: IProblemInfo) => problemList.push(e));
         }
 
         await fs.createFile(filePath);
         await fs.writeJson(filePath, problemList);
         return problemList;
+    }
+
+    public async isMyProblemSet(psID: string): Promise<boolean> {
+        return await this.getProblemSetPermission(psID) === ProblemPermissionEnum.MY_PROBLEM_SET;
     }
 
     public async getProblemInfoByID(psID: string, pID: string, problemType?: ProblemType): Promise<IProblemInfo> {
@@ -224,12 +281,17 @@ class PtaAPI {
             .then(json => json["submission"]);
     }
 
-    public async getExamProblemStatus(psID: string, cookie: string): Promise<IExamProblemStatus[] | undefined> {
+
+    /**
+     * @param [autoCreate=false] If the exam is not created, create it automatically.
+     */
+    public async getExamProblemStatus(psID: string, cookie: string, autoCreate: boolean = false): Promise<IExamProblemStatus[] | undefined> {
+        autoCreate && await this.createProblemSetExam(psID, cookie);
         return await httpGet(`https://pintia.cn/api/problem-sets/${psID}/exam-problem-status`, cookie).then(json => json["problemStatus"]);
     }
 
     public async getUnlockedProblemSetIDs(cookie: string): Promise<string[]> {
-        const problemSets: IProblemSet[] = await ptaApi.getAllProblemSets(cookie);
+        const problemSets: IProblemSet[] = await ptaApi.getAlwaysAvailableProblemSets(cookie);
         const psIDs: string[] = [];
         for (const ps of problemSets) {
             if ((ps.permission?.permission ?? ProblemPermissionEnum.UNKNOWN) !== ProblemPermissionEnum.LOCKED) {
@@ -246,19 +308,34 @@ class PtaAPI {
      * @param psID 
      * @returns 
      */
-    public async getProblemSetExam(psID: string, cookie: string): Promise<IProblemSetExam> {
-        const exam = await httpGet(`${this.problemUrl}/${psID}/exams`, cookie).then(json => json["exam"]);
-        if (!exam) {
-            await httpPost(`${this.problemUrl}/${psID}/exams`, cookie);
-        }
+    public async getProblemSetExam(psID: string, cookie?: string): Promise<IProblemSetExam> {
+        return await httpGet(`${this.problemUrl}/${psID}/exams`, cookie);
+    }
+
+    public async createProblemSetExamAndReturn(psID: string, cookie: string): Promise<IExam> {
+        await this.createProblemSetExam(psID, cookie);
         return await httpGet(`${this.problemUrl}/${psID}/exams`, cookie).then(json => json["exam"]);
+    }
+
+    public async createProblemSetExam(psID: string, cookie?: string): Promise<void> {
+        ptaChannel.appendLine(`[INFO] Try to create the exam of problem set ${psID}`);
+        await httpPost(`${this.problemUrl}/${psID}/exams`, cookie);
+    }
+
+    public async checkAndCreateProblemSetExam(psID: string, cookie?: string): Promise<void> {
+        const exam = await httpGet(`${this.problemUrl}/${psID}/exams`, cookie).then(json => json["exam"]);
+        !exam && await this.createProblemSetExam(psID, cookie);
+    }
+
+    public async getPronlemSetStatus(psID: string, cookie: string): Promise<string> {
+        return await httpGet(`${this.problemUrl}/${psID}/exams`, cookie).then(json => json["status"]);
     }
 
     public async getProblemSetName(psID: string): Promise<string> {
         let psID2name: Map<string, string> = ptaCache.get("psID2name");
         if (!psID2name) {
             psID2name = new Map<string, string>();
-            const problemSets: IProblemSet[] = await this.getAllProblemSets();
+            const problemSets: IProblemSet[] = await this.getAlwaysAvailableProblemSets();
             for (const item of problemSets) {
                 psID2name.set(item.id, item.name);
             }
@@ -425,6 +502,10 @@ class PtaAPI {
         const problemTypeID: number = problemTypeInfoMapping.get(problemType)?.type ?? -1;
         return problemTypeID === -1 ? `https://pintia.cn/problem-sets/${psID}` :
             `https://pintia.cn/problem-sets/${psID}/exam/problems/type/${problemTypeID}?problemSetProblemId=${pID}`
+    }
+
+    public getProblemSetURL(psID: string): string {
+        return `https://pintia.cn/problem-sets/${psID}`;
     }
 }
 

@@ -1,5 +1,15 @@
 :root {
-    --border-color: rgba(121, 121, 121, 0.12);
+    --border-color: var(--vscode-editorWidget-border);
+    --primary-font: var(--vscode-font-family);
+    --secondary-font: var(--vscode-editor-font-family);
+    --background-color: var(--vscode-editor-background);
+    --foreground-color: var(--vscode-editor-foreground);
+    --border-radius: 8px;
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --button-bg: var(--vscode-button-background);
+    --button-hover-bg: var(--vscode-button-hoverBackground);
+    --button-active-bg: var(--vscode-button-background);
+    --button-color: var(--vscode-button-foreground);
 }
 
 .vscode-light {
@@ -35,6 +45,13 @@ html {
     line-height: 1.5;
     padding: 10px 30px;
     margin: 0;
+    font-family: var(--primary-font);
+    background-color: var(--background-color);
+    color: var(--foreground-color);
+}
+
+body {
+    padding: 0 10px;
 }
 
 h1,
@@ -45,23 +62,23 @@ h5,
 h6 {
     font-family: inherit;
     font-weight: 500;
-    line-height: 1.2;
+    line-height: 1.3;
 }
 
 h1 {
-    font-size: 30px;
+    font-size: 2rem;
     margin: 10px 0 0;
 }
 
 h3 {
     margin: 16px 0;
-    font-size: 20px;
+    font-size: 1.25rem;
 }
 
 hr {
     border: 0;
     height: 1px;
-    border-bottom: 1px solid;
+    border-bottom: 1px solid var(--border-color);
 }
 
 a {
@@ -74,20 +91,22 @@ a:hover {
 }
 
 p {
-    margin: 7.5px 0;
-    font-size: 16px;
+    margin: 10px 0;
+    font-size: 1rem;
     color: inherit;
 }
 
 p img {
     display: block;
-    width: 500px;
-    max-width: 80%;
+    width: 100%;
+    max-width: 500px;
 }
 
 ul,
 ol {
-    font-size: 15px;
+    font-size: 1rem;
+    margin: 10px 0;
+    padding-left: 20px;
 }
 
 pre {
@@ -96,17 +115,18 @@ pre {
     position: relative;
     overflow: auto;
     display: block;
-    padding: 0.375rem 0.75rem;
+    padding: 0.75rem;
     background: var(--pre-bg-color, hsl(211, 20%, 97%));
     border: 1px solid var(--pre-border-color);
-    border-radius: 0.1875rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
 }
 
 pre code {
-    font-family: var(--vscode-editor-font-family, "SF Mono", Monaco, Menlo, Consolas, "Ubuntu Mono", "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace);
-    font-size: 1.05em;
-    line-height: 1.357em;
-    border-radius: 0.1875rem;
+    font-family: var(--secondary-font);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    border-radius: var(--border-radius);
     color: var(--vscode-editor-foreground);
     background-color: transparent;
     margin: 0 0.125rem;
@@ -122,12 +142,27 @@ pre:hover {
     position: absolute;
     right: 5px;
     top: 5px;
-    padding: 1px 5px;
+    padding: 5px 10px;
     border-radius: 5px;
-    background-color: #ccc;
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    border: none;
     cursor: pointer;
-    z-index: 2;
+    font-size: 0.82rem;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     display: none;
+}
+
+.copy-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.copy-button:hover {
+    background-color: var(--vscode-button-hoverBackground);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 pre:hover .copy-button {
@@ -135,31 +170,60 @@ pre:hover .copy-button {
 }
 
 .pta-note {
-    border: 1px solid var(--vscode-editor-foreground);
-    border-radius: 5px;
-    padding: 4px 16px;
+    border: 0.5px solid var(--vscode-editor-foreground);
+    border-radius: var(--border-radius);
+    padding: 8px 16px;
+    box-shadow: var(--box-shadow);
 }
 
-#solve {
+.content-container {
+    padding-bottom: 3rem;
+}
+
+.button-container {
     position: fixed;
-    bottom: 1rem;
-    right: 1rem;
+    bottom: 0;
+    left: 0;
+    width: 100%;
     border: 0;
-    margin: 1rem 0;
-    padding: 0.2rem 1rem;
-    color: var(--vscode-button-foreground);
-    background-color: var(--vscode-button-background);
+    padding: 0.5rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    background-color: var(--vscode-sideBar-background);
+    border-top: 1px solid var(--vscode-sideBar-border);
+    box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1;
 }
 
-#solve:hover {
-    background-color: var(--vscode-button-hoverBackground);
+.button-container button {
+    color: var(--button-color);
+    background-color: var(--button-bg);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.button-container button:hover {
+    background-color: var(--button-hover-bg);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.button-container button:active {
+    background-color: var(--button-active-bg);
+    transform: translateY(0);
 }
 
 .banner .ques-info {
     display: flex;
     justify-content: space-between;
     margin-top: 8px;
-    font-size: 13px;
+    font-size: 0.875rem;
 }
 
 .banner .ques-info .detail,
@@ -171,21 +235,51 @@ pre:hover .copy-button {
     margin: 8px auto 10px;
 }
 
+.header {
+    text-align: center;
+}
+
+.problem-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.problem-set-name {
+    font-size: 1rem;
+    color: var(--vscode-descriptionForeground);
+}
+
+.header h1 {
+    margin: 0;
+}
+
+.problem-set-name a {
+    color: inherit;
+}
+
+.header a:hover,
+.content-container a:hover {
+    color: var(--vscode-textLink-activeForeground);
+    text-decoration: underline;
+}
+
 table {
-    width: 95%;
+    width: 100%;
     margin: 0 auto;
     border-collapse: collapse;
     text-align: center;
-    font-size: 14px;
+    font-size: 0.88rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
 }
 
 thead {
-    font-size: 15px;
+    font-size: 1rem;
 }
 
 th,
 td {
-    border-bottom: 0.8px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
     padding: 16px;
 }
 
@@ -203,10 +297,40 @@ td {
 }
 
 .code-preview code {
-    line-height: 1.357em;
-    border-radius: 0.1875rem;
+    line-height: 1.5;
+    border-radius: var(--border-radius);
     color: var(--vscode-editor-foreground);
     margin: 0 0.125rem;
     display: block;
     padding: 5px;
+}
+
+.performance-details {
+    margin-top: 1rem;
+}
+
+.performance-details summary {
+    margin-bottom: 0.5rem;
+}
+
+.performance-content {
+    padding: 0.5rem;
+    border: 1px solid var(--vscode-sideBar-border);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+.performance-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.25rem 0;
+    font-size: 0.9rem;
+}
+
+.performance-item .key {
+    font-weight: normal;
+}
+
+.performance-item .value {
+    text-align: right;
 }

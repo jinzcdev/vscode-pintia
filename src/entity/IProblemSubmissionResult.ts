@@ -1,5 +1,5 @@
+import { IProblem } from "./IProblem";
 import { IProblemSubmissionDetail } from "./problemSubmissionCode";
-
 
 export interface IProblemSubmissionResult {
     publicCases: {
@@ -8,6 +8,8 @@ export interface IProblemSubmissionResult {
     queued: number;
     submission: ISubmission;
     examMember: IExamMember;
+    // extra
+    problem?: IProblem;
 }
 
 interface ICompilationResult {

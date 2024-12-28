@@ -8,6 +8,7 @@ import * as vscode from "vscode";
 import { ptaConfig } from "../ptaConfig";
 import { IQuickPickItem } from "../shared";
 import { showDirectorySelectDialog } from "./uiUtils";
+import { l10n } from "vscode";
 
 export async function selectWorkspaceFolder(): Promise<string> {
     let workspaceFolder: string = ptaConfig.getWorkspaceFolder();
@@ -24,36 +25,61 @@ export async function selectWorkspaceFolder(): Promise<string> {
             needAsk = false;
         }
     }
-
-    if (needAsk) {
-        const choice: string | undefined = await vscode.window.showQuickPick(
-            [
-                OpenOption.justOpenFile,
-                OpenOption.openInCurrentWindow,
-                OpenOption.openInNewWindow,
-                OpenOption.addToWorkspace,
-            ],
-            { placeHolder: "The PTA workspace folder is not opened in VS Code, would you like to open it?" },
-        );
-
-        // Todo: generate file first
-        switch (choice) {
-            case OpenOption.justOpenFile:
-                return workspaceFolder;
-            case OpenOption.openInCurrentWindow:
-                await vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(workspaceFolder), false);
-                return "";
-            case OpenOption.openInNewWindow:
-                await vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(workspaceFolder), true);
-                return "";
-            case OpenOption.addToWorkspace:
-                vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders?.length ?? 0, 0, { uri: vscode.Uri.file(workspaceFolder) });
-                break;
-            default:
-                return "";
-        }
+    if (!needAsk) {
+        return workspaceFolder;
     }
-    // to do 
+
+    const defaultChoice = ptaConfig.getPreviewProblemDefaultOpenedMethod() as OpenOptionEnum;
+
+    if (defaultChoice != OpenOptionEnum.alwaysAsk) {
+        return await handleOpenOption(defaultChoice, workspaceFolder);
+    }
+
+    const choice: PtaQuickPickItem | undefined = await vscode.window.showQuickPick(
+        [
+            {
+                label: l10n.t(OpenOptionEnum.justOpenFile),
+                value: OpenOptionEnum.justOpenFile
+            },
+            {
+                label: l10n.t(OpenOptionEnum.openInCurrentWindow),
+                value: OpenOptionEnum.openInCurrentWindow,
+            },
+            {
+                label: l10n.t(OpenOptionEnum.openInNewWindow),
+                value: OpenOptionEnum.openInNewWindow
+            },
+            {
+                label: l10n.t(OpenOptionEnum.addToWorkspace),
+                value: OpenOptionEnum.addToWorkspace
+            }
+        ],
+        { placeHolder: l10n.t("The PTA workspace folder is not opened in VS Code, would you like to open it? (You can configure the default opening method in the settings)") },
+    );
+
+    if (choice && choice.value) {
+        return await handleOpenOption(choice.value, workspaceFolder);
+    }
+
+    return "";
+}
+
+async function handleOpenOption(option: OpenOptionEnum, workspaceFolder: string): Promise<string> {
+    switch (option) {
+        case OpenOptionEnum.justOpenFile:
+            return workspaceFolder;
+        case OpenOptionEnum.openInCurrentWindow:
+            await vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(workspaceFolder), false);
+            break;
+        case OpenOptionEnum.openInNewWindow:
+            await vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(workspaceFolder), true);
+            break;
+        case OpenOptionEnum.addToWorkspace:
+            vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders?.length ?? 0, 0, { uri: vscode.Uri.file(workspaceFolder) });
+            break;
+        default:
+            return "";
+    }
     return workspaceFolder;
 }
 
@@ -71,7 +97,7 @@ export async function getActiveFilePath(uri?: vscode.Uri): Promise<string | unde
         return undefined;
     }
     if (textEditor.document.isDirty && !await textEditor.document.save()) {
-        vscode.window.showWarningMessage("Please save the solution file first.");
+        vscode.window.showWarningMessage(l10n.t("Please save the solution file first."));
         return undefined;
     }
     return textEditor.document.uri.fsPath;
@@ -91,18 +117,18 @@ export async function determinePintiaFolder(): Promise<string> {
     const picks: Array<IQuickPickItem<string>> = [];
     picks.push(
         {
-            label: `Default location`,
+            label: l10n.t("Default location"),
             detail: `${path.join(os.homedir(), ".pintia", "codes")}`,
             value: `${path.join(os.homedir(), ".pintia", "codes")}`,
         },
         {
-            label: "$(file-directory) Browse...",
+            label: l10n.t("{0} Browse...", "$(file-directory)"),
             value: ":browse",
         },
     );
     const choice: IQuickPickItem<string> | undefined = await vscode.window.showQuickPick(
         picks,
-        { placeHolder: "Select where you would like to save your Pintia files" },
+        { placeHolder: l10n.t("Select where you would like to save your Pintia files") },
     );
     if (!choice) {
         result = "";
@@ -122,9 +148,15 @@ export async function determinePintiaFolder(): Promise<string> {
     return result;
 }
 
-enum OpenOption {
+export enum OpenOptionEnum {
+    alwaysAsk = "Always ask",
     justOpenFile = "Just open the problem file",
     openInCurrentWindow = "Open in current window",
     openInNewWindow = "Open in new window",
     addToWorkspace = "Add to workspace",
+}
+
+
+interface PtaQuickPickItem extends vscode.QuickPickItem {
+    value?: OpenOptionEnum;
 }

@@ -15,6 +15,10 @@ export const ZOJ_PROBLEM_SET_ID: string = "91827364500";
 
 export import ptaCache = require('memory-cache');
 
+export const UNKNOWN = "Unknown";
+export const NO_OFFICIAL_SOLUTION = "该测试样例无官方答案"
+export const NONE = "无";
+
 export enum UserStatus {
     SignedIn = 1,
     SignedOut = 2
@@ -22,7 +26,19 @@ export enum UserStatus {
 
 export enum PtaLoginMethod {
     PTA = "PTA",
-    WeChat = "WeChat"
+    WeChat = "WeChat",
+    Cookie = "Cookie"
+}
+
+export enum PtaDashType {
+    MyProblemSet = "我的题目集",
+    Others = "其他"
+}
+
+export enum ProblemJudgingStatusEnum {
+    TIME_LIMIT_EXCEEDED = "TIME_LIMIT_EXCEEDED",
+    COMPILE_ERROR = "COMPILE_ERROR",
+    NEUTRAL = "NEUTRAL"
 }
 
 export interface IQuickPickItem<T> extends vscode.QuickPickItem {
@@ -39,7 +55,10 @@ export enum ProblemSubmissionState {
 export enum ProblemType {
     PROGRAMMING = "PROGRAMMING",
     CODE_COMPLETION = "CODE_COMPLETION",
-    MULTIPLE_FILE = "MULTIPLE_FILE"
+    MULTIPLE_FILE = "MULTIPLE_FILE",
+    TRUE_OR_FALSE = "TRUE_OR_FALSE",
+    MULTIPLE_CHOICE = "MULTIPLE_CHOICE",
+    FILL_IN_THE_BLANK_FOR_PROGRAMMING = "FILL_IN_THE_BLANK_FOR_PROGRAMMING"
 }
 
 export enum PtaNodeType {
@@ -52,7 +71,14 @@ export enum PtaNodeType {
 
 export enum ProblemPermissionEnum {
     UNKNOWN = -1,
-    LOCKED = 9
+    LOCKED = 9,
+    MY_PROBLEM_SET = 47
+}
+
+export enum ProblemSetExamStatus {
+    READY = "READY",            // 我的题集准备答题中
+    PROCESSING = "PROCESSING",  // 正在进行中
+    END = "END"                 // 已结束
 }
 
 export interface IPtaCode {
@@ -79,6 +105,7 @@ export interface IPtaNode {
     tag: string[];
     value: IPtaNodeValue;
     locked: boolean;
+    isMyProblemSet: boolean;
 }
 
 export interface IPtaNodeValue {
@@ -99,19 +126,23 @@ export const defaultPtaNode: IPtaNode = {
     title: "",
     label: "",
     type: PtaNodeType.ProblemSet,
+    isMyProblemSet: false,
     value: {
         summaries: {
             PROGRAMMING: {
                 total: 0,
-                totalScore: 0
+                totalScore: 0,
+                totalInPools: 0
             },
             CODE_COMPLETION: {
                 total: 0,
-                totalScore: 0
+                totalScore: 0,
+                totalInPools: 0
             },
             MULTIPLE_FILE: {
                 total: 0,
-                totalScore: 0
+                totalScore: 0,
+                totalInPools: 0
             }
         },
         total: 0,
@@ -131,24 +162,29 @@ export const defaultPtaNode: IPtaNode = {
 
 export type CallBack<T> = (msg: string, data?: T) => void;
 
-export const solutionStatusMapping: Map<string, string> = new Map([
-    ["OVERRIDDEN", "<td>已被覆盖</td>"],
-    ["WAITING", "<td>等待评测</td>"],
-    ["JUDGING", "<td style='color: orange;'>正在评测</td>"],
-    ["COMPILE_ERROR", "<td style='color: #237aff;'>编译错误</td>"],
-    ["ACCEPTED", "<td style='color: #ff5555;'>答案正确</td>"],
-    ["PARTIAL_ACCEPTED", "<td style='color: #00b000;'>部分正确</td>"],
-    ["PRESENTATION_ERROR", "<td style='color: #00b000;'>格式错误</td>"],
-    ["WRONG_ANSWER", "<td style='color: #00b000;'>答案错误</td>"],
-    ["MULTIPLE_ERROR", "<td style='color: #00b000;'>多种错误</td>"],
-    ["TIME_LIMIT_EXCEEDED", "<td style='color: #00b000;'>运行超时</td>"],
-    ["MEMORY_LIMIT_EXCEEDED", "<td style='color: #00b000;'>内存超限</td>"],
-    ["NON_ZERO_EXIT_CODE", "<td style='color: #00b000;'>非零返回</td>"],
-    ["SEGMENTATION_FAULT", "<td style='color: #00b000;'>段错误</td>"],
-    ["FLOAT_POINT_EXCEPTION", "<td style='color: #00b000;'>浮点错误</td>"],
-    ["OUTPUT_LIMIT_EXCEEDED", "<td style='color: #00b000;'>输出超限</td>"],
-    ["INTERNAL_ERROR", "<td>内部错误</td>"],
-    ["RUNTIME_ERROR", "<td style='color: #00b000;'>运行时错误</td>"],
+export interface ProblemJudgingStatus {
+    color: string;
+    text: string;
+}
+
+export const problemJudgingStatusMapping: Map<string, ProblemJudgingStatus> = new Map([
+    ["OVERRIDDEN", { color: "", text: "已被覆盖" }],
+    ["WAITING", { color: "", text: "等待评测" }],
+    ["JUDGING", { color: "orange", text: "正在评测" }],
+    ["COMPILE_ERROR", { color: "#237aff", text: "编译错误" }],
+    ["ACCEPTED", { color: "#ff5555", text: "答案正确" }],
+    ["PARTIAL_ACCEPTED", { color: "#00b000", text: "部分正确" }],
+    ["PRESENTATION_ERROR", { color: "#00b000", text: "格式错误" }],
+    ["WRONG_ANSWER", { color: "#00b000", text: "答案错误" }],
+    ["MULTIPLE_ERROR", { color: "#00b000", text: "多种错误" }],
+    ["TIME_LIMIT_EXCEEDED", { color: "#00b000", text: "运行超时" }],
+    ["MEMORY_LIMIT_EXCEEDED", { color: "#00b000", text: "内存超限" }],
+    ["NON_ZERO_EXIT_CODE", { color: "#00b000", text: "非零返回" }],
+    ["SEGMENTATION_FAULT", { color: "#00b000", text: "段错误" }],
+    ["FLOAT_POINT_EXCEPTION", { color: "#00b000", text: "浮点错误" }],
+    ["OUTPUT_LIMIT_EXCEEDED", { color: "#00b000", text: "输出超限" }],
+    ["INTERNAL_ERROR", { color: "", text: "内部错误" }],
+    ["RUNTIME_ERROR", { color: "#00b000", text: "运行时错误" }],
 ]);
 
 export const langCompilerMapping: Map<string, string> = new Map([
@@ -242,14 +278,25 @@ export const commentFormatMapping: Map<string, { single: string, start: string, 
     ["Bash (bash)", { single: "# ", start: "# ", middle: "# ", end: "" }],
 ]);
 
-export const problemTypeInfoMapping: Map<string, {
+export const problemTypeInfoMapping: Map<string, ProblemTypeInfo> = new Map([
+    ["TRUE_OR_FALSE", { name: "判断题", type: 1, prefix: "trueOrFalse", problemConfigKey: "trueOrFalseProblemConfig" }],
+    ["MULTIPLE_CHOICE", { name: "单选题", type: 2, prefix: "multipleChoice", problemConfigKey: "multipleChoiceProblemConfig" }],
+    ["FILL_IN_THE_BLANK_FOR_PROGRAMMING", { name: "程序填空题", type: 5, prefix: "fillInTheBlankForProgramming", problemConfigKey: "fillInTheBlankForProgrammingProblemConfig" }],
+    ["PROGRAMMING", { name: "编程题", type: 7, prefix: "programming", problemConfigKey: "programmingProblemConfig" }],
+    ["CODE_COMPLETION", { name: "函数题", type: 6, prefix: "codeCompletion", problemConfigKey: "codeCompletionProblemConfig" }],
+    ["MULTIPLE_FILE", { name: "多文件编程题", type: 9, prefix: "multipleFile", problemConfigKey: "multipleFileProblemConfig" }],
+]);
+
+export interface ProblemTypeInfo {
     name: string,
     type: number,
-    prefix: string
-}> = new Map([
-    ["PROGRAMMING", { name: "编程题", type: 7, prefix: "programming" }],
-    ["CODE_COMPLETION", { name: "函数题", type: 6, prefix: "codeCompletion" }],
-    ["MULTIPLE_FILE", { name: "多文件编程题", type: 9, prefix: "multipleFile" }],
+    prefix: string,
+    problemConfigKey: string
+}
+
+export const supportedProblemTypes: Set<string> = new Set([
+    "PROGRAMMING",
+    "CODE_COMPLETION"
 ]);
 
 export const colorThemeMapping: Map<string, string[]> = new Map([

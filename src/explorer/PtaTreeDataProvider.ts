@@ -2,11 +2,12 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import { PtaNode } from "./PtaNode";
-import { defaultPtaNode, IPtaNodeValue, ProblemSubmissionState, ProblemType, PtaNodeType } from "../shared";
+import { defaultPtaNode, IPtaNodeValue, ProblemSubmissionState, ProblemType, PtaDashType, PtaNodeType } from "../shared";
 import { ptaManager } from "../ptaManager";
 import { explorerNodeManager } from "./explorerNodeManager";
 import { ptaConfig } from "../ptaConfig";
 import { IProblemSummary } from "../entity/IProblemSummary";
+import { ptaApi } from "../utils/api";
 
 
 export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vscode.Disposable {
@@ -29,20 +30,17 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
     }
 
     getTreeItem(element: PtaNode): vscode.TreeItem | Thenable<vscode.TreeItem> {
-        if (element.pID === "notSignIn") {
+        if (!element) {
             return {
-                label: element.label,
-                collapsibleState: vscode.TreeItemCollapsibleState.None,
-                command: {
-                    title: "Sign in to Pintia",
-                    command: "pintia.signIn"
-                }
+                label: "",
+                collapsibleState: vscode.TreeItemCollapsibleState.None
             };
         }
         if (element.type === PtaNodeType.Dashboard) {
             return {
-                label: element.label,
-                collapsibleState: vscode.TreeItemCollapsibleState.None
+                label: `— ${element.label} —`,
+                collapsibleState: vscode.TreeItemCollapsibleState.None,
+                iconPath: element.label === PtaDashType.MyProblemSet ? new vscode.ThemeIcon("smiley") : new vscode.ThemeIcon('book')
             }
         }
         let contextValue: string;
@@ -70,12 +68,7 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
         const paged: boolean = limit !== 0;
 
         if (!ptaManager.getUserSession()) {
-            return [
-                new PtaNode(Object.assign({}, defaultPtaNode, {
-                    pID: "notSignIn",
-                    label: "Sign in to Pintia"
-                }))
-            ];
+            return null;
         }
         if (!element) {
             // root directory
@@ -83,18 +76,32 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
         }
 
         const value: IPtaNodeValue = element.value;
+        if (!value) {
+            return null;
+        }
+        if (!value.summaries) {
+            // 可能由于网络访问过快，summaries 为空
+            return ptaApi.getProblemSummary(element.psID).then((summaries) => {
+                if (!summaries) {
+                    return [];
+                }
+                value.summaries = summaries;
+                return this.getChildren(element);
+            });
+        }
         if (element.type === PtaNodeType.ProblemSet) {
             if (Object.keys(value.summaries).length > 1) {
                 return explorerNodeManager.getSubProblemSet(element);
             }
             const problemType: string = Object.keys(value.summaries)[0];
             const total: number = value.summaries[problemType as keyof IProblemSummary]?.total ?? 0;
+            element.value.problemType = problemType as ProblemType;
 
             if (!paged || total < limit) {
                 // 1-200, 201-400
-                return explorerNodeManager.getProblemNodes(element.psID, element.value.problemSet, problemType as ProblemType);
+                return explorerNodeManager.getProblemNodes(element);
             } else {
-                return explorerNodeManager.getProblemSetPageNodes(element.psID, element.value.problemSet, problemType as ProblemType, total, limit);
+                return explorerNodeManager.getProblemSetPageNodes(element, total, limit);
             }
         }
 
@@ -102,14 +109,14 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
             const total: number = value.summaries[value.problemType]?.total ?? 0;
             // node.type === PtaNodeType.ProblemType
             if (!paged || total < limit) {
-                return explorerNodeManager.getProblemNodes(element.psID, element.value.problemSet, value.problemType);
+                return explorerNodeManager.getProblemNodes(element);
             } else {
-                return explorerNodeManager.getProblemSetPageNodes(element.psID, element.value.problemSet, value.problemType, total, limit);
+                return explorerNodeManager.getProblemSetPageNodes(element, total, limit);
             }
         }
 
         if (element.type === PtaNodeType.ProblemPage) {
-            return explorerNodeManager.getProblemNodes(element.psID, element.value.problemSet, value.problemType, value.page, limit);
+            return explorerNodeManager.getProblemNodes(element, value.page, limit);
         }
 
         return null;

@@ -1,18 +1,9 @@
 
 export interface IProblemSummary {
 
-    PROGRAMMING?: {
+    [key: string]: {
         total: number;
         totalScore: number;
-    }
-
-    CODE_COMPLETION?: {
-        total: number;
-        totalScore: number;
-    }
-
-    MULTIPLE_FILE?: {
-        total: number;
-        totalScore: number;
+        totalInPools: number;
     }
 }

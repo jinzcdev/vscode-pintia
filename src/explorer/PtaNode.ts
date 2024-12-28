@@ -49,4 +49,8 @@ export class PtaNode {
         return this.data.isFavorite;
     }
 
+    public get isMyProblemSet(): boolean {
+        return this.data.isMyProblemSet;
+    }
+
 }
