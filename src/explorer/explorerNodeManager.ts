@@ -18,6 +18,8 @@ import { IProblemSetExam } from "../entity/IProblemSetExam";
 
 class ExplorerNodeManager implements Disposable {
 
+    private ptaNodeMap: Map<string, PtaNode> = new Map();
+
     public async getRootNodes(): Promise<PtaNode[]> {
         const sections: IDashSection[] = await ptaApi.getDashSections();
         const ptaNodeList: PtaNode[] = [];
@@ -63,9 +65,9 @@ class ExplorerNodeManager implements Disposable {
                 );
             });
         }
+        ptaNodeList.forEach(node => this.putPtaNode(node));
         return ptaNodeList;
     }
-
 
     public async getSubProblemSet(node: PtaNode): Promise<PtaNode[]> {
         // container two kinds of problems (CODE_COMPLETION, PROGRAMMING)
@@ -84,9 +86,10 @@ class ExplorerNodeManager implements Disposable {
                     value: Object.assign({}, value, {
                         problemType: problemType as ProblemType,
                     })
-                })));
+                }), node));
             }
         }
+        nodeList.forEach(node => this.putPtaNode(node));
         return nodeList;
     }
 
@@ -163,9 +166,10 @@ class ExplorerNodeManager implements Disposable {
                             problemInfo: pb,
                             problemSet: psName
                         }
-                    }))
+                    }), element)
                 );
             }
+            ptaNodeList.forEach(node => this.putPtaNode(node));
             return ptaNodeList;
         } catch (error: any) {
             ptaChannel.appendLine(error.toString());
@@ -173,7 +177,6 @@ class ExplorerNodeManager implements Disposable {
             return [];
         }
     }
-
 
     public async getProblemSetPageNodes(element: PtaNode, total: number, limit?: number): Promise<PtaNode[]> {
         if (limit === undefined) {
@@ -196,13 +199,26 @@ class ExplorerNodeManager implements Disposable {
                     problemType: problemType,
                     problemSet: psName
                 }
-            })));
+            }), element));
         }
+        nodeList.forEach(node => this.putPtaNode(node));
         return nodeList;
     }
 
-
     dispose() {
+    }
+
+    private putPtaNode(node: PtaNode | undefined) {
+        if (!node) {
+            return;
+        }
+        const key = PtaNode.hashKey(node.type, node.psID, node.pID);
+        key && this.ptaNodeMap.set(key, node);
+    }
+
+    public getPtaNode(type: PtaNodeType, psID?: string, pID?: string): PtaNode | undefined {
+        const key = PtaNode.hashKey(type, psID, pID);
+        return key ? this.ptaNodeMap.get(key) : undefined;
     }
 
 }

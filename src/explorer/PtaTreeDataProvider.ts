@@ -120,7 +120,13 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
         }
 
         return null;
+    }
 
+    getParent(element: PtaNode): vscode.ProviderResult<PtaNode> {
+        if (element.type === PtaNodeType.ProblemSet) {
+            return null;
+        }
+        return explorerNodeManager.getPtaNode(element.type, element.psID, element.pID);
     }
 
     private parseIconPathFromProblemState(element: PtaNode): string {

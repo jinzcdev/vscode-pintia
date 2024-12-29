@@ -8,6 +8,11 @@ class ExplorerController<T> implements Disposable {
     private treeView?: vscode.TreeView<T>;
     private ptaTreeDataProvider?: PtaTreeDataProvider;
 
+    public async revealPtaNode(node: T, options: { select?: boolean, focus?: boolean, expand?: boolean } = {
+        select: true, focus: true, expand: false
+    }) {
+        await this.treeView?.reveal(node, options);
+    }
 
     public createTreeView(context: vscode.ExtensionContext) {
         if (!this.treeView) {

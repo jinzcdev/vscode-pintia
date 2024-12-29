@@ -3,7 +3,7 @@ import { IPtaNode, IPtaNodeValue, ProblemSubmissionState, PtaNodeType } from "..
 
 export class PtaNode {
 
-    constructor(private data: IPtaNode) { }
+    constructor(public data: IPtaNode, public parent?: PtaNode) { }
 
     public get dashID(): number {
         return this.data.dashID;
@@ -53,4 +53,10 @@ export class PtaNode {
         return this.data.isMyProblemSet;
     }
 
+    public static hashKey(type: PtaNodeType, psID?: string, pID?: string): string | undefined {
+        if (!type || (!psID && !pID)) {
+            return undefined;
+        }
+        return `${type}-${psID ? psID : "0"}-${pID ? pID : "0"}`;
+    }
 }

@@ -15,7 +15,7 @@ import { favoritesTreeDataProvider } from "./favorites/favoritesTreeDataProvider
 import { ptaChannel } from './ptaChannel';
 import { ptaExecutor } from './ptaExecutor';
 import { ptaManager } from './ptaManager';
-import { configPath, IPtaCode, ProblemType, UserStatus } from './shared';
+import { configPath, defaultPtaNode, IPtaCode, ProblemType, PtaNodeType, UserStatus } from './shared';
 import { ptaStatusBarController } from './statusbar/ptaStatusBarController';
 import { PtaPreviewProvider } from './webview/PtaPreviewProvider';
 import { ProblemView } from "./webview/views/ProblemView";
@@ -24,6 +24,7 @@ import { historyManager } from "./view-history/historyManager";
 import { ptaConfig } from "./ptaConfig";
 import { PtaSubmissionProvider } from "./webview/PtaSubmissionProvider";
 import { ptaApi } from "./utils/api";
+import { explorerNodeManager } from "./explorer/explorerNodeManager";
 
 
 let globalContext: vscode.ExtensionContext;
@@ -68,7 +69,11 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand("pintia.clearCache", () => cache.clearCache()),
 		vscode.commands.registerCommand("pintia.signIn", () => ptaManager.signIn()),
 		vscode.commands.registerCommand("pintia.signOut", () => ptaManager.signOut()),
-		vscode.commands.registerCommand("pintia.previewProblem", async (psID: string, pID: string, codeIt: boolean = true) => {
+		vscode.commands.registerCommand("pintia.previewProblem", async (psID: string, pID: string, codeIt: boolean = true, focus: boolean = false) => {
+			if (focus) {
+				const ptaNode = explorerNodeManager.getPtaNode(PtaNodeType.Problem, psID, pID);
+				ptaNode && await explorerController.revealPtaNode(ptaNode);
+			}
 			const problem = await new ProblemView(psID, pID).fetch();
 			await PtaPreviewProvider.createOrUpdate(problem).show().then(() => {
 				historyManager.addProblem(historyManager.getCurrentUserId(), {
