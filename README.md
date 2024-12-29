@@ -3,7 +3,7 @@
 > 在 VS Code 中练习拼题 A 编程类习题
 
 <p align="center">
-  <img style="width: 50%; max-width: 60%;" src="./docs/imgs/vscode-pintia-logo.png" alt="">
+  <img style="width: 65%; max-width: 75%;" src="./docs/imgs/vscode-pintia-logo.png" alt="">
 </p>
 
 <p align="center">
@@ -30,7 +30,7 @@
 ### 1.1 登录/登出
 
 <p align="center">
-  <img style="width: 50%;" src="./docs/imgs/signin.png" alt="登录" />
+  <img style="width: 65%;" src="./docs/imgs/signin.png" alt="登录" />
 </p>
 
 - 只需在 `Pintia Explorer` 中点击 `登录拼题A/Sign in PTA` ，即可登录拼题A。(目前，支持 **微信二维码**、**Cookie** 登录）。
@@ -58,7 +58,7 @@
 ### 1.3 编辑器快捷键
 
 <p align="center">
-  <img style="width: 50%;" src="./docs/imgs/shortcuts.png" alt="编辑器快捷键" />
+  <img style="width: 65%;" src="./docs/imgs/shortcuts.png" alt="编辑器快捷键" />
 </p>
 
 - 该插件支持 3 个编辑器快捷键
@@ -129,7 +129,7 @@
 
 ## 2. 插件命令
 
-使用 `Ctrl+Shift+P` (in Windows) 或 `Command+Shift+P` (in Mac) 打开命令面板并输入 `pta` 可快速使用插件的相关命令。
+使用 `Ctrl+Shift+P` （in Windows) 或 `Command+Shift+P` (in MacOS) 打开命令面板并输入 `pta` 可快速使用插件的相关命令。
 
 | 命令                               | 描述                | 备注                                                             |
 | ---------------------------------- | ------------------- | ---------------------------------------------------------------- |
@@ -175,7 +175,3 @@
 ## 5. 更新日志
 
 请参考 [CHANGELOG](./CHANGELOG.md) | [英文文档](./docs/CHANGELOG_en-US.md)
-
-## 6. 鸣谢
-
-- Pintia (拼题A) 插件的功能设计参考了 [LeetCode](https://marketplace.visualstudio.com/items?itemName=LeetCode.vscode-leetcode)。

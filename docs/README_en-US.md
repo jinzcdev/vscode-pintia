@@ -3,7 +3,7 @@
 > Solve PTA problems in VS Code
 
 <p align="center">
-  <img style="width: 50%; max-width: 60%;" src="./imgs/vscode-pintia-logo.png" alt="">
+  <img style="width: 65%; max-width: 75%;" src="./docs/imgs/vscode-pintia-logo.png" alt="">
 </p>
 
 <p align="center">
@@ -30,7 +30,7 @@
 ### 1.1 Sign In/Out
 
 <p align="center">
-  <img style="width: 50%;" src="./imgs/signin.png" alt="Sign in" />
+  <img style="width: 65%;" src="./imgs/signin.png" alt="Sign in" />
 </p>
 
 - Simply click `Sign in PTA` in the `Pintia Explorer` will let you **sign in** with your Pintia account. (Currently, only **WeChat QR** codes are supported for signin)
@@ -57,7 +57,7 @@
 ### 1.3 Editor Shortcuts
 
 <p align="center">
-  <img style="width: 50%;" src="./imgs/shortcuts.png" alt="Editor Shortcuts" />
+  <img style="width: 65%;" src="./imgs/shortcuts.png" alt="Editor Shortcuts" />
 </p>
 
 - The extension supports 3 editor shortcuts (aka Code Lens):
@@ -128,7 +128,7 @@ You can enter the following prefixes in code editor to generate the correspondin
 
 ## 2. Commands
 
-Use `Ctrl+Shift+P` (in Windows) or `Command+Shift+P` (in Mac) to open the command panel and enter `pintia` for quick access to the `Pintia Extension`'s related commands.
+Use `Ctrl+Shift+P` (in Windows) or `Command+Shift+P` (in MacOS) to open the command panel and enter `pintia` for quick access to the `Pintia Extension`'s related commands.
 
 | Command                            | Description                   | Note                                                                                             |
 | ---------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------ |
@@ -174,7 +174,3 @@ If your problem still cannot be addressed, feel free to [file an issue](https://
 ## 5. Release Notes
 
 Refer to [CHANGELOG](./CHANGELOG_en-US.md) | [中文文档](../CHANGELOG.md)
-
-## 6. Acknowledgement
-
-- The design of the `Pintia Extension` references the design of the [LeetCode](https://marketplace.visualstudio.com/items?itemName=LeetCode.vscode-leetcode) in many of its features.
