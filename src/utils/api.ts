@@ -95,6 +95,7 @@ class PtaAPI {
     /**
      * Get the problem sets that the user has joined.
      * @param cookie necessary for the user to get the their problem sets.
+     * @param [onlyActive=true] whether only return the active problem sets.
      * @returns 
      */
     public async getMyProblemSets(cookie?: string, onlyActive: boolean = true): Promise<IProblemSet[]> {
@@ -308,11 +309,11 @@ class PtaAPI {
      * @param psID 
      * @returns 
      */
-    public async getProblemSetExam(psID: string, cookie?: string): Promise<IProblemSetExam> {
+    public async getProblemSetExams(psID: string, cookie?: string): Promise<IProblemSetExam> {
         return await httpGet(`${this.problemUrl}/${psID}/exams`, cookie);
     }
 
-    public async createProblemSetExamAndReturn(psID: string, cookie: string): Promise<IExam> {
+    public async createProblemSetExamAndReturn(psID: string, cookie?: string): Promise<IExam> {
         await this.createProblemSetExam(psID, cookie);
         return await httpGet(`${this.problemUrl}/${psID}/exams`, cookie).then(json => json["exam"]);
     }
@@ -322,12 +323,12 @@ class PtaAPI {
         await httpPost(`${this.problemUrl}/${psID}/exams`, cookie);
     }
 
-    public async checkAndCreateProblemSetExam(psID: string, cookie?: string): Promise<void> {
+    public async checkAndCreateProblemSetExam(psID: string, cookie?: string): Promise<IExam> {
         const exam = await httpGet(`${this.problemUrl}/${psID}/exams`, cookie).then(json => json["exam"]);
-        !exam && await this.createProblemSetExam(psID, cookie);
+        return exam ?? await this.createProblemSetExamAndReturn(psID, cookie);
     }
 
-    public async getPronlemSetStatus(psID: string, cookie: string): Promise<string> {
+    public async getProblemSetStatus(psID: string, cookie: string): Promise<string> {
         return await httpGet(`${this.problemUrl}/${psID}/exams`, cookie).then(json => json["status"]);
     }
 

@@ -4,7 +4,7 @@ import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs-extra";
-import { ProblemPermissionEnum, searchIndexPath, ZOJ_PROBLEM_SET_ID } from "../shared";
+import { searchIndexPath, ZOJ_PROBLEM_SET_ID } from "../shared";
 import { ptaChannel } from "../ptaChannel";
 import { ptaApi } from "../utils/api";
 import { ptaConfig } from "../ptaConfig";
@@ -42,7 +42,7 @@ export async function createProblemSearchIndex(context: vscode.ExtensionContext)
 export async function refreshProblemSearchIndex(): Promise<void> {
     await vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
-        title: "Fetching the problem search index...",
+        title: l10n.t("Fetching the problem search index..."),
         cancellable: false
     }, async (p: vscode.Progress<{ message?: string; increment?: number }>) => {
         return new Promise<void>(async (resolve: () => void, reject: (e: Error) => void): Promise<void> => {

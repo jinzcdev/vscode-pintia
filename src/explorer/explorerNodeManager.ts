@@ -99,21 +99,33 @@ class ExplorerNodeManager implements Disposable {
             }
 
             if (element.isMyProblemSet) {
-                const exams: IProblemSetExam = await ptaApi.getProblemSetExam(psID, userSession.cookie);
-                if (exams && !exams.exam && exams.status === ProblemSetExamStatus.READY) {
-                    // 私有题目集不应自动创建 exam, 询问用户是否创建
-                    await showYesOrNoPick(l10n.t("The exam is not started yet. Do you want to start the exam now?")).then(created => {
-                        created && vscode.window.withProgress({
+                const exams: IProblemSetExam = await ptaApi.getProblemSetExams(psID, userSession.cookie);
+                if (exams && !exams.exam) {
+                    if (exams.status === ProblemSetExamStatus.READY) {
+                        // 私有题目集不应自动创建 exam, 询问用户是否创建
+                        const created = await showYesOrNoPick(l10n.t("The exam is not started yet. Do you want to start the exam now?"))
+                        if (!created) {
+                            return [];
+                        }
+                        vscode.window.withProgress({
                             location: vscode.ProgressLocation.Notification,
                             title: l10n.t("Creating exam for {0}...", psName),
                             cancellable: false
                         }, async (p: vscode.Progress<{ message?: string; increment?: number }>) => {
                             ptaApi.createProblemSetExam(psID);
                         });
-                    });
+                    } 
+                    else if (exams.status === ProblemSetExamStatus.PENDING) {
+                        vscode.window.showErrorMessage(l10n.t("The exam is not ready yet. Please wait for the exam to start."));
+                        return [];
+                    }
                 }
             }
-            await ptaApi.checkAndCreateProblemSetExam(psID, userSession.cookie);
+            const exam = await ptaApi.checkAndCreateProblemSetExam(psID, userSession.cookie);
+            if (!exam) {
+                promptForOpenOutputChannel(l10n.t("Failed to create exam. Please open the output channel for details."), DialogType.error);
+                return [];
+            }
             let problemList: IProblemInfo[], startIndex = 1;
             if (page !== undefined && limit !== undefined) {
                 problemList = await ptaApi.getProblemInfoListByPage(psID, problemType, page, limit);

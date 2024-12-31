@@ -4,6 +4,8 @@ import { showDirectorySelectDialog } from '../utils/uiUtils';
 import { ptaConfig } from '../ptaConfig';
 import * as fs from 'fs-extra';
 import { determinePintiaFolder } from '../utils/workspaceUtils';
+import { l10n } from 'vscode';
+import { IQuickPickItem } from '../shared';
 
 export async function changeWorkspaceFolder() {
     const directory: vscode.Uri[] | undefined = await showDirectorySelectDialog();
@@ -22,25 +24,25 @@ export async function openWorkspace() {
         }
     }
 
-    const choice: string | undefined = await vscode.window.showQuickPick(
+    const choice: IQuickPickItem<OpenOptionEnum> | undefined = await vscode.window.showQuickPick(
         [
-            OpenOption.openInCurrentWindow,
-            OpenOption.openInNewWindow
+            { label: l10n.t(OpenOptionEnum.openInCurrentWindow), value: OpenOptionEnum.openInCurrentWindow },
+            { label: l10n.t(OpenOptionEnum.openInNewWindow), value: OpenOptionEnum.openInNewWindow }
         ],
-        { placeHolder: vscode.l10n.t("How would you like to open it?") }
+        { placeHolder: l10n.t("How would you like to open it?") }
     );
 
-    switch (choice) {
-        case OpenOption.openInCurrentWindow:
+    switch (choice?.value) {
+        case OpenOptionEnum.openInCurrentWindow:
             await vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(workspaceFolder), false);
             break;
-        case OpenOption.openInNewWindow:
+        case OpenOptionEnum.openInNewWindow:
             await vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(workspaceFolder), true);
             break;
     }
 }
 
-enum OpenOption {
+enum OpenOptionEnum {
     openInCurrentWindow = "Open in current window",
     openInNewWindow = "Open in new window"
 }

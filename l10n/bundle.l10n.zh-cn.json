@@ -65,6 +65,8 @@
   "Testing the sample...": "正在测试样例 ...",
   "Sample {0}": "样例 {0}",
   "The exam is not started yet. Do you want to start the exam now?": "考试尚未开启，您要现在开启考试吗？",
+  "The exam is not ready yet. Please wait for the exam to start.": "未到考试时间，请等待考试开始。",
+  "Failed to create exam. Please open the output channel for details.": "考试创建失败，请打开输出通道查看详情。",
   "Fetching user's exams for {0}...": "正在获取 {0} 的考试结果 ...",
   "Creating exam for {0}...": "正在创建习题 {0} 的考试 ...",
   "{0} Home": "{0} 主页",
@@ -86,5 +88,6 @@
   "Open in current window": "在当前窗口中打开",
   "Open in new window": "在新窗口中打开",
   "Add to workspace": "添加到工作区",
-  "Please save the solution file first.": "请先保存代码源文件。"
+  "Please save the solution file first.": "请先保存代码源文件。",
+  "Fetching the problem search index...": "正在获取题目搜索索引 ..."
 }
