@@ -43,7 +43,7 @@ class PtaExecutor extends EventEmitter implements Disposable {
 
                     const problemPermission = await ptaApi.getProblemSetPermission(psID, cookie) as ProblemPermissionEnum;
 
-                    const problemSetExam = await ptaApi.getProblemSetExam(psID, cookie);
+                    const problemSetExam = await ptaApi.getProblemSetExams(psID, cookie);
                     if (!problemSetExam.exam) {
                         // 用户个人的题集, 不自动创建 exam
                         if (problemPermission === ProblemPermissionEnum.MY_PROBLEM_SET) {
@@ -111,7 +111,7 @@ class PtaExecutor extends EventEmitter implements Disposable {
 
                     const problemPermission = await ptaApi.getProblemSetPermission(psID, cookie) as ProblemPermissionEnum;
 
-                    const problemSetExam = await ptaApi.getProblemSetExam(psID, cookie);
+                    const problemSetExam = await ptaApi.getProblemSetExams(psID, cookie);
                     if (!problemSetExam.exam) {
                         // 用户个人的题集, 不自动创建 exam
                         if (problemPermission === ProblemPermissionEnum.MY_PROBLEM_SET) {

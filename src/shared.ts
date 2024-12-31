@@ -76,6 +76,7 @@ export enum ProblemPermissionEnum {
 }
 
 export enum ProblemSetExamStatus {
+    PENDING = "PENDING",        // 未开始
     READY = "READY",            // 我的题集准备答题中
     PROCESSING = "PROCESSING",  // 正在进行中
     END = "END"                 // 已结束

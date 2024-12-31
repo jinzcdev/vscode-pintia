@@ -35,7 +35,7 @@ export async function selectWorkspaceFolder(): Promise<string> {
         return await handleOpenOption(defaultChoice, workspaceFolder);
     }
 
-    const choice: PtaQuickPickItem | undefined = await vscode.window.showQuickPick(
+    const choice: IQuickPickItem<OpenOptionEnum> | undefined = await vscode.window.showQuickPick(
         [
             {
                 label: l10n.t(OpenOptionEnum.justOpenFile),
@@ -154,9 +154,4 @@ export enum OpenOptionEnum {
     openInCurrentWindow = "Open in current window",
     openInNewWindow = "Open in new window",
     addToWorkspace = "Add to workspace",
-}
-
-
-interface PtaQuickPickItem extends vscode.QuickPickItem {
-    value?: OpenOptionEnum;
 }
