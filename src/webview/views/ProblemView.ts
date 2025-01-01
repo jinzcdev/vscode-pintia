@@ -47,7 +47,7 @@ export class ProblemView {
         this.label = problem.label;
         this.title = problem.title;
         this.author = problem.author;
-        this.content = problem.content;
+        this.content = problem.description ? problem.description : problem.content;
         this.problemSetId = problem.problemSetId;
         this.organization = problem.organization.name;
         this.lastSubmissionId = problem.lastSubmissionId;
