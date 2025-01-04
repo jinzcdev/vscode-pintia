@@ -12,6 +12,7 @@ import { UserAuthProviderFactory } from "./auth/UserAuthProviderFactory";
 import * as cache from "./commands/cache";
 import { l10n } from "vscode";
 import { t } from "@vscode/l10n";
+import { autoCheckInPTA } from "./commands/user";
 
 
 class PtaManager extends EventEmitter {
@@ -137,6 +138,7 @@ class PtaManager extends EventEmitter {
                         ptaChannel.error(reason.toString());
                         await promptForOpenOutputChannel(l10n.t("Update user profile failed. Please open the output channel for details."), DialogType.error);
                     });
+                    autoCheckInPTA();
                 } else {
                     this.userSession = undefined;
                     this.userStatus = UserStatus.SignedOut;

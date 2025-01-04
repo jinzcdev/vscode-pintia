@@ -47,8 +47,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	await fs.mkdirs(configPath).then(() => {
 		Promise.all([
 			ptaManager.fetchLoginStatus(),
-			cache.createProblemSearchIndex(context),
-			user.autoCheckInPTA()
+			cache.createProblemSearchIndex(context)
 		]);
 	});
 
