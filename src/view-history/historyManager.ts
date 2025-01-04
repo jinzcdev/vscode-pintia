@@ -62,7 +62,7 @@ class HistoryManager implements Disposable {
                 this.trimViewedProblems();
             }
         } catch (error: any) {
-            ptaChannel.appendLine(error.toString());
+            ptaChannel.error(error.toString());
             await promptForOpenOutputChannel(l10n.t("Failed to load viewed problems. Please check the output channel for details."), DialogType.error);
         }
     }
@@ -72,7 +72,7 @@ class HistoryManager implements Disposable {
             fs.mkdirSync(path.dirname(this.filePath), { recursive: true });
             fs.writeFileSync(this.filePath, JSON.stringify(this.viewedProblems));
         } catch (error: any) {
-            ptaChannel.appendLine(error.toString());
+            ptaChannel.error(error.toString());
             await promptForOpenOutputChannel(l10n.t("Failed to save viewed problems. Please check the output channel for details."), DialogType.error);
         }
     }

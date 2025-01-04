@@ -43,7 +43,7 @@ export class PtaTestProvider extends PtaWebview<TestView> {
                 }
             };
         } catch (error: any) {
-            ptaChannel.appendLine(error.toString());
+            ptaChannel.error(error.toString());
             promptForOpenOutputChannel(l10n.t("Failed to test!"), DialogType.error);
         }
     }

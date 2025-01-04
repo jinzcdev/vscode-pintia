@@ -144,7 +144,7 @@ class ExplorerNodeManager implements Disposable {
             }, async (p: vscode.Progress<{ message?: string; increment?: number }>) => {
                 return new Promise<void>(async (resolve: () => void, reject: (e: Error) => void): Promise<void> => {
 
-                    ptaChannel.appendLine("[INFO] Refetching user's exams");
+                    ptaChannel.info("Refetching user's exams");
                     examProblemStatus = await ptaApi.getExamProblemStatus(psID, userSession.cookie);
                     if (examProblemStatus) {
                         for (const e of examProblemStatus!) {
@@ -180,7 +180,7 @@ class ExplorerNodeManager implements Disposable {
             }
             return ptaNodeList;
         } catch (error: any) {
-            ptaChannel.appendLine(error.toString());
+            ptaChannel.error(error.toString());
             promptForOpenOutputChannel(l10n.t("Failed to fetch the problem list. Please open the output channel for details."), DialogType.error);
             return [];
         }

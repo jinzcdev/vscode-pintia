@@ -68,7 +68,7 @@ export async function checkInPTA(): Promise<void> {
             }
         }
     } catch (error: any) {
-        ptaChannel.appendLine(error.toString());
+        ptaChannel.error(error.toString());
         promptForOpenOutputChannel(l10n.t("Failed to check in. Please open the output channel for details."), DialogType.error);
     }
 }
@@ -91,7 +91,7 @@ export async function checkedInStatus(): Promise<boolean> {
             return await ptaApi.getCheckInStatus(userSession.cookie).then(e => e.exists);
         }
     } catch (error: any) {
-        ptaChannel.appendLine(error.toString());
+        ptaChannel.error(error.toString());
         promptForOpenOutputChannel(l10n.t("Failed to get the status of checkin. Please open the output channel for details."), DialogType.error);
     }
     return false;

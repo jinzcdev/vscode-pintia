@@ -13,8 +13,8 @@ export async function httpGet(url: string, cookie: string = ''): Promise<any> {
         }
     })
         .then(response => response.json());
-    ptaChannel.appendLine(`[HTTP Get - Request] ${url}`);
-    ptaChannel.appendLine(`[HTTP Get - Response] ${JSON.stringify(json)}`);
+    ptaChannel.info(`[HTTP Get - Request] ${url}`);
+    ptaChannel.info(`[HTTP Get - Response] ${JSON.stringify(json)}`);
     return json;
 }
 
@@ -30,8 +30,8 @@ export async function httpPost(url: string, cookie: string = '', body?: any): Pr
         body: JSON.stringify(body)
     })
         .then(response => response.json());
-    ptaChannel.appendLine(`[HTTP Post - Request] ${url}\n${JSON.stringify(body)}`);
-    ptaChannel.appendLine(`[HTTP Post - Response] ${JSON.stringify(json)}`);
+    ptaChannel.info(`[HTTP Post - Request] ${url}\n${JSON.stringify(body)}`);
+    ptaChannel.info(`[HTTP Post - Response] ${JSON.stringify(json)}`);
     return json;
 }
 

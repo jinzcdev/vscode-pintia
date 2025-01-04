@@ -28,9 +28,9 @@ export async function createProblemSearchIndex(context: vscode.ExtensionContext)
         const indexFileSrc = context.asAbsolutePath(path.join("resources", "search_index.json"));
         try {
             await fs.copy(indexFileSrc, indexFileDest);
-            ptaChannel.appendLine(`[INFO] Copy the search index to ${indexFileDest}.`);
+            ptaChannel.info(`Copy the search index to ${indexFileDest}.`);
         } catch (error: any) {
-            ptaChannel.appendLine(error.toString());
+            ptaChannel.error(error.toString());
             await promptForOpenOutputChannel(l10n.t("Failed to copy problem index. Please open the output channel for details."), DialogType.error);
         }
     }
@@ -61,7 +61,7 @@ export async function refreshProblemSearchIndex(): Promise<void> {
                 const problemIndex = await ptaApi.getProblemSearchIndex(problemSetAllowedIndex);
                 if (Object.keys(problemIndex).length !== 0) {
                     await fs.writeJson(searchIndexPath, problemIndex);
-                    ptaChannel.appendLine(`[INFO] Fetch the problem search index successfully.`);
+                    ptaChannel.info(`Fetch the problem search index successfully.`);
                 } else {
                     await promptForOpenOutputChannel(l10n.t("Failed to fetch problem search index. Please open the output channel for details."), DialogType.error);
                 }

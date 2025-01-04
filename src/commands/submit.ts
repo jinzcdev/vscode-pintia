@@ -207,7 +207,7 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
             }
         });
     } catch (error: any) {
-        ptaChannel.appendLine(error.toString());
+        ptaChannel.error(error.toString());
         await promptForOpenOutputChannel(l10n.t("Testing sample failed. Please open output channel for details."), DialogType.error);
     }
 }
@@ -231,7 +231,7 @@ export async function testCustomSample(ptaCode: IPtaCode, index: number): Promis
             }
         });
     } catch (error: any) {
-        ptaChannel.appendLine(error.toString());
+        ptaChannel.error(error.toString());
         await promptForOpenOutputChannel(l10n.t("Testing sample failed. Please open output channel for details."), DialogType.error);
     }
 }

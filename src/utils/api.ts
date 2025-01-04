@@ -36,7 +36,7 @@ class PtaAPI {
     public async getDashSections(): Promise<IDashSection[]> {
         const filePath = path.join(cacheDirPath, "dashboard.json");
         if (await fs.pathExists(filePath)) {
-            ptaChannel.appendLine(`[INFO] Read the cache of dashboard from the "${filePath}"`);
+            ptaChannel.info(`Read the cache of dashboard from the "${filePath}"`);
             return await fs.readJSON(filePath);
         }
 
@@ -57,7 +57,7 @@ class PtaAPI {
     public async getAlwaysAvailableProblemSets(cookie?: string, onlyProgrammingProblem: boolean = true): Promise<IProblemSet[]> {
         const filePath = path.join(cacheDirPath, "always_available_problem_sets.json");
         if (await fs.pathExists(filePath)) {
-            ptaChannel.appendLine(`[INFO] Read the cache of always available problem sets from the "${filePath}"`);
+            ptaChannel.info(`Read the cache of always available problem sets from the "${filePath}"`);
             const problemSets: IProblemSet[] = await fs.readJSON(filePath) ?? [];
             if (problemSets.length > 0) {
                 return problemSets;
@@ -101,7 +101,7 @@ class PtaAPI {
     public async getMyProblemSets(cookie?: string, onlyActive: boolean = true): Promise<IProblemSet[]> {
         const filePath = path.join(cacheDirPath, onlyActive ? "my_problem_sets_active.json" : "my_problem_sets_all.json");
         if (await fs.pathExists(filePath)) {
-            ptaChannel.appendLine(`[INFO] Read the cache of my problem sets from the "${filePath}"`);
+            ptaChannel.info(`Read the cache of my problem sets from the "${filePath}"`);
             const problemSets: IProblemSet[] = await fs.readJSON(filePath) ?? [];
             if (problemSets.length > 0) {
                 return problemSets;
@@ -184,7 +184,7 @@ class PtaAPI {
     public async getAllProblemInfoList(psID: string, problemType: ProblemType): Promise<IProblemInfo[]> {
         const filePath = path.join(cacheDirPath, psID, problemType + ".json");
         if (await fs.pathExists(filePath)) {
-            ptaChannel.appendLine(`[INFO] Read the problem list from the "${filePath}"`);
+            ptaChannel.info(`Read the problem list from the "${filePath}"`);
             const problemInfoList: IProblemInfo[] = await fs.readJSON(filePath) ?? [];
             if (problemInfoList.length > 0) {
                 return problemInfoList;
@@ -217,7 +217,7 @@ class PtaAPI {
         }
         const filePath = path.join(cacheDirPath, psID, problemType + ".json");
         if (await fs.pathExists(filePath)) {
-            ptaChannel.appendLine(`[INFO] Read the problem list from the "${filePath}"`);
+            ptaChannel.info(`Read the problem list from the "${filePath}"`);
             const problemInfoList: Array<IProblemInfo> = await fs.readJSON(filePath);
             for (const item of problemInfoList) {
                 if (item["id"] === pID) {
@@ -261,7 +261,7 @@ class PtaAPI {
         // That cookie is not undefined denotes requirement for submission result, therefore, 
         // the problem need to be updated.
         if (!cookie && await fs.pathExists(filePath)) {
-            ptaChannel.appendLine(`[INFO] Read the problem detail from the "${filePath}"`);
+            ptaChannel.info(`Read the problem detail from the "${filePath}"`);
             return await fs.readJSON(filePath);
         }
 
@@ -319,7 +319,7 @@ class PtaAPI {
     }
 
     public async createProblemSetExam(psID: string, cookie?: string): Promise<void> {
-        ptaChannel.appendLine(`[INFO] Try to create the exam of problem set ${psID}`);
+        ptaChannel.info(`Try to create the exam of problem set ${psID}`);
         await httpPost(`${this.problemUrl}/${psID}/exams`, cookie);
     }
 
@@ -353,7 +353,7 @@ class PtaAPI {
     public async getProblemSet(psID: string): Promise<IProblemSet> {
         const filePath = path.join(cacheDirPath, psID + ".json");
         if (await fs.pathExists(filePath)) {
-            ptaChannel.appendLine(`[INFO] Read the information of problem set from the "${filePath}"`);
+            ptaChannel.info(`Read the information of problem set from the "${filePath}"`);
             return await fs.readJSON(filePath);
         }
         const problemSet = await httpGet(`${this.problemUrl}/${psID}/exams`).then(json => json["problemSet"]);
@@ -491,7 +491,7 @@ class PtaAPI {
             }
             return allProblems;
         } catch (error: any) {
-            ptaChannel.appendLine(`[ERROR]: ${error.toString()}. The delay is too short.`);
+            ptaChannel.error(`${error.toString()}. The delay is too short.`);
         }
         return {};
     }

@@ -36,7 +36,7 @@ class PtaCookieAuthProvider implements IUserAuthProvider {
                 }
                 resolve(userSession);
             } catch (error: any) {
-                ptaChannel.append(error.toString());
+                ptaChannel.error(error.toString());
                 vscode.window.showErrorMessage(error.toString());
                 resolve(undefined);
             }

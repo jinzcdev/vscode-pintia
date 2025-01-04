@@ -67,7 +67,7 @@ class FavoriteProblemsManager implements Disposable {
                 this.favoriteProblems = JSON.parse(data);
             }
         } catch (error: any) {
-            ptaChannel.appendLine(error.toString());
+            ptaChannel.error(error.toString());
             await promptForOpenOutputChannel(l10n.t("Failed to load favorite problems. Please open the output channel for details."), DialogType.error);
         }
     }
@@ -78,7 +78,7 @@ class FavoriteProblemsManager implements Disposable {
             fs.mkdirSync(path.dirname(this.filePath), { recursive: true });
             fs.writeFileSync(this.filePath, JSON.stringify(this.favoriteProblems));
         } catch (error: any) {
-            ptaChannel.appendLine(error.toString());
+            ptaChannel.error(error.toString());
             await promptForOpenOutputChannel(l10n.t("Failed to save favorite problems. Please open the output channel for details."), DialogType.error);
         }
     }

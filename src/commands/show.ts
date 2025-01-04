@@ -88,7 +88,7 @@ export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
             await vscode.window.showTextDocument(fileUri, { preview: false, viewColumn: vscode.ViewColumn.Two });
         }
     } catch (error: any) {
-        ptaChannel.appendLine(error.toString());
+        ptaChannel.error(error.toString());
         await promptForOpenOutputChannel(l10n.t("Coding the problem failed. Please open the output channel for details."), DialogType.error);
     }
 }
@@ -117,7 +117,7 @@ async function fetchProblemIndex(): Promise<Array<IProblemSearchItem>> {
     const problems: Array<IProblemSearchItem> = [];
     try {
         const searchIndex = await fs.readJSON(searchIndexPath);
-        ptaChannel.appendLine("[INFO] Fetched the problem search index from the local");
+        ptaChannel.info("Fetched the problem search index from the local");
 
         const ignoredLocked: boolean = ptaConfig.getSearchIndexIgnoreLockedProblemSets();
         const ignoredZOJ: boolean = ptaConfig.getSearchIndexIgnoreZOJ();
@@ -139,7 +139,7 @@ async function fetchProblemIndex(): Promise<Array<IProblemSearchItem>> {
             }
         }
     } catch (e: any) {
-        ptaChannel.appendLine(e.toString());
+        ptaChannel.error(e.toString());
         await promptForOpenOutputChannel(l10n.t("Failed to fetch the problem search index. Please open the output channel for details."), DialogType.error);
     }
 

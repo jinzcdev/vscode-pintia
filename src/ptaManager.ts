@@ -71,14 +71,14 @@ class PtaManager extends EventEmitter {
                         await fs.createFile(userSessionPath);
                         await fs.writeJson(userSessionPath, userSession)
                             .catch(reason => {
-                                ptaChannel.appendLine(reason);
+                                ptaChannel.info(reason);
                                 reject(reason);
                             });
                         vscode.window.showInformationMessage(l10n.t("Successfully logged in as {0}", userSession.user));
                         this.userSession = userSession;
                         this.userStatus = UserStatus.SignedIn;
 
-                        ptaChannel.appendLine(`Login successfully and save \`user.json\` to ${path}`);
+                        ptaChannel.info(`Login successfully and save \`user.json\` to ${path}`);
 
                         this.emit("statusChanged");
                     }
@@ -86,7 +86,7 @@ class PtaManager extends EventEmitter {
                     resolve();
                 }
                 catch (error: any) {
-                    ptaChannel.appendLine(error.toString());
+                    ptaChannel.error(error.toString());
                     await promptForOpenOutputChannel(`Failed to login PTA. Please open the output channel for details.`, DialogType.error);
                     reject(error);
                 }
@@ -104,7 +104,7 @@ class PtaManager extends EventEmitter {
 
                 await Promise.all([userAuthProvider.signOut(loginSession.cookie), fs.remove(userFilePath), cache.clearCache()]);
                 vscode.window.showInformationMessage(l10n.t("Successfully signed out."));
-                ptaChannel.appendLine(`[INFO] Logout the current user successfully and remove user information from ${userFilePath}.`);
+                ptaChannel.info(`Logout the current user successfully and remove user information from ${userFilePath}.`);
             } else {
                 vscode.window.showInformationMessage(l10n.t("The user is not logged in."));
                 return;
@@ -114,7 +114,7 @@ class PtaManager extends EventEmitter {
             this.userStatus = UserStatus.SignedOut;
             this.emit("statusChanged");
         } catch (error: any) {
-            ptaChannel.appendLine(error.toString());
+            ptaChannel.error(error.toString());
             promptForOpenOutputChannel(l10n.t("Signout failed. Please open the output channel for details."), DialogType.error)
         }
     }
@@ -123,7 +123,7 @@ class PtaManager extends EventEmitter {
         const filePath = path.join(configPath, "user.json");
         try {
             if (await fs.pathExists(filePath)) {
-                ptaChannel.appendLine(`[INFO] Read the user session from the "${filePath}"`);
+                ptaChannel.info(`Read the user session from the "${filePath}"`);
                 const loginSession: IUserSession = await fs.readJSON(filePath);
                 const user: IPtaUser | undefined = await ptaApi.getCurrentUser(loginSession.cookie);
                 if (user) {
@@ -134,7 +134,7 @@ class PtaManager extends EventEmitter {
                     this.userStatus = UserStatus.SignedIn;
 
                     fs.writeJson(filePath, loginSession).catch(async reason => {
-                        ptaChannel.appendLine(`[ERROR]: ${reason.toString()}`);
+                        ptaChannel.error(reason.toString());
                         await promptForOpenOutputChannel(l10n.t("Update user profile failed. Please open the output channel for details."), DialogType.error);
                     });
                 } else {
