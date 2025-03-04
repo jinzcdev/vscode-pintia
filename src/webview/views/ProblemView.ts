@@ -125,8 +125,8 @@ export class ProblemView {
             psName: problem.problemSetName,
             problemType: problem.type as ProblemType,
             compiler: compiler,
-            title: `${problem.label} ${problem.title}`
-
+            label: problem.label,
+            title: problem.title
         };
     }
 }

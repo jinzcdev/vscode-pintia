@@ -70,6 +70,29 @@ class PtaConfig {
         this.update("filePath", filePath);
     }
 
+    public getProblemFileName(): string {
+        return this.getConfiguration().get<string>("file.problemFileNameFormat", "{label} {title}");
+    }
+
+    public setProblemFileName(fileName: string) {
+        this.update("file.problemFileNameFormat", fileName);
+    }
+
+    public getReplaceSpaceWithUnderscore(): boolean {
+        return this.getConfiguration().get<boolean>("file.replaceSpaceWithUnderscore", false);
+    }
+
+    public setReplaceSpaceWithUnderscore(replace: boolean) {
+        this.update("file.replaceSpaceWithUnderscore", replace);
+    }
+    
+    public getConvertChineseCharacters(): boolean {
+        return this.getConfiguration().get<boolean>("file.convertChineseCharacters", false);
+    }
+    
+    public setConvertChineseCharacters(convert: boolean) {
+        this.update("file.convertChineseCharacters", convert);
+    }
 
     public getEditorShortcuts(): string[] {
         return this.getConfiguration().get<string[]>("editor.shortcuts", []);

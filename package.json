@@ -306,6 +306,27 @@
                     "markdownDescription": "%configuration.pintia.previewProblem.defaultOpenedMethod%",
                     "order": 3
                 },
+                "pintia.file.problemFileNameFormat": {
+                    "type": "string",
+                    "default": "{label} {title}",
+                    "scope": "window",
+                    "markdownDescription": "%configuration.pintia.file.problemFileNameFormat%",
+                    "order": 4
+                },
+                "pintia.file.replaceSpaceWithUnderscore": {
+                    "type": "boolean",
+                    "default": false,
+                    "scope": "window",
+                    "markdownDescription": "%configuration.pintia.file.replaceSpaceWithUnderscore%",
+                    "order": 4
+                },
+                "pintia.file.convertChineseCharacters": {
+                    "type": "boolean",
+                    "default": false,
+                    "scope": "window",
+                    "markdownDescription": "%configuration.pintia.file.convertChineseCharacters%",
+                    "order": 4
+                },
                 "pintia.paging.pageSize": {
                     "type": "number",
                     "default": 100,
@@ -628,8 +649,9 @@
         "@vscode/l10n": "^0.0.18",
         "@vscode/markdown-it-katex": "^1.1.0",
         "fs-extra": "11.2.0",
+        "pinyin-pro": "3.26.0",
         "highlight.js": "^11.10.0",
-        "katex": "0.16.11",
+        "katex": "0.16.21",
         "markdown-it": "14.1.0",
         "markdown-it-replace-link": "1.2.1",
         "memory-cache": "^0.2.0",

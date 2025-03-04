@@ -1,9 +1,8 @@
-
 import * as path from "path";
 import * as vscode from "vscode";
 import * as fs from "fs-extra";
 import { selectWorkspaceFolder } from "../utils/workspaceUtils";
-import { commentFormatMapping, compilerLangMapping, IPtaCode, IQuickPickItem, langCompilerMapping, ProblemType, problemTypeInfoMapping, ptaCompiler, searchIndexPath, UNKNOWN, ZOJ_PROBLEM_SET_ID } from "../shared";
+import { compilerLangMapping, IPtaCode, IQuickPickItem, langCompilerMapping, ProblemType, problemTypeInfoMapping, ptaCompiler, searchIndexPath, UNKNOWN, ZOJ_PROBLEM_SET_ID } from "../shared";
 import { ptaChannel } from "../ptaChannel";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import { ptaConfig } from "../ptaConfig";
@@ -13,6 +12,7 @@ import { ptaManager } from "../ptaManager";
 import { IUserSession } from "../entity/userLoginSession";
 import { IProblemSearchItem } from "../entity/IProblemSearchItem";
 import { l10n } from "vscode";
+import { convertChineseCharacters } from "../utils/chineseUtils";
 
 
 export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
@@ -53,14 +53,33 @@ export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
         }
 
         const ext: string = ptaCompiler[defaultCompiler as keyof typeof ptaCompiler].ext;
-        let finalPath: string = path.join(workspaceFolder, `${ptaCode.title!}.${ext}`);
+
+        const fileNameFormat = ptaConfig.getProblemFileName();
+
+        let fileName = fileNameFormat.replace(/{label}/g, ptaCode.label ?? "")
+            .replace(/{title}/g, ptaCode.title ?? "")
+            .replace(/{pid}/g, ptaCode.pID)
+            .replace(/{psid}/g, ptaCode.psID)
+            .replace(/[<>:"/\\|?*]/g, '_').trim() ?? `${ptaCode.label} ${ptaCode.title}`;
+
+        if (ptaConfig.getReplaceSpaceWithUnderscore()) {
+            fileName = fileName.replace(/\s+/g, '_');
+        }
+        if (ptaConfig.getConvertChineseCharacters()) {
+            fileName = convertChineseCharacters(fileName);
+        }
+
+        let finalPath: string = path.join(workspaceFolder, `${fileName}.${ext}`);
         if (ptaConfig.getAutoCreateProblemSetFolder() && ptaCode.psName) {
-            finalPath = path.join(workspaceFolder, ptaCode.psName, `${ptaCode.title!}.${ext}`);
+            // 如果题集名称包含中文且启用了转换中文字符
+            const psName = ptaConfig.getConvertChineseCharacters() ? convertChineseCharacters(ptaCode.psName) : ptaCode.psName;
+            finalPath = path.join(workspaceFolder, psName, `${fileName}.${ext}`);
         }
 
         const fileUri = vscode.Uri.file(finalPath);
 
         if (!await fs.pathExists(finalPath)) {
+            await fs.ensureDir(path.dirname(finalPath));
             await fs.createFile(finalPath);
 
             const problem: IProblem = await ptaApi.getProblem(ptaCode.psID, ptaCode.pID, ptaManager.getUserSession()?.cookie);
