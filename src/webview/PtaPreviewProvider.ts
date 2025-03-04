@@ -1,6 +1,4 @@
 import * as vscode from "vscode";
-import { ptaConfig } from '../ptaConfig';
-import { imgUrlPrefix, langCompilerMapping, ProblemType } from '../shared';
 import { ptaApi } from "../utils/api";
 import { PtaWebviewWithCodeStyle } from "./PtaWebviewWithCodeStyle";
 import * as markdownEngine from './markdownEngine';

@@ -15,7 +15,7 @@ import { favoritesTreeDataProvider } from "./favorites/favoritesTreeDataProvider
 import { ptaChannel } from './ptaChannel';
 import { ptaExecutor } from './ptaExecutor';
 import { ptaManager } from './ptaManager';
-import { configPath, IPtaCode, ProblemType, UserStatus } from './shared';
+import { configPath, IPtaCode, UserStatus } from './shared';
 import { ptaStatusBarController } from './statusbar/ptaStatusBarController';
 import { PtaPreviewProvider } from './webview/PtaPreviewProvider';
 import { ProblemView } from "./webview/views/ProblemView";

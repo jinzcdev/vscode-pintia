@@ -89,6 +89,7 @@ export interface IPtaCode {
     psName?: string;
     problemType?: ProblemType;
     problemSet?: string;
+    label?: string;
     title?: string;
     code?: string;
     customTests?: string[];
