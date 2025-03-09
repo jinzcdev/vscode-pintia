@@ -1,13 +1,12 @@
 import * as vscode from "vscode";
-import { ptaConfig } from '../ptaConfig';
-import { imgUrlPrefix, langCompilerMapping, ProblemType } from '../shared';
+import { IProblemConfig } from "../entity/IProblem";
+import { getGlobalContext } from "../extension";
+import { compilerLangMapping } from '../shared';
 import { ptaApi } from "../utils/api";
+import { getNonce, IWebViewMessage } from "./PtaWebview";
 import { PtaWebviewWithCodeStyle } from "./PtaWebviewWithCodeStyle";
 import * as markdownEngine from './markdownEngine';
 import { ProblemView } from "./views/ProblemView";
-import { getGlobalContext } from "../extension";
-import { getNonce, IWebViewMessage } from "./PtaWebview";
-import { IProblemConfig } from "../entity/IProblem";
 
 export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
 
@@ -40,17 +39,8 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
         const keyword: string = `${problem.label} ${problem.title}`.replace(/ /g, '+');
         const copyButtonScriptUri = this.getWebview()?.asWebviewUri(vscode.Uri.joinPath(getGlobalContext().extensionUri, "media", "main.js"));
         const problemConfig = problem.problemConfig as IProblemConfig;
-        const { codeSizeLimit = -1, timeLimit = -1, memoryLimit = -1, stackSizeLimit = -1 } = problemConfig || {};
-        const performance = {
-            codeSizeLimit: codeSizeLimit !== -1 ? { displayName: "代码长度限制", value: `${codeSizeLimit} KB` } : null,
-            timeLimit: timeLimit !== -1 ? { displayName: "时间限制", value: `${timeLimit} ms` } : null,
-            memoryLimit: memoryLimit !== -1 ? { displayName: "内存限制", value: `${memoryLimit / 1024} MB` } : null,
-            stackSizeLimit: stackSizeLimit !== -1 ? { displayName: "栈限制", value: `${stackSizeLimit} KB` } : null
-        };
-        const performanceHtml = Object.entries(performance)
-            .filter(([_, value]) => value !== null)
-            .map(([_, value]) => `<div class="performance-item"><span class="key">${value!.displayName}</span><span class="value">${value!.value}</span></div>`)
-            .join("");
+
+        const performanceHtml = this.generatePerformanceHtml(problemConfig);
 
         return `
         <div class="header">
@@ -123,6 +113,77 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
             </div>
         </div>
         <script nonce="${getNonce()}" src="${copyButtonScriptUri}"></script>`;
+    }
+
+    private generatePerformanceHtml(problemConfig: IProblemConfig | undefined): string {
+        if (!problemConfig) return '';
+
+        const { codeSizeLimit = -1, timeLimit = -1, memoryLimit = -1, stackSizeLimit = -1, customizeLimits = [] } = problemConfig;
+        let result = '';
+
+        const limitTypesInCustomLimits = new Set<string>();
+
+        customizeLimits.forEach(limit => {
+            Object.entries(limit).forEach(([key, value]) => {
+                if (value !== undefined && key.endsWith('Limit')) {
+                    limitTypesInCustomLimits.add(key);
+                }
+            });
+        });
+
+        // 显示通用的限制条件（不在customizeLimits中出现的）
+        const generateLimitIfNeeded = (key: string, label: string, value: number, unit: string) => {
+            if (value !== -1 && !limitTypesInCustomLimits.has(key)) {
+                result += this.generateLimitHtml(label, `${value} ${unit}`);
+            }
+        };
+
+        generateLimitIfNeeded('codeSizeLimit', '代码长度限制', codeSizeLimit, 'KB');
+        generateLimitIfNeeded('timeLimit', '时间限制', timeLimit, 'ms');
+        generateLimitIfNeeded('memoryLimit', '内存限制', memoryLimit / 1024, 'MB');
+        generateLimitIfNeeded('stackSizeLimit', '栈限制', stackSizeLimit, 'KB');
+
+        if (customizeLimits.length > 0) {
+
+            // 添加每个自定义编译器的限制
+            customizeLimits.forEach(limit => {
+                const compiler = limit.compiler;
+                const compilerName = compilerLangMapping.get(compiler) || compiler;
+
+                result += `<div class="performance-compiler">${compilerName}</div>`;
+
+                const generateCustomLimitIfNeeded = (key: string, label: string, value: number | undefined, unit: string) => {
+                    if (value !== undefined && value !== -1) {
+                        result += this.generateLimitHtml(label, `${value} ${unit}`);
+                    }
+                };
+
+                generateCustomLimitIfNeeded('timeLimit', '时间限制', limit.timeLimit, 'ms');
+                generateCustomLimitIfNeeded('memoryLimit', '内存限制', limit.memoryLimit / 1024, 'MB');
+                generateCustomLimitIfNeeded('stackSizeLimit', '栈限制', limit.stackSizeLimit, 'KB');
+                generateCustomLimitIfNeeded('codeSizeLimit', '代码长度限制', limit.codeSizeLimit, 'KB');
+            });
+
+            // 添加默认/其他编译器的限制
+            const hasDefaultLimits = ['timeLimit', 'memoryLimit', 'stackSizeLimit', 'codeSizeLimit'].some(key =>
+                limitTypesInCustomLimits.has(key) && problemConfig[key as keyof IProblemConfig] !== -1
+            );
+
+            if (hasDefaultLimits) {
+                result += `<div class="performance-compiler">其他编译器</div>`;
+
+                generateLimitIfNeeded('timeLimit', '时间限制', timeLimit, 'ms');
+                generateLimitIfNeeded('memoryLimit', '内存限制', memoryLimit / 1024, 'MB');
+                generateLimitIfNeeded('stackSizeLimit', '栈限制', stackSizeLimit, 'KB');
+                generateLimitIfNeeded('codeSizeLimit', '代码长度限制', codeSizeLimit, 'KB');
+            }
+        }
+
+        return result;
+    }
+
+    private generateLimitHtml(key: string, value: string): string {
+        return `<div class="performance-item"><span class="key">${key}</span><span class="value">${value}</span></div>`;
     }
 
     protected async onDidReceiveMessage(msg: IWebViewMessage): Promise<void> {

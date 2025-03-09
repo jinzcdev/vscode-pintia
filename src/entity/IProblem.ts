@@ -77,9 +77,17 @@ interface ICodeCompletionAndProgrammingProblemConfig {
         output: string;
     }];
     testdataDescriptionCode: string;
-    customizeLimits: [];
+    customizeLimits: [ICustomizeLimit];
     stackSizeLimit: number;
     ignorePresentationError: boolean;
+}
+
+interface ICustomizeLimit {
+    compiler: string;
+    codeSizeLimit: number;
+    timeLimit: number;
+    memoryLimit: number;
+    stackSizeLimit: number;
 }
 
 /**

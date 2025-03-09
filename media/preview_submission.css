@@ -404,3 +404,12 @@ td {
 .performance-item .value {
     text-align: right;
 }
+
+.performance-compiler {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.25rem 0;
+    font-size: 0.9rem;
+    font-style: italic;
+    color: var(--vscode-descriptionForeground);
+}

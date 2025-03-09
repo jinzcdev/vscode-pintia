@@ -19,7 +19,7 @@ import { l10n } from "vscode";
 export async function submitSolution(ptaCode: IPtaCode): Promise<void> {
     try {
         if (!ptaCode.code) {
-            vscode.window.showInformationMessage(l10n.t("The code must be wrapped in `@pintia code=start` and `@pintia code=end`"));
+            vscode.window.showWarningMessage(l10n.t("The code must be wrapped in `@pintia code=start` and `@pintia code=end`"));
             return;
         }
 
@@ -47,7 +47,7 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
     try {
 
         if (!ptaCode.code) {
-            vscode.window.showWarningMessage("The code must be wrapped in `@pintia code=start` and `@pintia code=end`");
+            vscode.window.showWarningMessage(l10n.t("The code must be wrapped in `@pintia code=start` and `@pintia code=end`"));
             return;
         }
 
