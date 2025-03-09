@@ -1,5 +1,3 @@
-
-
 (function () {
     const vscode = acquireVsCodeApi();
     let button;
@@ -24,6 +22,40 @@
             vscode.postMessage({
                 type: 'command',
                 value: 'pintia.previewProblem'
+            });
+        };
+    }
+
+    if (button = document.getElementById('btnMoreActions')) {
+        button.onclick = (event) => {
+            event.stopPropagation();
+            const menu = document.querySelector('.more-actions-menu');
+            menu.classList.toggle('show');
+
+            const closeMenu = (e) => {
+                if (!menu.contains(e.target) && !button.contains(e.target)) {
+                    menu.classList.remove('show');
+                    document.removeEventListener('click', closeMenu);
+                }
+            };
+            document.addEventListener('click', closeMenu);
+        };
+    }
+
+    // 为更多操作菜单中的所有按钮添加事件处理
+    const moreActionsButtons = document.querySelectorAll('.more-actions-menu button');
+    moreActionsButtons.forEach(menuButton => {
+        menuButton.addEventListener('click', () => {
+            const menu = document.querySelector('.more-actions-menu');
+            menu.classList.remove('show');
+        });
+    });
+
+    if (button = document.getElementById('btnCopyProblemContent')) {
+        button.onclick = () => {
+            vscode.postMessage({
+                type: 'command',
+                value: 'pintia.copyContent'
             });
         };
     }

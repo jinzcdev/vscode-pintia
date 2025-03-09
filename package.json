@@ -629,7 +629,7 @@
         "@vscode/markdown-it-katex": "^1.1.0",
         "fs-extra": "11.2.0",
         "highlight.js": "^11.10.0",
-        "katex": "0.16.11",
+        "katex": "^0.16.21",
         "markdown-it": "14.1.0",
         "markdown-it-replace-link": "1.2.1",
         "memory-cache": "^0.2.0",

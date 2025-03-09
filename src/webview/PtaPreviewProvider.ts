@@ -91,14 +91,14 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
             ` : ""}
 
             ${markdownEngine.render([
-                "搜索一下: " + [
-                    `[谷歌](https://www.google.com/search?q=${keyword})`,
-                    `[百度](https://www.baidu.com/s?wd=${keyword})`,
-                    `[必应](https://cn.bing.com/search?q=${keyword})`,
-                    `[参考代码(仅部分题目)](https://github.com/jinzcdev/PTA/tree/main/${this.formatProblemSetName(problem.problemSetName)})`
-                ].join(" | "),
-                "<hr>"
-            ].join("\n"))}
+            "搜索一下: " + [
+                `[谷歌](https://www.google.com/search?q=${keyword})`,
+                `[必应](https://cn.bing.com/search?q=${keyword})`,
+                `[百度](https://www.baidu.com/s?wd=${keyword})`,
+                `[参考代码(仅部分题目)](https://github.com/jinzcdev/PTA/tree/main/${this.formatProblemSetName(problem.problemSetName)})`
+            ].join(" | "),
+            "<hr>"
+        ].join("\n"))}
 
             ${problem.lastProgram.trim().length ?
                 markdownEngine.render([
@@ -111,8 +111,16 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
 
         <div class="button-container">
             <button id="btnCheckLastSubmission">查看上次提交</button>
-            <button id="btnUpdate">刷新题目</button>
             <button id="btnSolve">开始编程</button>
+            <div class="right-buttons">
+                <button id="btnMoreActions" class="more-actions-trigger">
+                    <span class="more-actions-icon">⋯</span>
+                </button>
+                <div class="more-actions-menu">
+                    <button id="btnCopyProblemContent">复制题目原文</button>
+                    <button id="btnUpdate">刷新题目</button>
+                </div>
+            </div>
         </div>
         <script nonce="${getNonce()}" src="${copyButtonScriptUri}"></script>`;
     }
@@ -126,12 +134,18 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
                     await vscode.commands.executeCommand("pintia.previewProblem", this.data.ptaCode.psID, this.data.ptaCode.pID, false);
                 } else if (msg.value === "pintia.checkLastSubmission") {
                     await vscode.commands.executeCommand("pintia.checkLastSubmission", this.data.ptaCode);
+                } else if (msg.value.startsWith("pintia.copyContent")) {
+                    const content = this.data.problem.content;
+                    vscode.env.clipboard.writeText(content).then(() => {
+                        vscode.window.showInformationMessage(vscode.l10n.t('Successfully copied to the clipboard!'));
+                    });
                 }
                 break;
             case "text":
-                vscode.window.showInformationMessage(msg.value);
+                vscode.window.showInformationMessage(vscode.l10n.t(msg.value));
                 break;
             default:
+                await super.onDidReceiveMessage(msg);
         }
     }
 

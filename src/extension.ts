@@ -15,7 +15,7 @@ import { favoritesTreeDataProvider } from "./favorites/favoritesTreeDataProvider
 import { ptaChannel } from './ptaChannel';
 import { ptaExecutor } from './ptaExecutor';
 import { ptaManager } from './ptaManager';
-import { configPath, IPtaCode, ProblemType, UserStatus } from './shared';
+import { configPath, IPtaCode, UserStatus } from './shared';
 import { ptaStatusBarController } from './statusbar/ptaStatusBarController';
 import { PtaPreviewProvider } from './webview/PtaPreviewProvider';
 import { ProblemView } from "./webview/views/ProblemView";
@@ -109,6 +109,8 @@ export async function activate(context: vscode.ExtensionContext) {
 				if (data && data.queued === -1 && data.submission.status !== "WAITING" && data.submission.status !== "JUDGING") {
 					PtaSubmissionProvider.createOrUpdate(data).show();
 				}
+			} else {
+				vscode.window.showInformationMessage(vscode.l10n.t("No submission history found!"));
 			}
 		})
 	);

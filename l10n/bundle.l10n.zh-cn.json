@@ -89,5 +89,7 @@
   "Open in new window": "在新窗口中打开",
   "Add to workspace": "添加到工作区",
   "Please save the solution file first.": "请先保存代码源文件。",
-  "Fetching the problem search index...": "正在获取题目搜索索引 ..."
+  "Fetching the problem search index...": "正在获取题目搜索索引 ...",
+  "Successfully copied to the clipboard!": "已复制至剪贴板！",
+  "No submission history found!": "未找到提交历史！"
 }

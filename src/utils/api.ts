@@ -98,9 +98,9 @@ class PtaAPI {
      * @param [onlyActive=true] whether only return the active problem sets.
      * @returns 
      */
-    public async getMyProblemSets(cookie?: string, onlyActive: boolean = true): Promise<IProblemSet[]> {
+    public async getMyProblemSets(cookie?: string, onlyActive: boolean = true, cached: boolean = false): Promise<IProblemSet[]> {
         const filePath = path.join(cacheDirPath, onlyActive ? "my_problem_sets_active.json" : "my_problem_sets_all.json");
-        if (await fs.pathExists(filePath)) {
+        if (cached && await fs.pathExists(filePath)) {
             ptaChannel.info(`Read the cache of my problem sets from the "${filePath}"`);
             const problemSets: IProblemSet[] = await fs.readJSON(filePath) ?? [];
             if (problemSets.length > 0) {
