@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { ptaConfig } from "../ptaConfig";
 import { IPtaCode } from "../shared";
 import { l10n } from "vscode";
+import { parseCodeBlock, parseCodeInfo, getCodeLensRange, ICodeBlock } from "../utils/editorUtils";
 
 export class CustomCodeLensProvider implements vscode.CodeLensProvider<PtaCodeLens> {
 
@@ -22,15 +23,15 @@ export class CustomCodeLensProvider implements vscode.CodeLensProvider<PtaCodeLe
         }
 
         const content: string = document.getText();
-        const ptaCode: IPtaCode | null = this.parseCodeInfo(content);
+        const ptaCode: IPtaCode | null = parseCodeInfo(content);
         if (!ptaCode) {
             return undefined;
         }
 
-        const range: vscode.Range = this.getCodeLensRange(document, /@pintia\s+code=end/g)[0];
+        const range: vscode.Range = getCodeLensRange(document, /@pintia\s+code=end/g)[0];
         const codeLens: PtaCodeLens[] = shortcuts.map(shortcut => new PtaCodeLens(range, document.uri.fsPath, content, shortcut));
 
-        const customTestRanges: vscode.Range[] = this.getCodeLensRange(document, /@pintia\s+test=start/g);
+        const customTestRanges: vscode.Range[] = getCodeLensRange(document, /@pintia\s+test=start/g);
         for (let i = 0; i < customTestRanges.length; i++) {
             codeLens.push(new PtaCodeLens(customTestRanges[i], document.uri.fsPath, content, "customTest", i));
         }
@@ -40,15 +41,15 @@ export class CustomCodeLensProvider implements vscode.CodeLensProvider<PtaCodeLe
     public resolveCodeLens(codeLens: PtaCodeLens, token: vscode.CancellationToken): vscode.ProviderResult<PtaCodeLens> {
         if (codeLens instanceof PtaCodeLens) {
             const command = codeLens.commandTitle;
-            const ptaCode: IPtaCode | null = this.parseCodeInfo(codeLens.codeContent);
+            const ptaCode: IPtaCode | null = parseCodeInfo(codeLens.codeContent);
             if (!ptaCode) {
                 return codeLens;
             }
-            const code: ICodeBlock[] = this.parseCodeBlock(codeLens.codeContent, "@pintia\\s+code=start\\s*?\\n", "\\n[^\\n]*?@pintia\\s+code=end");
+            const code: ICodeBlock[] = parseCodeBlock(codeLens.codeContent, "@pintia\\s+code=start\\s*?\\n", "\\n[^\\n]*?@pintia\\s+code=end");
             if (code.length !== 0) {
                 ptaCode.code = code[0].code;
             }
-            const customTests: ICodeBlock[] = this.parseCodeBlock(codeLens.codeContent, "@pintia\\s+test=start\\s*?\\n", "\\n[^\\n]*?@pintia\\s+test=end");
+            const customTests: ICodeBlock[] = parseCodeBlock(codeLens.codeContent, "@pintia\\s+test=start\\s*?\\n", "\\n[^\\n]*?@pintia\\s+test=end");
             ptaCode.customTests = customTests.map((value, _) => value.code);
 
             if (command === "Submit") {
@@ -79,46 +80,6 @@ export class CustomCodeLensProvider implements vscode.CodeLensProvider<PtaCodeLe
         }
         return codeLens;
     }
-
-    private parseCodeInfo(data: string): IPtaCode | null {
-        const matchResult: RegExpMatchArray | null = data.match(/@pintia\s+psid=(\S+)\s+pid=(\S+)\s+compiler=(\S+)/);
-        if (!matchResult) {
-            return null;
-        }
-        return {
-            psID: matchResult[1],
-            pID: matchResult[2],
-            compiler: matchResult[3]
-        }
-    }
-
-    private parseCodeBlock(data: string, start: string, end: string): ICodeBlock[] {
-        const codeblock: ICodeBlock[] = [];
-        const regex = new RegExp(`${start}([\\s\\S]*?)${end}`, 'g');
-        let match;
-        while ((match = regex.exec(data)) !== null) {
-            const code = match[1].trim();
-            if (code.length > 0) {
-                const startLine = data.substring(0, match.index).split('\n').length;
-                codeblock.push({
-                    lineNum: startLine,
-                    code: code
-                });
-            }
-        }
-        return codeblock;
-    }
-
-    private getCodeLensRange(document: vscode.TextDocument, regex: RegExp): vscode.Range[] {
-        const text = document.getText();
-        const ranges = [];
-        let matches, textLine = document.lineAt(document.lineCount - 1);
-        while ((matches = regex.exec(text)) !== null) {
-            textLine = document.lineAt(document.positionAt(matches.index).line);
-            textLine?.range && ranges.push(textLine.range);
-        }
-        return ranges;
-    }
 }
 
 class PtaCodeLens extends vscode.CodeLens {
@@ -131,11 +92,6 @@ class PtaCodeLens extends vscode.CodeLens {
     ) {
         super(range);
     }
-}
-
-interface ICodeBlock {
-    lineNum: number;
-    code: string
 }
 
 export const customCodeLensProvider: CustomCodeLensProvider = new CustomCodeLensProvider();

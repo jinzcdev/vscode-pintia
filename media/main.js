@@ -17,6 +17,14 @@
             });
         };
     }
+    document.addEventListener('keydown', (event) => {
+        // 检测 Ctrl+Enter 或 Cmd+Enter
+        if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+            const solveButton = document.getElementById('btnSolve');
+            solveButton && solveButton.click();
+        }
+    });
+
     if (button = document.getElementById('btnUpdate')) {
         button.onclick = () => {
             vscode.postMessage({

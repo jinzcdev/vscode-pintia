@@ -101,7 +101,7 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
 
         <div class="button-container">
             <button id="btnCheckLastSubmission">查看上次提交</button>
-            <button id="btnSolve">开始编程</button>
+            <button id="btnSolve" title="⌘/Ctrl+Enter">开始编程</button>
             <div class="right-buttons">
                 <button id="btnMoreActions" class="more-actions-trigger">
                     <span class="more-actions-icon">⋯</span>

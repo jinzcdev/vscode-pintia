@@ -159,6 +159,7 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
                     return;
                 }
                 testInput = customTests[testChoice.value];
+                testOutput = getTestInputAnswerFromExampleTestDatas(problem, testInput) ?? "";
             } else {
                 vscode.window.showErrorMessage(l10n.t("No custom test samples found. Please check the format of the test code blocks."));
                 return;

@@ -599,6 +599,24 @@
                     }
                 ]
             }
+        ],
+        "keybindings": [
+            {
+                "command": "pintia.submitSolutionByShortcut",
+                "key": "cmd+shift+j",
+                "mac": "cmd+shift+j",
+                "win": "ctrl+shift+j",
+                "linux": "ctrl+shift+j",
+                "when": "editorTextFocus && pintia.validCodeFile"
+            },
+            {
+                "command": "pintia.testSolutionByShortcut",
+                "key": "cmd+shift+k",
+                "mac": "cmd+shift+k",
+                "win": "ctrl+shift+k",
+                "linux": "ctrl+shift+k",
+                "when": "editorTextFocus && pintia.validCodeFile"
+            }
         ]
     },
     "scripts": {
