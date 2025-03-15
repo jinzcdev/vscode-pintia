@@ -109,6 +109,7 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
                 <div class="more-actions-menu">
                     <button id="btnCopyProblemContent">复制题目原文</button>
                     <button id="btnUpdate">刷新题目</button>
+                    <button id="btnOpenGuide">查看插件使用指南</button>
                 </div>
             </div>
         </div>
@@ -195,11 +196,13 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
                     await vscode.commands.executeCommand("pintia.previewProblem", this.data.ptaCode.psID, this.data.ptaCode.pID, false);
                 } else if (msg.value === "pintia.checkLastSubmission") {
                     await vscode.commands.executeCommand("pintia.checkLastSubmission", this.data.ptaCode);
-                } else if (msg.value.startsWith("pintia.copyContent")) {
+                } else if (msg.value === "pintia.copyContent") {
                     const content = this.data.problem.content;
                     vscode.env.clipboard.writeText(content).then(() => {
                         vscode.window.showInformationMessage(vscode.l10n.t('Successfully copied to the clipboard!'));
                     });
+                } else if (msg.value === "pintia.openGuide") {
+                    await vscode.commands.executeCommand("pintia.welcome");
                 }
                 break;
             case "text":

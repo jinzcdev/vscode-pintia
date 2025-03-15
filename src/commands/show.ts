@@ -7,6 +7,7 @@ import { ptaChannel } from "../ptaChannel";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import { ptaConfig } from "../ptaConfig";
 import { ptaApi } from "../utils/api";
+import * as stringUtils from "../utils/stringUtils";
 import { IProblem } from "../entity/IProblem";
 import { ptaManager } from "../ptaManager";
 import { IUserSession } from "../entity/userLoginSession";
@@ -72,7 +73,13 @@ export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
         let finalPath: string = path.join(workspaceFolder, `${fileName}.${ext}`);
         if (ptaConfig.getAutoCreateProblemSetFolder() && ptaCode.psName) {
             // 如果题集名称包含中文且启用了转换中文字符
-            const psName = ptaConfig.getConvertChineseCharacters() ? convertChineseCharacters(ptaCode.psName) : ptaCode.psName;
+            let psName = ptaConfig.getConvertChineseCharacters() ? convertChineseCharacters(ptaCode.psName) : ptaCode.psName;
+            const customName = ptaConfig.getCustomProblemSetName()[ptaCode.psID];
+            if (customName && stringUtils.isValidFileName(customName)) {
+                psName = customName;
+            } else if (customName) {
+                vscode.window.showWarningMessage(l10n.t("The custom problem set name contains invalid characters. The default problem set name will be used."));
+            }
             finalPath = path.join(workspaceFolder, psName, `${fileName}.${ext}`);
         }
 

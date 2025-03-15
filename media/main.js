@@ -68,6 +68,15 @@
         };
     }
 
+    if (button = document.getElementById('btnOpenGuide')) {
+        button.onclick = () => {
+            vscode.postMessage({
+                type: 'command',
+                value: 'pintia.openGuide'
+            });
+        };
+    }
+
     var lst_pre = document.getElementsByTagName("pre");
     for (const pre of lst_pre) {
         const copyButton = document.createElement('button');

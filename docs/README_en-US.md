@@ -3,7 +3,7 @@
 > Solve PTA problems in VS Code
 
 <p align="center">
-  <img style="width: 65%; max-width: 75%;" src="./docs/imgs/vscode-pintia-logo.png" alt="">
+  <img style="width: 65%; max-width: 75%;" src="./imgs/vscode-pintia-logo.png" alt="">
 </p>
 
 <p align="center">
@@ -145,24 +145,23 @@ Use `Ctrl+Shift+P` (in Windows) or `Command+Shift+P` (in MacOS) to open the comm
 | `pintia.clearViewedProblems`       | Clear Problem Preview History |                                                                                                  |
 | `pintia.clearFavoriteProblems`     | Clear My Favorites            |                                                                                                  |
 
-## 3. Settings
+## 3. Main Settings
 
 | Setting Name                                 | Description                                                                                                                                                                                        | Default Value                   |
 | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
 | `pintia.workspaceFolder`                     | Specify the path of the workspace folder to store the problem files.                                                                                                                               | `""`                            |
-| `pintia.previewProblem.openAndCodeIt`        | Specify whether to automatically open the code editor when previewing a problem. It is recommended not to set `#pintia.previewProblem.defaultOpenedMethod#` to `Always Ask` when enabled.          | `false`                         |
-| `pintia.previewProblem.defaultOpenedMethod`  | Specify the method of opening the code editor when previewing a problem and the default is `Always Ask`.                                                                                           | `Always Ask`                    |
-| `pintia.paging.pageSize`                     | Specify whether to page the problem list when the problem set is too large. It is not paged when pageSize is 0.                                                                                    | `100`                           |
-| `pintia.codeColorTheme`                      | Specify the code color theme.                                                                                                                                                                      | `atom-one`                      |
-| `pintia.showLocked`                          | Show locked problems.                                                                                                                                                                              | `true`                          |
-| `pintia.enableStatusBar`                     | Specify whether the Pintia status bar is displayed.                                                                                                                                                | `true`                          |
-| `pintia.autoCheckIn`                         | Specify whether to automatically check in Pintia's education supermarket when the Pintia Extension is activated.                                                                                   | `true`                          |
 | `pintia.defaultLanguage`                     | Default language for solving the problems.                                                                                                                                                         | `C++ (g++)`                     |
+| `pintia.previewProblem.openAndCodeIt`        | Specify whether to automatically open the code editor when previewing a problem. It is recommended not to set `#pintia.previewProblem.defaultOpenedMethod#` to `Always Ask` when enabled.          | `false`                         |
+| `pintia.paging.pageSize`                     | Specify whether to page the problem list when the problem set is too large. It is not paged when pageSize is 0.                                                                                    | `100`                           |
+| `pintia.autoCreateProblemSetFolder`          | Specify whether to automatically create a problem set folder and place source code files in this directory when coding a problem.                                                                  | `true`                          |
 | `pintia.editor.shortcuts`                    | Customize the shortcuts in editors.                                                                                                                                                                | `["Submit", "Test", "Preview"]` |
+| `pintia.autoCheckIn`                         | Specify whether to automatically check in Pintia's education supermarket when the Pintia Extension is activated.                                                                                   | `true`                          |
+| `pintia.file.problemFileNameFormat`          | Set the naming format of the problem file. Supports variables: `{label}` (problem label), `{title}` (problem title), `{pid}` (problem ID), `{psid}` (problem set ID).                              | `{label} {title}`               |
+| `pintia.file.replaceSpaceWithUnderscore`     | Specify whether to replace spaces in problem file names with underscores. When enabled, "A1001 Hello World" will become "A1001_Hello_World".                                                       | `false`                         |
+| `pintia.file.convertChineseCharacters`       | Convert Chinese characters in the problem file name to pinyin and Chinese punctuation to English punctuation to avoid compilation or debugging issues with some compilers.                         | `false`                         |
+| `pintia.file.customProblemSetName`           | Customize the problem set folder name. Accepts a JSON string that maps the problem set ID to a custom name and has the highest priority.                                                           | `{}`                            |
 | `pintia.searchIndex.ignoreZOJ`               | Specify whether to ignore the problem set, ***ZOJ Problem Set***, in the problem search index.                                                                                                     | `true`                          |
 | `pintia.searchIndex.ignoreLockedProblemSets` | Specify whether to ignore locked problem sets in the problem search index.                                                                                                                         | `true`                          |
-| `pintia.searchIndex.autoRefresh`             | Specify whether to automatically refresh exercise problem search index when the Pintia Extension is activated. It is not recommended to set it due to the low-frequency update and time-consuming. | `false`                         |
-| `pintia.autoCreateProblemSetFolder`          | Specify whether to automatically create a problem set folder and place source code files in this directory when coding a problem.                                                                  | `true`                          |
 | `pintia.problemHistoryListSize`              | Specify the size of the problem preview history list.                                                                                                                                              | `200`                           |
 
 ## 4. Want Help?

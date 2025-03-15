@@ -8,8 +8,8 @@
   "Submitting solution Failed. Please open output channel for details.": "提交解决方案失败，请打开输出通道查看详情。",
   "Testing sample failed. Please open the output channel for details.": "测试样例失败，请打开输出通道查看详情。",
   "Failed to test!": "测试失败",
-  "Failed to load viewed problems. Please check the output channel for details.": "加载已查看题目失败，请检查输出通道查看详情。",
-  "Failed to save viewed problems. Please check the output channel for details.": "保存已查看题目失败，请检查输出通道查看详情。",
+  "Failed to load viewed problems. Please check the output channel for details.": "加载已查看题目失败，请打开输出通道查看详情。",
+  "Failed to save viewed problems. Please check the output channel for details.": "保存已查看题目失败，请打开输出通道查看详情。",
   "Failed to load favorite problems. Please open the output channel for details.": "加载收藏题目失败，请打开输出通道查看详情。",
   "Failed to save favorite problems. Please open the output channel for details.": "保存收藏题目失败，请打开输出通道查看详情。",
   "Failed to fetch the problem list. Please open the output channel for details.": "获取题目列表失败，请打开输出通道查看详情。",
@@ -91,5 +91,7 @@
   "Please save the solution file first.": "请先保存代码源文件。",
   "Fetching the problem search index...": "正在获取题目搜索索引 ...",
   "Successfully copied to the clipboard!": "已复制至剪贴板！",
-  "No submission history found!": "未找到提交历史！"
+  "No submission history found!": "未找到提交历史！",
+  "Failed to parse custom problem set name JSON. Please check the output channel for details.": "解析自定义题目集名称 JSON 失败，请打开输出通道查看详情。",
+  "The custom problem set name contains invalid characters. The default problem set name will be used.": "自定义题目集名称包含无效字符，将使用默认题目集名称。"
 }

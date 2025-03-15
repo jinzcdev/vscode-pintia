@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
 import { OpenOptionEnum } from "./utils/workspaceUtils";
+import { ptaChannel } from "./ptaChannel";
+import { DialogType, promptForOpenOutputChannel } from "./utils/uiUtils";
 
 class PtaConfig {
 
@@ -85,13 +87,33 @@ class PtaConfig {
     public setReplaceSpaceWithUnderscore(replace: boolean) {
         this.update("file.replaceSpaceWithUnderscore", replace);
     }
-    
+
     public getConvertChineseCharacters(): boolean {
         return this.getConfiguration().get<boolean>("file.convertChineseCharacters", false);
     }
-    
+
     public setConvertChineseCharacters(convert: boolean) {
         this.update("file.convertChineseCharacters", convert);
+    }
+
+    public getCustomProblemSetName(): Record<string, string> {
+        try {
+            const customNameJson = this.getConfiguration().get<string>("file.customProblemSetName", "{}");
+            if (!customNameJson.trim()) {
+                return {};
+            }
+            return JSON.parse(customNameJson);
+        } catch (error: any) {
+            ptaChannel.error(error.toString());
+            promptForOpenOutputChannel(vscode.l10n.t("Failed to parse custom problem set name JSON. Please check the output channel for details."), DialogType.error);
+            return {};
+        }
+    }
+
+    public setCustomProblemSetName(customNameJson: string) {
+        if (customNameJson.trim()) {
+            this.update("file.customProblemSetName", customNameJson);
+        }
     }
 
     public getEditorShortcuts(): string[] {

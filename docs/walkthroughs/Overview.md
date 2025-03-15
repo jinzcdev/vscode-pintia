@@ -1,6 +1,8 @@
 # 概述
 
-![VSCode Pintia Logo](../imgs/vscode-pintia-logo.png)
+<img src="../imgs/vscode-pintia-logo.png" width="80%" />
+
+查看 Pintia 插件的发布日志：[Release Notes](https://github.com/jinzcdev/vscode-pintia/releases)
 
 ## 特色功能
 
@@ -8,11 +10,11 @@
 2. 检测题目中的输入样例，快速提交测试
 3. 支持使用 Markdown 语法添加笔记
 4. 一键搜索题解或查看插件作者的参考代码
-5. 自动签到拼题A教育商店
+5. 自动签到拼题 A 教育商店
 
 ## 插件详细功能介绍
 
-1. 在 VS Code 中登录 拼题A
+1. 在 VS Code 中登录 拼题 A
 2. 预览习题、自动创建源文件
 3. 快速提交、测试你的代码
 4. 在源文件中嵌入自定义测试样例并提交测试
