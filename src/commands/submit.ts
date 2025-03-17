@@ -38,8 +38,9 @@ export async function submitSolution(ptaCode: IPtaCode): Promise<void> {
                     vscode.window.showInformationMessage(l10n.t("submission failed!"));
             }
         });
-    } catch (error) {
-        await promptForOpenOutputChannel(`Failed to submit the solution. Please open the output channel for details.`, DialogType.error);
+    } catch (error: any) {
+        ptaChannel.error(error);
+        await promptForOpenOutputChannel(l10n.t(`Failed to submit your code. Please check the output channel for details.`), DialogType.error);
     }
 }
 
@@ -208,8 +209,8 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
             }
         });
     } catch (error: any) {
-        ptaChannel.error(error.toString());
-        await promptForOpenOutputChannel(l10n.t("Testing sample failed. Please open output channel for details."), DialogType.error);
+        ptaChannel.error(error);
+        await promptForOpenOutputChannel(l10n.t("Testing sample failed. Please check the output channel for details."), DialogType.error);
     }
 }
 
@@ -232,8 +233,8 @@ export async function testCustomSample(ptaCode: IPtaCode, index: number): Promis
             }
         });
     } catch (error: any) {
-        ptaChannel.error(error.toString());
-        await promptForOpenOutputChannel(l10n.t("Testing sample failed. Please open output channel for details."), DialogType.error);
+        ptaChannel.error(error);
+        await promptForOpenOutputChannel(l10n.t("Testing sample failed. Please check the output channel for details."), DialogType.error);
     }
 }
 

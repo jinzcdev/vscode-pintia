@@ -123,7 +123,7 @@ class ExplorerNodeManager implements Disposable {
             }
             const exam = await ptaApi.checkAndCreateProblemSetExam(psID, userSession.cookie);
             if (!exam) {
-                promptForOpenOutputChannel(l10n.t("Failed to create exam. Please open the output channel for details."), DialogType.error);
+                promptForOpenOutputChannel(l10n.t("Failed to create exam. Please check the output channel for details."), DialogType.error);
                 return [];
             }
             let problemList: IProblemInfo[], startIndex = 1;
@@ -181,7 +181,7 @@ class ExplorerNodeManager implements Disposable {
             return ptaNodeList;
         } catch (error: any) {
             ptaChannel.error(error.toString());
-            promptForOpenOutputChannel(l10n.t("Failed to fetch the problem list. Please open the output channel for details."), DialogType.error);
+            promptForOpenOutputChannel(l10n.t("Failed to fetch the problem list. Please check the output channel for details."), DialogType.error);
             return [];
         }
     }

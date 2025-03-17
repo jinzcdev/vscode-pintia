@@ -45,7 +45,7 @@ class WeChatAuthProvider implements IUserAuthProvider {
                 });
             } catch (error: any) {
                 ptaChannel.error(error.toString());
-                await promptForOpenOutputChannel(l10n.t("Failed to login PTA. Please open the output channel for details."), DialogType.error);
+                await promptForOpenOutputChannel(l10n.t("Failed to login PTA. Please check the output channel for details."), DialogType.error);
                 resolve(undefined);
             }
         });

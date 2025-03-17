@@ -88,7 +88,7 @@ class PtaManager extends EventEmitter {
                 }
                 catch (error: any) {
                     ptaChannel.error(error.toString());
-                    await promptForOpenOutputChannel(`Failed to login PTA. Please open the output channel for details.`, DialogType.error);
+                    await promptForOpenOutputChannel(`Failed to login PTA. Please check the output channel for details.`, DialogType.error);
                     reject(error);
                 }
             });
@@ -116,7 +116,7 @@ class PtaManager extends EventEmitter {
             this.emit("statusChanged");
         } catch (error: any) {
             ptaChannel.error(error.toString());
-            promptForOpenOutputChannel(l10n.t("Signout failed. Please open the output channel for details."), DialogType.error)
+            promptForOpenOutputChannel(l10n.t("Signout failed. Please check the output channel for details."), DialogType.error)
         }
     }
 
@@ -136,7 +136,7 @@ class PtaManager extends EventEmitter {
 
                     fs.writeJson(filePath, loginSession).catch(async reason => {
                         ptaChannel.error(reason.toString());
-                        await promptForOpenOutputChannel(l10n.t("Update user profile failed. Please open the output channel for details."), DialogType.error);
+                        await promptForOpenOutputChannel(l10n.t("Update user profile failed. Please check the output channel for details."), DialogType.error);
                     });
                     autoCheckInPTA();
                 } else {

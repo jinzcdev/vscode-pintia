@@ -18,7 +18,7 @@ export async function clearCache(): Promise<void> {
         await ptaExecutor.clearCache();
         vscode.window.showInformationMessage(l10n.t("Clear the cache of pintia successfully!"));
     } catch (error) {
-        await promptForOpenOutputChannel(l10n.t("Failed to delete cache. Please open the output channel for details."), DialogType.error);
+        await promptForOpenOutputChannel(l10n.t("Failed to delete cache. Please check the output channel for details."), DialogType.error);
     }
 }
 
@@ -31,7 +31,7 @@ export async function createProblemSearchIndex(context: vscode.ExtensionContext)
             ptaChannel.info(`Copy the search index to ${indexFileDest}.`);
         } catch (error: any) {
             ptaChannel.error(error.toString());
-            await promptForOpenOutputChannel(l10n.t("Failed to copy problem index. Please open the output channel for details."), DialogType.error);
+            await promptForOpenOutputChannel(l10n.t("Failed to copy problem index. Please check the output channel for details."), DialogType.error);
         }
     }
     if (ptaConfig.getSearchIndexAutoRefresh()) {
@@ -63,7 +63,7 @@ export async function refreshProblemSearchIndex(): Promise<void> {
                     await fs.writeJson(searchIndexPath, problemIndex);
                     ptaChannel.info(`Fetch the problem search index successfully.`);
                 } else {
-                    await promptForOpenOutputChannel(l10n.t("Failed to fetch problem search index. Please open the output channel for details."), DialogType.error);
+                    await promptForOpenOutputChannel(l10n.t("Failed to fetch problem search index. Please check the output channel for details."), DialogType.error);
                 }
                 resolve();
             } catch (error: any) {

@@ -115,7 +115,7 @@ export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
         }
     } catch (error: any) {
         ptaChannel.error(error.toString());
-        await promptForOpenOutputChannel(l10n.t("Coding the problem failed. Please open the output channel for details."), DialogType.error);
+        await promptForOpenOutputChannel(l10n.t("Coding the problem failed. Please check the output channel for details."), DialogType.error);
     }
 }
 
@@ -166,7 +166,7 @@ async function fetchProblemIndex(): Promise<Array<IProblemSearchItem>> {
         }
     } catch (e: any) {
         ptaChannel.error(e.toString());
-        await promptForOpenOutputChannel(l10n.t("Failed to fetch the problem search index. Please open the output channel for details."), DialogType.error);
+        await promptForOpenOutputChannel(l10n.t("Failed to fetch the problem search index. Please check the output channel for details."), DialogType.error);
     }
 
     return problems;

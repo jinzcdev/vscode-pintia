@@ -57,7 +57,7 @@ class PtaExecutor extends EventEmitter implements Disposable {
                         problemType: problemType
                     });
                     if (submission.error) {
-                        throw JSON.stringify(submission.error);
+                        throw new Error(JSON.stringify(submission.error));
                     }
                     let data: IProblemSubmissionResult;
                     let interval = setInterval(async () => {
@@ -71,8 +71,6 @@ class PtaExecutor extends EventEmitter implements Disposable {
                     }, 1000);
                 } catch (error: any) {
                     reject(error);
-                    ptaChannel.error(error.toString());
-                    await promptForOpenOutputChannel(l10n.t("Submitting solution Failed. Please open output channel for details."), DialogType.error);
                 }
             });
         });
@@ -141,8 +139,6 @@ class PtaExecutor extends EventEmitter implements Disposable {
                         }
                     }, 1000);
                 } catch (error: any) {
-                    ptaChannel.error(error.toString());
-                    await promptForOpenOutputChannel(l10n.t("Testing sample failed. Please open the output channel for details."), DialogType.error);
                     reject(error);
                 }
             });
