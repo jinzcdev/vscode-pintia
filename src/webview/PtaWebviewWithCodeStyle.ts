@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { ptaConfig } from "../ptaConfig";
 import { colorThemeMapping } from "../shared";
-import { PtaWebview } from "./PtaWebview";
+import { IWebViewMessage, PtaWebview } from "./PtaWebview";
 import { getGlobalContext } from "../extension";
 import * as path from 'path';
 
@@ -42,6 +42,16 @@ export abstract class PtaWebviewWithCodeStyle<T> extends PtaWebview<T> {
             <link rel="stylesheet" href="${katexCssPath}">
             <link rel="stylesheet" href="${highlightCssPath}">
             <link rel="stylesheet" href="${previewCssPath}">`
+    }
+
+    protected async onDidReceiveMessage(msg: IWebViewMessage): Promise<void> {
+        switch (msg.type) {
+            case "text":
+                vscode.window.showInformationMessage(msg.value);
+                break;
+            default:
+                await super.onDidReceiveMessage(msg);
+        }
     }
 
 }

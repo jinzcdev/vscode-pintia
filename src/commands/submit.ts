@@ -19,7 +19,7 @@ import { l10n } from "vscode";
 export async function submitSolution(ptaCode: IPtaCode): Promise<void> {
     try {
         if (!ptaCode.code) {
-            vscode.window.showInformationMessage(l10n.t("The code must be wrapped in `@pintia code=start` and `@pintia code=end`"));
+            vscode.window.showWarningMessage(l10n.t("The code must be wrapped in `@pintia code=start` and `@pintia code=end`"));
             return;
         }
 
@@ -47,7 +47,7 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
     try {
 
         if (!ptaCode.code) {
-            vscode.window.showWarningMessage("The code must be wrapped in `@pintia code=start` and `@pintia code=end`");
+            vscode.window.showWarningMessage(l10n.t("The code must be wrapped in `@pintia code=start` and `@pintia code=end`"));
             return;
         }
 
@@ -159,6 +159,7 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
                     return;
                 }
                 testInput = customTests[testChoice.value];
+                testOutput = getTestInputAnswerFromExampleTestDatas(problem, testInput) ?? "";
             } else {
                 vscode.window.showErrorMessage(l10n.t("No custom test samples found. Please check the format of the test code blocks."));
                 return;

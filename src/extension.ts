@@ -13,17 +13,18 @@ import { PtaNode } from "./explorer/PtaNode";
 import { favoriteProblemsManager } from "./favorites/favoriteProblemsManager";
 import { favoritesTreeDataProvider } from "./favorites/favoritesTreeDataProvider";
 import { ptaChannel } from './ptaChannel';
+import { ptaConfig } from "./ptaConfig";
 import { ptaExecutor } from './ptaExecutor';
 import { ptaManager } from './ptaManager';
-import { configPath, IPtaCode, ProblemType, UserStatus } from './shared';
+import { configPath, IPtaCode, UserStatus } from './shared';
 import { ptaStatusBarController } from './statusbar/ptaStatusBarController';
-import { PtaPreviewProvider } from './webview/PtaPreviewProvider';
-import { ProblemView } from "./webview/views/ProblemView";
-import { historyTreeDataProvider } from "./view-history/historyTreeDataProvider";
-import { historyManager } from "./view-history/historyManager";
-import { ptaConfig } from "./ptaConfig";
-import { PtaSubmissionProvider } from "./webview/PtaSubmissionProvider";
 import { ptaApi } from "./utils/api";
+import { executeSubmitSolution, executeTestSolution, updatePtaValidCodeContext } from "./utils/editorUtils";
+import { historyManager } from "./view-history/historyManager";
+import { historyTreeDataProvider } from "./view-history/historyTreeDataProvider";
+import { PtaPreviewProvider } from './webview/PtaPreviewProvider';
+import { PtaSubmissionProvider } from "./webview/PtaSubmissionProvider";
+import { ProblemView } from "./webview/views/ProblemView";
 
 
 let globalContext: vscode.ExtensionContext;
@@ -50,6 +51,22 @@ export async function activate(context: vscode.ExtensionContext) {
 			cache.createProblemSearchIndex(context)
 		]);
 	});
+
+	// 初始化时设置当前编辑器的上下文
+	updatePtaValidCodeContext();
+
+	// 监听编辑器变化
+	context.subscriptions.push(
+		vscode.window.onDidChangeActiveTextEditor(() => updatePtaValidCodeContext()),
+		vscode.workspace.onDidChangeTextDocument(() => {
+			// 当文档内容变化时，只有当变化的是当前活动编辑器的文档时，才更新上下文
+			if (vscode.window.activeTextEditor &&
+				vscode.workspace.textDocuments.some(doc =>
+					doc === vscode.window.activeTextEditor!.document)) {
+				updatePtaValidCodeContext();
+			}
+		})
+	);
 
 	context.subscriptions.push(
 		ptaStatusBarController,
@@ -109,8 +126,12 @@ export async function activate(context: vscode.ExtensionContext) {
 				if (data && data.queued === -1 && data.submission.status !== "WAITING" && data.submission.status !== "JUDGING") {
 					PtaSubmissionProvider.createOrUpdate(data).show();
 				}
+			} else {
+				vscode.window.showInformationMessage(vscode.l10n.t("No submission history found!"));
 			}
-		})
+		}),
+		vscode.commands.registerCommand("pintia.submitSolutionByShortcut", executeSubmitSolution),
+		vscode.commands.registerCommand("pintia.testSolutionByShortcut", executeTestSolution)
 	);
 }
 

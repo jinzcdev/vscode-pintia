@@ -1,6 +1,8 @@
 # Overview
 
-![VSCode Pintia Logo](../imgs/vscode-pintia-logo.png)
+<img src="../imgs/vscode-pintia-logo.png" width="80%" />
+
+View the release notes of the Pintia Extension: [Release Notes](https://github.com/jinzcdev/vscode-pintia/releases)
 
 ## Features
 

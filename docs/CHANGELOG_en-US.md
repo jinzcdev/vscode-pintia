@@ -4,6 +4,23 @@
 
 ---
 
+## [0.8.0] - 2025/03/15
+
+### Features
+
+- **Problem Preview**
+    - Added more operation buttons to include less frequently used actions
+    - Added functionality to copy the original problem content
+
+- **File Naming** [Issue #14](https://github.com/jinzcdev/vscode-pintia/issues/14)
+    - Support for custom file name templates, including problem ID, problem tags, problem name, problem set ID, etc.
+    - Support for converting Chinese problem names to Pinyin
+    - Support for custom problem set folder names
+    
+- **Editor Shortcuts**
+    - Added shortcuts for submitting answers (`Cmd/Ctrl+Shift+J`) and testing code (`Cmd/Ctrl+Shift+K`) in PTA source files
+    - Added **Start Coding** (`Cmd/Ctrl+Enter`) shortcut in the problem preview page
+
 ## [0.7.0] - 2024/12/27
 
 ### Features
