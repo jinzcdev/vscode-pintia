@@ -92,5 +92,6 @@
   "Successfully copied to the clipboard!": "已复制至剪贴板！",
   "No submission history found!": "未找到提交历史！",
   "Failed to parse custom problem set name JSON. Please check the output channel for details.": "解析自定义题目集名称 JSON 失败，请打开输出通道查看详情。",
-  "The custom problem set name contains invalid characters. The default problem set name will be used.": "自定义题目集名称包含无效字符，将使用默认题目集名称。"
+  "The custom problem set name contains invalid characters. The default problem set name will be used.": "自定义题目集名称包含无效字符，将使用默认题目集名称。",
+  "API request failed. Please check the output channel for details.": "API 请求失败，请打开输出通道查看详情。"
 }

@@ -435,7 +435,7 @@ class PtaAPI {
     }
 
     public async getCurrentUser(cookie: string): Promise<IPtaUser | undefined> {
-        return await httpGet("https://pintia.cn/api/u/current", cookie)
+        return await httpGet("https://passport.pintia.cn/api/u/current", cookie)
             .then(json => json['user']);
     }
 
