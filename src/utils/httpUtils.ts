@@ -1,6 +1,8 @@
+import * as vscode from "vscode";
 import fetch from "node-fetch";
 import { ptaChannel } from "../ptaChannel";
 import { ptaManager } from "../ptaManager";
+import { DialogType, promptForOpenOutputChannel } from "./uiUtils";
 
 export async function httpGet(url: string, cookie: string = ''): Promise<any> {
     const json = await fetch(url, {
@@ -12,7 +14,16 @@ export async function httpGet(url: string, cookie: string = ''): Promise<any> {
             'Cookie': !cookie ? ptaManager.getUserSession()?.cookie ?? '' : cookie
         }
     })
-        .then(response => response.json());
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .catch(error => {
+            ptaChannel.error(error);
+            promptForOpenOutputChannel(vscode.l10n.t("API request failed. Please check the output channel for details."), DialogType.error);
+        });
     ptaChannel.info(`[HTTP Get - Request] ${url}`);
     ptaChannel.info(`[HTTP Get - Response] ${JSON.stringify(json)}`);
     return json;
@@ -29,7 +40,16 @@ export async function httpPost(url: string, cookie: string = '', body?: any): Pr
         },
         body: JSON.stringify(body)
     })
-        .then(response => response.json());
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .catch(error => {
+            ptaChannel.error(error);
+            promptForOpenOutputChannel(vscode.l10n.t("API request failed. Please check the output channel for details."), DialogType.error);
+        });
     ptaChannel.info(`[HTTP Post - Request] ${url}\n${JSON.stringify(body)}`);
     ptaChannel.info(`[HTTP Post - Response] ${JSON.stringify(json)}`);
     return json;
