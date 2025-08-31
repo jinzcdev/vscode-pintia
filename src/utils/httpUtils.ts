@@ -15,7 +15,7 @@ export async function httpGet(url: string, cookie: string = ''): Promise<any> {
         }
     })
         .then(response => {
-            if (!response.ok) {
+            if (!response.ok && response.status !== 412) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.json();
@@ -41,7 +41,7 @@ export async function httpPost(url: string, cookie: string = '', body?: any): Pr
         body: JSON.stringify(body)
     })
         .then(response => {
-            if (!response.ok) {
+            if (!response.ok && response.status !== 412) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.json();
