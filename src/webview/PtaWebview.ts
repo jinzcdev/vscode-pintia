@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
-import { Disposable } from "vscode";
+import { Disposable, l10n } from "vscode";
+import { ptaChannel } from "../ptaChannel";
+import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 
 export abstract class PtaWebview<T> implements Disposable {
 
@@ -16,27 +18,32 @@ export abstract class PtaWebview<T> implements Disposable {
     }
 
     public async show(focused: boolean = true): Promise<void> {
-        await this.loadViewData(this.view);
-        if (!focused && !this.currentPanel) {
-            return;
-        }
-        if (this.currentPanel) {
-            this.currentPanel.title = `PTA: ${this.data.title}`;
-            this.currentPanel.webview.html = await this.getWebviewContent();
-            focused && this.currentPanel.reveal(vscode.ViewColumn.One);
-            return;
-        }
-        this.currentPanel = vscode.window.createWebviewPanel(
-            'PTA',
-            `PTA: ${this.data.title}`,
-            vscode.ViewColumn.One,
-            {
-                enableScripts: true
+        try {
+            await this.loadViewData(this.view);
+            if (!focused && !this.currentPanel) {
+                return;
             }
-        );
-        this.currentPanel.webview.html = await this.getWebviewContent();
-        this.currentPanel.onDidDispose(this.onDidDisposeWebview, this, this.listeners);
-        this.currentPanel.webview.onDidReceiveMessage(this.onDidReceiveMessage, this, this.listeners);
+            if (this.currentPanel) {
+                this.currentPanel.title = `PTA: ${this.data.title}`;
+                this.currentPanel.webview.html = await this.getWebviewContent();
+                focused && this.currentPanel.reveal(vscode.ViewColumn.One);
+                return;
+            }
+            this.currentPanel = vscode.window.createWebviewPanel(
+                'PTA',
+                `PTA: ${this.data.title}`,
+                vscode.ViewColumn.One,
+                {
+                    enableScripts: true
+                }
+            );
+            this.currentPanel.webview.html = await this.getWebviewContent();
+            this.currentPanel.onDidDispose(this.onDidDisposeWebview, this, this.listeners);
+            this.currentPanel.webview.onDidReceiveMessage(this.onDidReceiveMessage, this, this.listeners);
+        } catch (error) {
+            ptaChannel.error(error instanceof Error ? error.message : String(error));
+            promptForOpenOutputChannel(l10n.t(`Failed to load the webview.`), DialogType.error);
+        }
     }
 
     private async getWebviewContent() {

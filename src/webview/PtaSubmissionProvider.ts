@@ -45,7 +45,7 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
                 totalScore: problem.score,
                 timeLimit: problemConfig?.timeLimit ?? UNKNOWN,
                 memoryLimit: problemConfig?.memoryLimit ?? UNKNOWN,
-                nickname: result.examMember.user.nickname,
+                nickname: result.user?.nickname,
                 submitAt: result.submission.submitAt,
                 status: judgeResponseContent.status,
                 score: judgeResponseContent.score,

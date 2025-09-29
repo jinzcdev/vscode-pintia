@@ -8,6 +8,15 @@ export interface IProblemSubmissionResult {
     queued: number;
     submission: ISubmission;
     examMember: IExamMember;
+    user?: {
+        id: string;
+        nickname: string;
+    };
+    studentUser?: {
+        studentNumber: string;
+        name: string;
+        id: string;
+    };
     // extra
     problem?: IProblem;
 }
@@ -77,15 +86,8 @@ interface ISubmission {
 }
 
 interface IExamMember {
-    user: {
-        id: string;
-        nickname: string;
-    };
-    studentUser: {
-        studentNumber: string;
-        name: string;
-        id: string;
-    };
+    studentUserId: string;
+    userId: string;
     userGroupId: string;
     examId: string;
 }
