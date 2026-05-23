@@ -1,0 +1,5 @@
+{
+    "require": "out-test/test/setup.js",
+    "spec": "out-test/test/unit/**/*.test.js",
+    "timeout": 10000
+}
