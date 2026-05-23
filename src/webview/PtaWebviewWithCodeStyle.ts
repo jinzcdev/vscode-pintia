@@ -3,10 +3,9 @@ import { ptaConfig } from "../ptaConfig";
 import { colorThemeMapping } from "../shared";
 import { IWebViewMessage, PtaWebview } from "./PtaWebview";
 import { getGlobalContext } from "../extension";
-import * as path from 'path';
+import * as path from "path";
 
 export abstract class PtaWebviewWithCodeStyle<T> extends PtaWebview<T> {
-
     protected activeColorTheme: string = "atom-one-dark.css";
 
     constructor(view: T) {
@@ -33,15 +32,20 @@ export abstract class PtaWebviewWithCodeStyle<T> extends PtaWebview<T> {
     }
 
     protected getStyle(): string {
-
-        const katexCssPath = this.getWebview()?.asWebviewUri(vscode.Uri.file(path.resolve(require.resolve("katex/dist/katex.min.css"))));
-        const highlightCssPath = this.getWebview()?.asWebviewUri(vscode.Uri.file(path.resolve(require.resolve(`highlight.js/styles/${this.activeColorTheme}`))));
-        const previewCssPath = this.getWebview()?.asWebviewUri(vscode.Uri.joinPath(getGlobalContext().extensionUri, "media", "preview_submission.css"));
+        const katexCssPath = this.getWebview()?.asWebviewUri(
+            vscode.Uri.file(path.resolve(require.resolve("katex/dist/katex.min.css")))
+        );
+        const highlightCssPath = this.getWebview()?.asWebviewUri(
+            vscode.Uri.file(path.resolve(require.resolve(`highlight.js/styles/${this.activeColorTheme}`)))
+        );
+        const previewCssPath = this.getWebview()?.asWebviewUri(
+            vscode.Uri.joinPath(getGlobalContext().extensionUri, "media", "preview_submission.css")
+        );
 
         return `
             <link rel="stylesheet" href="${katexCssPath}">
             <link rel="stylesheet" href="${highlightCssPath}">
-            <link rel="stylesheet" href="${previewCssPath}">`
+            <link rel="stylesheet" href="${previewCssPath}">`;
     }
 
     protected async onDidReceiveMessage(msg: IWebViewMessage): Promise<void> {
@@ -53,5 +57,4 @@ export abstract class PtaWebviewWithCodeStyle<T> extends PtaWebview<T> {
                 await super.onDidReceiveMessage(msg);
         }
     }
-
 }

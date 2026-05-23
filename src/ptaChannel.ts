@@ -1,7 +1,9 @@
 import * as vscode from "vscode";
 
 class PtaChannel implements vscode.Disposable {
-    private readonly channel: vscode.LogOutputChannel = vscode.window.createOutputChannel("PTA (Pintia)", { log: true });
+    private readonly channel: vscode.LogOutputChannel = vscode.window.createOutputChannel("PTA (Pintia)", {
+        log: true,
+    });
 
     public appendLine(message: string): void {
         this.channel.appendLine(message);

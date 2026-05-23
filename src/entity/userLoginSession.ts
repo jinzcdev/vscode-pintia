@@ -4,7 +4,7 @@ import { IPtaUser } from "./IPtaUser";
 export enum AuthStatus {
     WAITING = "WAITING",
     SUCCESSFUL = "SUCCESSFUL",
-    FAILURE = "FAILURE"
+    FAILURE = "FAILURE",
 }
 
 export interface IWechatAuth {
@@ -30,9 +30,9 @@ export interface IWechatUserInfo {
 }
 
 export interface IUserSession {
-    id: string,
-    user: string,
-    email: string,
-    loginMethod: PtaLoginMethod,
-    cookie: string
+    id: string;
+    user: string;
+    email: string;
+    loginMethod: PtaLoginMethod;
+    cookie: string;
 }

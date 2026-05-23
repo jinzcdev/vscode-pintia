@@ -7,7 +7,6 @@ import { IUserAuthProvider } from "./IUserAuthProvider";
 import { l10n } from "vscode";
 
 class PtaCookieAuthProvider implements IUserAuthProvider {
-
     async signIn(): Promise<IUserSession | undefined> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -28,7 +27,7 @@ class PtaCookieAuthProvider implements IUserAuthProvider {
                         user: user.nickname,
                         email: user.email,
                         loginMethod: PtaLoginMethod.Cookie,
-                        cookie: cookie
+                        cookie: cookie,
                     };
                     logged = true;
                 } else {
@@ -49,10 +48,10 @@ class PtaCookieAuthProvider implements IUserAuthProvider {
 
     private async handleInputCookieSignIn(): Promise<string | undefined> {
         const cookie: string | undefined = await vscode.window.showInputBox({
-            prompt: l10n.t('Enter the value of the `PTASession` cookie for Pintia'),
+            prompt: l10n.t("Enter the value of the `PTASession` cookie for Pintia"),
             password: false,
             ignoreFocusOut: true,
-            validateInput: (s: string): string | undefined => s ? undefined : l10n.t('Cookie must not be empty'),
+            validateInput: (s: string): string | undefined => (s ? undefined : l10n.t("Cookie must not be empty")),
         });
         return cookie;
     }

@@ -1,9 +1,8 @@
-import * as QRCode from 'qrcode';
+import * as QRCode from "qrcode";
 import { PtaWebview } from "./PtaWebview";
-import { LoginView } from './views/LoginView';
+import { LoginView } from "./views/LoginView";
 
 export class PtaLoginProvider extends PtaWebview<LoginView> {
-
     private static instance: PtaLoginProvider | null = null;
 
     public static createOrUpdate(view: LoginView): PtaLoginProvider {
@@ -18,9 +17,9 @@ export class PtaLoginProvider extends PtaWebview<LoginView> {
         this.data = {
             title: "QRCode",
             qrcodeBase64: await QRCode.toDataURL(loginView.qrcode, {
-                type: "image/png"
-            })
-        }
+                type: "image/png",
+            }),
+        };
     }
 
     protected getStyle(): string {
@@ -56,7 +55,6 @@ export class PtaLoginProvider extends PtaWebview<LoginView> {
                 <img class="qrcode"
                 src="${this.data.qrcodeBase64}">
             </div>
-        `
+        `;
     }
-
 }

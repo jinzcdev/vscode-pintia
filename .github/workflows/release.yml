@@ -1,0 +1,90 @@
+# Publish extension to Open VSX and Visual Studio Marketplace on version tags.
+# https://github.com/marketplace/actions/publish-vs-code-extension
+name: Release Extension
+
+on:
+  push:
+    tags:
+      - "v*"
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm run test
+
+      # Package once and publish the same .vsix to both registries.
+      - name: Publish to Open VSX Registry
+        uses: HaaLeo/publish-vscode-extension@v2
+        id: publishToOpenVSX
+        with:
+          pat: ${{ secrets.OPEN_VSX_TOKEN }}
+          baseContentUrl: https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}
+          baseImagesUrl: https://github.com/${{ github.repository }}/raw/${{ github.ref_name }}
+          skipDuplicate: true
+
+      - name: Publish to Visual Studio Marketplace
+        uses: HaaLeo/publish-vscode-extension@v2
+        with:
+          pat: ${{ secrets.VS_MARKETPLACE_TOKEN }}
+          registryUrl: https://marketplace.visualstudio.com
+          extensionFile: ${{ steps.publishToOpenVSX.outputs.vsixPath }}
+          skipDuplicate: true
+
+      - name: Build release notes
+        id: release_notes
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          NOTES_FILE="${RUNNER_TEMP}/release-notes.md"
+
+          awk -v ver="$VERSION" '
+            /^## \[/ {
+              if (found) exit
+              if ($0 ~ "\\[" ver "\\]") { found=1; next }
+            }
+            found && /^## \[/ { exit }
+            found { print }
+          ' CHANGELOG.md > "$NOTES_FILE"
+
+          if [ ! -s "$NOTES_FILE" ]; then
+            {
+              echo "## ${GITHUB_REF_NAME}"
+              echo ""
+              echo "See [CHANGELOG.md](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/CHANGELOG.md)."
+            } > "$NOTES_FILE"
+          fi
+
+          echo "body_path=$NOTES_FILE" >> "$GITHUB_OUTPUT"
+
+      - name: Create draft GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          draft: true
+          body_path: ${{ steps.release_notes.outputs.body_path }}
+          files: ${{ steps.publishToOpenVSX.outputs.vsixPath }}
+          fail_on_unmatched_files: true

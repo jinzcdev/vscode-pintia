@@ -4,7 +4,6 @@ import { ptaChannel } from "./ptaChannel";
 import { DialogType, promptForOpenOutputChannel } from "./utils/uiUtils";
 
 class PtaConfig {
-
     private getConfiguration(): vscode.WorkspaceConfiguration {
         return vscode.workspace.getConfiguration("pintia");
     }
@@ -105,7 +104,12 @@ class PtaConfig {
             return JSON.parse(customNameJson);
         } catch (error: any) {
             ptaChannel.error(error.toString());
-            promptForOpenOutputChannel(vscode.l10n.t("Failed to parse custom problem set name JSON. Please check the output channel for details."), DialogType.error);
+            promptForOpenOutputChannel(
+                vscode.l10n.t(
+                    "Failed to parse custom problem set name JSON. Please check the output channel for details."
+                ),
+                DialogType.error
+            );
             return {};
         }
     }

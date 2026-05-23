@@ -1,4 +1,3 @@
-
 export interface IProblemSetExam {
     status: string;
     exam?: IExam;

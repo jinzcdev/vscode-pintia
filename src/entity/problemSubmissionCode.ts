@@ -14,7 +14,7 @@ export interface IProblemSubmissionDetail {
     customTestData?: {
         hasCustomTestData: boolean;
         content: string;
-    }
+    };
     problemId: string;
 }
 
@@ -27,10 +27,12 @@ interface IMultipleFileSubmissionDetail {
     memoryLimit: number;
     cpuCount: number;
     template: number;
-    files: [{
-        path: string;
-        directory: boolean;
-    }],
+    files: [
+        {
+            path: string;
+            directory: boolean;
+        },
+    ];
     judgeZip: string;
     originalScore: number;
     compiles: string[];

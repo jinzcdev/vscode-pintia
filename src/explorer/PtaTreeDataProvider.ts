@@ -1,31 +1,42 @@
-
 import * as vscode from "vscode";
 import * as path from "path";
 import { PtaNode } from "./PtaNode";
-import { defaultPtaNode, IPtaNodeValue, ProblemSubmissionState, ProblemType, PtaDashType, PtaNodeType } from "../shared";
+import {
+    defaultPtaNode,
+    IPtaNodeValue,
+    ProblemSubmissionState,
+    ProblemType,
+    PtaDashType,
+    PtaNodeType,
+} from "../shared";
 import { ptaManager } from "../ptaManager";
 import { explorerNodeManager } from "./explorerNodeManager";
 import { ptaConfig } from "../ptaConfig";
 import { IProblemSummary } from "../entity/IProblemSummary";
 import { ptaApi } from "../utils/api";
 
-
 export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vscode.Disposable {
-
     private context: vscode.ExtensionContext | undefined;
     private configurationChangeListener: vscode.Disposable;
 
-    private onDidChangeTreeDataEvent: vscode.EventEmitter<PtaNode | undefined | null> = new vscode.EventEmitter<PtaNode | undefined | null>();
+    private onDidChangeTreeDataEvent: vscode.EventEmitter<PtaNode | undefined | null> = new vscode.EventEmitter<
+        PtaNode | undefined | null
+    >();
 
     public readonly onDidChangeTreeData: vscode.Event<any> = this.onDidChangeTreeDataEvent.event;
 
-
     public constructor(context: vscode.ExtensionContext) {
-        this.configurationChangeListener = vscode.workspace.onDidChangeConfiguration((event: vscode.ConfigurationChangeEvent) => {
-            if (event.affectsConfiguration("pintia.paging.pageSize") || event.affectsConfiguration("pintia.showLocked")) {
-                this.onDidChangeTreeDataEvent.fire(null);
-            }
-        }, this);
+        this.configurationChangeListener = vscode.workspace.onDidChangeConfiguration(
+            (event: vscode.ConfigurationChangeEvent) => {
+                if (
+                    event.affectsConfiguration("pintia.paging.pageSize") ||
+                    event.affectsConfiguration("pintia.showLocked")
+                ) {
+                    this.onDidChangeTreeDataEvent.fire(null);
+                }
+            },
+            this
+        );
         this.context = context;
     }
 
@@ -33,15 +44,18 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
         if (!element) {
             return {
                 label: "",
-                collapsibleState: vscode.TreeItemCollapsibleState.None
+                collapsibleState: vscode.TreeItemCollapsibleState.None,
             };
         }
         if (element.type === PtaNodeType.Dashboard) {
             return {
                 label: `— ${element.label} —`,
                 collapsibleState: vscode.TreeItemCollapsibleState.None,
-                iconPath: element.label === PtaDashType.MyProblemSet ? new vscode.ThemeIcon("smiley") : new vscode.ThemeIcon('book')
-            }
+                iconPath:
+                    element.label === PtaDashType.MyProblemSet
+                        ? new vscode.ThemeIcon("smiley")
+                        : new vscode.ThemeIcon("book"),
+            };
         }
         let contextValue: string;
         if (element.type === PtaNodeType.Problem) {
@@ -51,15 +65,20 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
         }
         return {
             label: element.type === PtaNodeType.Problem ? `${element.label} (${element.score})` : element.label,
-            collapsibleState: element.type === PtaNodeType.Problem ?
-                vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Collapsed,
+            collapsibleState:
+                element.type === PtaNodeType.Problem
+                    ? vscode.TreeItemCollapsibleState.None
+                    : vscode.TreeItemCollapsibleState.Collapsed,
             iconPath: this.parseIconPathFromProblemState(element),
-            command: element.type === PtaNodeType.Problem ? {
-                title: "Preview Problem",
-                command: "pintia.previewProblem",
-                arguments: [element.psID, element.pID]
-            } : undefined,
-            contextValue: contextValue
+            command:
+                element.type === PtaNodeType.Problem
+                    ? {
+                          title: "Preview Problem",
+                          command: "pintia.previewProblem",
+                          arguments: [element.psID, element.pID],
+                      }
+                    : undefined,
+            contextValue: contextValue,
         };
     }
 
@@ -80,14 +99,17 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
             return null;
         }
         if (!value.summaries) {
-            // 可能由于网络访问过快，summaries 为空
+            // summaries 为空时尝试懒加载；403 等失败返回 {}，避免反复重试
             return ptaApi.getProblemSummary(element.psID).then((summaries) => {
-                if (!summaries) {
+                value.summaries = summaries;
+                if (Object.keys(summaries).length === 0) {
                     return [];
                 }
-                value.summaries = summaries;
                 return this.getChildren(element);
             });
+        }
+        if (Object.keys(value.summaries).length === 0) {
+            return [];
         }
         if (element.type === PtaNodeType.ProblemSet) {
             if (Object.keys(value.summaries).length > 1) {
@@ -120,7 +142,6 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
         }
 
         return null;
-
     }
 
     private parseIconPathFromProblemState(element: PtaNode): string {
@@ -152,5 +173,4 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
     public dispose() {
         this.configurationChangeListener.dispose();
     }
-
 }

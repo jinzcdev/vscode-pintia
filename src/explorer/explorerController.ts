@@ -4,17 +4,15 @@ import { PtaNode } from "./PtaNode";
 import { PtaTreeDataProvider } from "./PtaTreeDataProvider";
 
 class ExplorerController<T> implements Disposable {
-
     private treeView?: vscode.TreeView<T>;
     private ptaTreeDataProvider?: PtaTreeDataProvider;
-
 
     public createTreeView(context: vscode.ExtensionContext) {
         if (!this.treeView) {
             this.ptaTreeDataProvider = new PtaTreeDataProvider(context);
             this.treeView = vscode.window.createTreeView("pintiaExplorer", {
                 treeDataProvider: this.ptaTreeDataProvider,
-                showCollapseAll: true
+                showCollapseAll: true,
             });
             context.subscriptions.push(this);
         }
@@ -30,7 +28,6 @@ class ExplorerController<T> implements Disposable {
         this.treeView = undefined;
         this.ptaTreeDataProvider = undefined;
     }
-
 }
 
 export const explorerController: ExplorerController<PtaNode> = new ExplorerController();

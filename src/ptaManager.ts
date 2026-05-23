@@ -14,9 +14,7 @@ import { l10n } from "vscode";
 import { t } from "@vscode/l10n";
 import { autoCheckInPTA } from "./commands/user";
 
-
 class PtaManager extends EventEmitter {
-
     private userSession: IUserSession | undefined;
     private userStatus: UserStatus;
 
@@ -28,10 +26,9 @@ class PtaManager extends EventEmitter {
 
     public async signIn(): Promise<void> {
         if (this.userStatus === UserStatus.SignedIn) {
-            const choice: string | undefined = await vscode.window.showQuickPick(
-                ["Yes", "No"],
-                { placeHolder: l10n.t("You are already logged in. Do you want to log out of the current account?") },
-            );
+            const choice: string | undefined = await vscode.window.showQuickPick(["Yes", "No"], {
+                placeHolder: l10n.t("You are already logged in. Do you want to log out of the current account?"),
+            });
             if (!choice || choice === "No") {
                 return;
             }
@@ -42,12 +39,12 @@ class PtaManager extends EventEmitter {
             {
                 label: l10n.t("{0} QR Code", "$(device-camera)"),
                 detail: l10n.t("Use WeChat QRCode to login"),
-                value: PtaLoginMethod.WeChat
+                value: PtaLoginMethod.WeChat,
             },
             {
                 label: l10n.t("{0} Pintia Cookie", "$(key)"),
                 detail: l10n.t("Use Pintia cookie to login"),
-                value: PtaLoginMethod.Cookie
+                value: PtaLoginMethod.Cookie,
             }
         );
 
@@ -58,54 +55,67 @@ class PtaManager extends EventEmitter {
 
         const userAuthProvider = UserAuthProviderFactory.createUserAuthProvider(choice.value);
 
-        await vscode.window.withProgress({
-            location: vscode.ProgressLocation.Notification,
-            title: l10n.t("Waiting for signin..."),
-            cancellable: false
-        }, async (p: vscode.Progress<{ message?: string; increment?: number }>) => {
-            return new Promise<void>(async (resolve: () => void, reject: (e: Error) => void): Promise<void> => {
-                try {
-                    const userSession = await userAuthProvider.signIn();
+        await vscode.window.withProgress(
+            {
+                location: vscode.ProgressLocation.Notification,
+                title: l10n.t("Waiting for signin..."),
+                cancellable: false,
+            },
+            async (p: vscode.Progress<{ message?: string; increment?: number }>) => {
+                return new Promise<void>(async (resolve: () => void, reject: (e: Error) => void): Promise<void> => {
+                    try {
+                        const userSession = await userAuthProvider.signIn();
 
-                    if (userSession) {
-                        const userSessionPath: string = path.join(configPath, 'user.json');
-                        await fs.createFile(userSessionPath);
-                        await fs.writeJson(userSessionPath, userSession)
-                            .catch(reason => {
+                        if (userSession) {
+                            const userSessionPath: string = path.join(configPath, "user.json");
+                            await fs.createFile(userSessionPath);
+                            await fs.writeJson(userSessionPath, userSession).catch((reason) => {
                                 ptaChannel.info(reason);
                                 reject(reason);
                             });
-                        vscode.window.showInformationMessage(l10n.t("Successfully logged in as {0}", userSession.user));
-                        this.userSession = userSession;
-                        this.userStatus = UserStatus.SignedIn;
+                            vscode.window.showInformationMessage(
+                                l10n.t("Successfully logged in as {0}", userSession.user)
+                            );
+                            this.userSession = userSession;
+                            this.userStatus = UserStatus.SignedIn;
 
-                        ptaChannel.info(`Login successfully and save \`user.json\` to ${path}`);
+                            ptaChannel.info(`Login successfully and save \`user.json\` to ${path}`);
 
-                        this.emit("statusChanged");
+                            this.emit("statusChanged");
+                        }
+
+                        resolve();
+                    } catch (error: any) {
+                        ptaChannel.error(error.toString());
+                        await promptForOpenOutputChannel(
+                            `Failed to login PTA. Please check the output channel for details.`,
+                            DialogType.error
+                        );
+                        reject(error);
                     }
-
-                    resolve();
-                }
-                catch (error: any) {
-                    ptaChannel.error(error.toString());
-                    await promptForOpenOutputChannel(`Failed to login PTA. Please check the output channel for details.`, DialogType.error);
-                    reject(error);
-                }
-            });
-        });
+                });
+            }
+        );
     }
 
     public async signOut(): Promise<void> {
         try {
-
             const userFilePath = path.join(configPath, "user.json");
             if (await fs.pathExists(userFilePath)) {
                 const loginSession: IUserSession = await fs.readJSON(userFilePath);
-                const userAuthProvider = UserAuthProviderFactory.createUserAuthProvider(loginSession.loginMethod as PtaLoginMethod);
+                const userAuthProvider = UserAuthProviderFactory.createUserAuthProvider(
+                    loginSession.loginMethod as PtaLoginMethod
+                );
 
-                await Promise.all([userAuthProvider.signOut(loginSession.cookie), fs.remove(userFilePath), cache.clearCache()]);
+                await Promise.all([
+                    userAuthProvider.signOut(loginSession.cookie),
+                    fs.remove(userFilePath),
+                    cache.clearCache(),
+                ]);
                 vscode.window.showInformationMessage(l10n.t("Successfully signed out."));
-                ptaChannel.info(`Logout the current user successfully and remove user information from ${userFilePath}.`);
+                ptaChannel.info(
+                    `Logout the current user successfully and remove user information from ${userFilePath}.`
+                );
             } else {
                 vscode.window.showInformationMessage(l10n.t("The user is not logged in."));
                 return;
@@ -116,7 +126,10 @@ class PtaManager extends EventEmitter {
             this.emit("statusChanged");
         } catch (error: any) {
             ptaChannel.error(error.toString());
-            promptForOpenOutputChannel(l10n.t("Signout failed. Please check the output channel for details."), DialogType.error)
+            promptForOpenOutputChannel(
+                l10n.t("Signout failed. Please check the output channel for details."),
+                DialogType.error
+            );
         }
     }
 
@@ -134,9 +147,12 @@ class PtaManager extends EventEmitter {
                     this.userSession = loginSession;
                     this.userStatus = UserStatus.SignedIn;
 
-                    fs.writeJson(filePath, loginSession).catch(async reason => {
+                    fs.writeJson(filePath, loginSession).catch(async (reason) => {
                         ptaChannel.error(reason.toString());
-                        await promptForOpenOutputChannel(l10n.t("Update user profile failed. Please check the output channel for details."), DialogType.error);
+                        await promptForOpenOutputChannel(
+                            l10n.t("Update user profile failed. Please check the output channel for details."),
+                            DialogType.error
+                        );
                     });
                     autoCheckInPTA();
                 } else {

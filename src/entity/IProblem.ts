@@ -15,8 +15,8 @@ export interface IProblem {
     content: string;
     type: string;
     author: string;
-    difficulty: number,
-    compiler: string;   // compiler to be allowed to use in this problem.
+    difficulty: number;
+    compiler: string; // compiler to be allowed to use in this problem.
     problemStatus: string;
     lastSubmissionId: string;
     solution: string;
@@ -45,9 +45,9 @@ export interface IProblem {
             answerZip: string;
             fileContents: any;
             files: any;
-        }
+        };
         problemId: string;
-    },
+    };
 }
 
 export interface IProblemConfig extends ICodeCompletionAndProgrammingProblemConfig, IMultipleFileProblemConfig {
@@ -64,18 +64,19 @@ export interface IProblemConfig extends ICodeCompletionAndProgrammingProblemConf
     tools: string[];
 }
 
-
 /**
  * programmingProblemConfig
  * codeCompletionProblemConfig
  */
 interface ICodeCompletionAndProgrammingProblemConfig {
     codeSizeLimit: number;
-    exampleTestDatas: [{
-        name: string;
-        input: string;
-        output: string;
-    }];
+    exampleTestDatas: [
+        {
+            name: string;
+            input: string;
+            output: string;
+        },
+    ];
     testdataDescriptionCode: string;
     customizeLimits: [ICustomizeLimit];
     stackSizeLimit: number;
@@ -96,12 +97,14 @@ interface ICustomizeLimit {
 interface IMultipleFileProblemConfig {
     cpuCount: number;
     template: string;
-    files: [{
-        path: string;
-        directory: boolean;
-    }];
-    judgeZip: string,
-    originalScore: 100,
+    files: [
+        {
+            path: string;
+            directory: boolean;
+        },
+    ];
+    judgeZip: string;
+    originalScore: 100;
     compiles: string[];
     withLocalhostNetwork: boolean;
     fileContents: {

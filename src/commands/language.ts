@@ -2,9 +2,7 @@ import { l10n, QuickPickItem, window } from "vscode";
 import { ptaConfig } from "../ptaConfig";
 import { langCompilerMapping } from "../shared";
 
-
 export async function changeDefaultLanguage(): Promise<void> {
-
     const defaultLanguage: string = ptaConfig.getDefaultLanguage();
     const languages = langCompilerMapping.keys();
 

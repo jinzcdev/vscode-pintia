@@ -1,9 +1,9 @@
 out
+out-test
 dist
 node_modules
 .vscode-test/
 *.vsix
 **/.DS_Store
-src/test/
 **/tmp/
 .vscode/c_cpp_properties.json

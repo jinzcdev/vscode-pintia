@@ -10,12 +10,12 @@ export async function addFavoriteProblem(problem: PtaNode | ProblemBasicInfo) {
         pID: problem.pID,
         psID: problem.psID,
         psName: problem instanceof PtaNode ? problem.value.problemSet : problem.psName,
-        title: problem.title
+        title: problem.title,
     });
     await Promise.all([
         favoritesTreeDataProvider.refresh(),
         historyTreeDataProvider.refresh(),
-        explorerController.refreshTreeData()
+        explorerController.refreshTreeData(),
     ]);
 }
 
@@ -24,6 +24,6 @@ export async function removeFavoriteProblem(pID: string) {
     await Promise.all([
         favoritesTreeDataProvider.refresh(),
         historyTreeDataProvider.refresh(),
-        explorerController.refreshTreeData()
+        explorerController.refreshTreeData(),
     ]);
 }

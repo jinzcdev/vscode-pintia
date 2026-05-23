@@ -35,8 +35,8 @@
 
 - Simply click `Sign in PTA` in the `Pintia Explorer` will let you **sign in** with your Pintia account. (Currently, only **WeChat QR** codes are supported for signin)
 - You can also use the following command to sign in/out:
-  - **Pintia: Sign in**
-  - **Pintia: Sign out**
+    - **Pintia: Sign in**
+    - **Pintia: Sign out**
 
 ---
 
@@ -48,9 +48,10 @@
 
 - Directly click on the problem to see the problem description.
 
-  > :star: **Note:** 
-  > - You can specify the path of the workspace folder to store the problem files by updating the setting `pintia.workspaceFolder`. The default value is：**\$HOME/.pintia/codes**.
-  > - You can change the default language by triggering the command: `Pintia: Change Default Language`.
+    > :star: **Note:**
+    >
+    > - You can specify the path of the workspace folder to store the problem files by updating the setting `pintia.workspaceFolder`. The default value is：**\$HOME/.pintia/codes**.
+    > - You can change the default language by triggering the command: `Pintia: Change Default Language`.
 
 ---
 
@@ -61,10 +62,9 @@
 </p>
 
 - The extension supports 3 editor shortcuts (aka Code Lens):
-
-  - `Submit`: Submit your answer to Pintia.
-  - `Test`: Test your answer with customized test cases or default ones.
-  - `Preview`: Open the problem preview in source files.
+    - `Submit`: Submit your answer to Pintia.
+    - `Test`: Test your answer with customized test cases or default ones.
+    - `Preview`: Open the problem preview in source files.
 
 ---
 
@@ -76,8 +76,8 @@
 
 - You can put your codes between `@pintia code=start` and `@pintia code=end` (enter `ptacode` to quickly add them).
 - Also, you can put your custom test samples between `@pintia test=start` and `@pintia test=end` (enter `ptatest` to quickly add them).
-And then click `Test custom sample` to quickly test your code.
-> :star: **Note:** Only the code wrapped between `@pintia code=start` and `@pintia code=end` will be submitted to Pintia judge when you try to submit your codes by clicking `submit` or `test`.
+  And then click `Test custom sample` to quickly test your code.
+    > :star: **Note:** Only the code wrapped between `@pintia code=start` and `@pintia code=end` will be submitted to Pintia judge when you try to submit your codes by clicking `submit` or `test`.
 
 ---
 
@@ -147,22 +147,22 @@ Use `Ctrl+Shift+P` (in Windows) or `Command+Shift+P` (in MacOS) to open the comm
 
 ## 3. Main Settings
 
-| Setting Name                                 | Description                                                                                                                                                                                        | Default Value                   |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| `pintia.workspaceFolder`                     | Specify the path of the workspace folder to store the problem files.                                                                                                                               | `""`                            |
-| `pintia.defaultLanguage`                     | Default language for solving the problems.                                                                                                                                                         | `C++ (g++)`                     |
-| `pintia.previewProblem.openAndCodeIt`        | Specify whether to automatically open the code editor when previewing a problem. It is recommended not to set `#pintia.previewProblem.defaultOpenedMethod#` to `Always Ask` when enabled.          | `false`                         |
-| `pintia.paging.pageSize`                     | Specify whether to page the problem list when the problem set is too large. It is not paged when pageSize is 0.                                                                                    | `100`                           |
-| `pintia.autoCreateProblemSetFolder`          | Specify whether to automatically create a problem set folder and place source code files in this directory when coding a problem.                                                                  | `true`                          |
-| `pintia.editor.shortcuts`                    | Customize the shortcuts in editors.                                                                                                                                                                | `["Submit", "Test", "Preview"]` |
-| `pintia.autoCheckIn`                         | Specify whether to automatically check in Pintia's education supermarket when the Pintia Extension is activated.                                                                                   | `true`                          |
-| `pintia.file.problemFileNameFormat`          | Set the naming format of the problem file. Supports variables: `{label}` (problem label), `{title}` (problem title), `{pid}` (problem ID), `{psid}` (problem set ID).                              | `{label} {title}`               |
-| `pintia.file.replaceSpaceWithUnderscore`     | Specify whether to replace spaces in problem file names with underscores. When enabled, "A1001 Hello World" will become "A1001_Hello_World".                                                       | `false`                         |
-| `pintia.file.convertChineseCharacters`       | Convert Chinese characters in the problem file name to pinyin and Chinese punctuation to English punctuation to avoid compilation or debugging issues with some compilers.                         | `false`                         |
-| `pintia.file.customProblemSetName`           | Customize the problem set folder name. Accepts a JSON string that maps the problem set ID to a custom name and has the highest priority.                                                           | `{}`                            |
-| `pintia.searchIndex.ignoreZOJ`               | Specify whether to ignore the problem set, ***ZOJ Problem Set***, in the problem search index.                                                                                                     | `true`                          |
-| `pintia.searchIndex.ignoreLockedProblemSets` | Specify whether to ignore locked problem sets in the problem search index.                                                                                                                         | `true`                          |
-| `pintia.problemHistoryListSize`              | Specify the size of the problem preview history list.                                                                                                                                              | `200`                           |
+| Setting Name                                 | Description                                                                                                                                                                               | Default Value                   |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| `pintia.workspaceFolder`                     | Specify the path of the workspace folder to store the problem files.                                                                                                                      | `""`                            |
+| `pintia.defaultLanguage`                     | Default language for solving the problems.                                                                                                                                                | `C++ (g++)`                     |
+| `pintia.previewProblem.openAndCodeIt`        | Specify whether to automatically open the code editor when previewing a problem. It is recommended not to set `#pintia.previewProblem.defaultOpenedMethod#` to `Always Ask` when enabled. | `false`                         |
+| `pintia.paging.pageSize`                     | Specify whether to page the problem list when the problem set is too large. It is not paged when pageSize is 0.                                                                           | `100`                           |
+| `pintia.autoCreateProblemSetFolder`          | Specify whether to automatically create a problem set folder and place source code files in this directory when coding a problem.                                                         | `true`                          |
+| `pintia.editor.shortcuts`                    | Customize the shortcuts in editors.                                                                                                                                                       | `["Submit", "Test", "Preview"]` |
+| `pintia.autoCheckIn`                         | Specify whether to automatically check in Pintia's education supermarket when the Pintia Extension is activated.                                                                          | `true`                          |
+| `pintia.file.problemFileNameFormat`          | Set the naming format of the problem file. Supports variables: `{label}` (problem label), `{title}` (problem title), `{pid}` (problem ID), `{psid}` (problem set ID).                     | `{label} {title}`               |
+| `pintia.file.replaceSpaceWithUnderscore`     | Specify whether to replace spaces in problem file names with underscores. When enabled, "A1001 Hello World" will become "A1001_Hello_World".                                              | `false`                         |
+| `pintia.file.convertChineseCharacters`       | Convert Chinese characters in the problem file name to pinyin and Chinese punctuation to English punctuation to avoid compilation or debugging issues with some compilers.                | `false`                         |
+| `pintia.file.customProblemSetName`           | Customize the problem set folder name. Accepts a JSON string that maps the problem set ID to a custom name and has the highest priority.                                                  | `{}`                            |
+| `pintia.searchIndex.ignoreZOJ`               | Specify whether to ignore the problem set, **_ZOJ Problem Set_**, in the problem search index.                                                                                            | `true`                          |
+| `pintia.searchIndex.ignoreLockedProblemSets` | Specify whether to ignore locked problem sets in the problem search index.                                                                                                                | `true`                          |
+| `pintia.problemHistoryListSize`              | Specify the size of the problem preview history list.                                                                                                                                     | `200`                           |
 
 ## 4. Want Help?
 
