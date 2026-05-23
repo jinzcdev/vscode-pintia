@@ -4,6 +4,14 @@
 
 ---
 
+## [0.9.2] - 2026/05/23
+
+### Bug Fixes
+
+- **Problem Sets**
+    - Fixed 403 errors triggered by unstarted or ready problem sets in the Explorer ([Issue #22](https://github.com/jinzcdev/vscode-pintia/issues/22))
+    - Silently handle expected 403 responses and prevent lazy-load retries from making the Explorer unusable
+
 ## [0.8.0] - 2025/03/15
 
 ### Features
