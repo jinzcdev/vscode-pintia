@@ -7,7 +7,6 @@ import { NO_OFFICIAL_SOLUTION, NONE, ProblemJudgingStatusEnum, problemJudgingSta
 import { defaultIfBlank } from "../utils/stringUtils";
 
 export class PtaTestProvider extends PtaWebview<TestView> {
-
     private static instance: PtaTestProvider | null = null;
 
     public static createOrUpdate(view: TestView): PtaTestProvider {
@@ -24,8 +23,9 @@ export class PtaTestProvider extends PtaWebview<TestView> {
 
         try {
             const judgeResponseContent = result.submission.judgeResponseContents[0];
-            const codeJudgeResponseContent = judgeResponseContent.programmingJudgeResponseContent
-                ?? judgeResponseContent.codeCompletionJudgeResponseContent;
+            const codeJudgeResponseContent =
+                judgeResponseContent.programmingJudgeResponseContent ??
+                judgeResponseContent.codeCompletionJudgeResponseContent;
             const testcaseJudgeResults = codeJudgeResponseContent!.testcaseJudgeResults;
 
             this.data = {
@@ -33,14 +33,17 @@ export class PtaTestProvider extends PtaWebview<TestView> {
                 testResult: {
                     testCase: result.submission.submissionDetails[0].customTestData?.content,
                     answer: !answer ? NO_OFFICIAL_SOLUTION : answer,
-                    myAnswer: judgeResponseContent.status !== ProblemJudgingStatusEnum.NEUTRAL
-                        ? (problemJudgingStatusMapping.get(judgeResponseContent.status)?.text ?? judgeResponseContent.status) : (testcaseJudgeResults?.custom.stdout ?? ""),
+                    myAnswer:
+                        judgeResponseContent.status !== ProblemJudgingStatusEnum.NEUTRAL
+                            ? (problemJudgingStatusMapping.get(judgeResponseContent.status)?.text ??
+                              judgeResponseContent.status)
+                            : (testcaseJudgeResults?.custom.stdout ?? ""),
                     problemType: result.submission.problemType,
                     compiler: result.submission.compiler,
                     time: result.submission.time,
                     memory: result.submission.memory,
-                    compilationOutput: defaultIfBlank(codeJudgeResponseContent?.compilationResult?.log, NONE)
-                }
+                    compilationOutput: defaultIfBlank(codeJudgeResponseContent?.compilationResult?.log, NONE),
+                },
             };
         } catch (error: any) {
             ptaChannel.error(error.toString());
@@ -183,5 +186,4 @@ export class PtaTestProvider extends PtaWebview<TestView> {
             </div>
         `;
     }
-
 }

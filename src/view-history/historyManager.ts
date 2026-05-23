@@ -1,15 +1,15 @@
-import * as fs from 'fs-extra';
-import * as path from 'path';
+import * as fs from "fs-extra";
+import * as path from "path";
 import * as vscode from "vscode";
-import { Disposable, l10n } from 'vscode';
-import { ptaChannel } from '../ptaChannel';
+import { Disposable, l10n } from "vscode";
+import { ptaChannel } from "../ptaChannel";
 
-import { ProblemBasicInfo } from '../entity/ProblemBasicInfo';
-import { ptaConfig } from '../ptaConfig';
-import { ptaManager } from '../ptaManager';
-import { viewedProblemPath } from '../shared';
-import { DialogType, promptForOpenOutputChannel } from '../utils/uiUtils';
-import { historyTreeDataProvider } from './historyTreeDataProvider';
+import { ProblemBasicInfo } from "../entity/ProblemBasicInfo";
+import { ptaConfig } from "../ptaConfig";
+import { ptaManager } from "../ptaManager";
+import { viewedProblemPath } from "../shared";
+import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
+import { historyTreeDataProvider } from "./historyTreeDataProvider";
 
 class HistoryManager implements Disposable {
     private static instance: HistoryManager;
@@ -39,7 +39,7 @@ class HistoryManager implements Disposable {
             this.viewedProblems[userId] = [];
         }
         const problems = this.viewedProblems[userId];
-        const index = problems.findIndex(p => p.pID === problem.pID);
+        const index = problems.findIndex((p) => p.pID === problem.pID);
         if (index >= 0) {
             problems.splice(index, 1);
         }
@@ -57,13 +57,16 @@ class HistoryManager implements Disposable {
                 fs.mkdirSync(path.dirname(this.filePath), { recursive: true });
                 fs.writeFileSync(this.filePath, JSON.stringify({}));
             } else {
-                const data = fs.readFileSync(this.filePath, 'utf-8');
+                const data = fs.readFileSync(this.filePath, "utf-8");
                 this.viewedProblems = JSON.parse(data);
                 this.trimViewedProblems();
             }
         } catch (error: any) {
             ptaChannel.error(error.toString());
-            await promptForOpenOutputChannel(l10n.t("Failed to load viewed problems. Please check the output channel for details."), DialogType.error);
+            await promptForOpenOutputChannel(
+                l10n.t("Failed to load viewed problems. Please check the output channel for details."),
+                DialogType.error
+            );
         }
     }
 
@@ -73,7 +76,10 @@ class HistoryManager implements Disposable {
             fs.writeFileSync(this.filePath, JSON.stringify(this.viewedProblems));
         } catch (error: any) {
             ptaChannel.error(error.toString());
-            await promptForOpenOutputChannel(l10n.t("Failed to save viewed problems. Please check the output channel for details."), DialogType.error);
+            await promptForOpenOutputChannel(
+                l10n.t("Failed to save viewed problems. Please check the output channel for details."),
+                DialogType.error
+            );
         }
     }
 

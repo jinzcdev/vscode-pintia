@@ -16,7 +16,6 @@
     - Support for custom file name templates, including problem ID, problem tags, problem name, problem set ID, etc.
     - Support for converting Chinese problem names to Pinyin
     - Support for custom problem set folder names
-    
 - **Editor Shortcuts**
     - Added shortcuts for submitting answers (`Cmd/Ctrl+Shift+J`) and testing code (`Cmd/Ctrl+Shift+K`) in PTA source files
     - Added **Start Coding** (`Cmd/Ctrl+Enter`) shortcut in the problem preview page

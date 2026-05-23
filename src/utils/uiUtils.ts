@@ -1,4 +1,3 @@
-
 import * as vscode from "vscode";
 import * as os from "os";
 import { ptaChannel } from "../ptaChannel";
@@ -55,7 +54,9 @@ export async function showFileSelectDialog(fsPath?: string): Promise<vscode.Uri[
 function getBelongingWorkspaceFolderUri(fsPath: string | undefined): vscode.Uri | undefined {
     let defaultUri: vscode.Uri | undefined;
     if (fsPath) {
-        const workspaceFolder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(fsPath));
+        const workspaceFolder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(
+            vscode.Uri.file(fsPath)
+        );
         if (workspaceFolder) {
             defaultUri = workspaceFolder.uri;
         }
@@ -80,7 +81,9 @@ export async function openUrl(url: string): Promise<void> {
 }
 
 export async function showYesOrNoPick(message: string): Promise<boolean> {
-    return await vscode.window.showInformationMessage(message, DialogOptions.yes, DialogOptions.no) === DialogOptions.yes;
+    return (
+        (await vscode.window.showInformationMessage(message, DialogOptions.yes, DialogOptions.no)) === DialogOptions.yes
+    );
 }
 
 export enum DialogType {

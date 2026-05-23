@@ -2,11 +2,13 @@
 export interface ICheckIn {
     rewards: {
         DAILY_CHECK_IN: {
-            rewards: [{
-                purchaseObjectType: string;
-                amount: number
-            }]
-        }
+            rewards: [
+                {
+                    purchaseObjectType: string;
+                    amount: number;
+                },
+            ];
+        };
     };
     error: {
         code: string;
@@ -17,9 +19,11 @@ export interface ICheckIn {
 export interface ICheckInStatus {
     exists: boolean;
     rewardContent: {
-        rewards: [{
-            purchaseObjectType: string;
-            amount: number;
-        }]
-    }
+        rewards: [
+            {
+                purchaseObjectType: string;
+                amount: number;
+            },
+        ];
+    };
 }

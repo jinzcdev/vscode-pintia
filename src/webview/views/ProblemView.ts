@@ -1,14 +1,11 @@
-
-import { IProblem, IProblemConfig } from '../../entity/IProblem';
-import { IProblemInfo } from '../../entity/IProblemInfo';
-import { ptaConfig } from '../../ptaConfig';
+import { IProblem, IProblemConfig } from "../../entity/IProblem";
+import { IProblemInfo } from "../../entity/IProblemInfo";
+import { ptaConfig } from "../../ptaConfig";
 import { ptaManager } from "../../ptaManager";
-import { compilerLangMapping, IPtaCode, langCompilerMapping, ProblemType, problemTypeInfoMapping } from '../../shared';
-import { ptaApi } from '../../utils/api';
-
+import { compilerLangMapping, IPtaCode, langCompilerMapping, ProblemType, problemTypeInfoMapping } from "../../shared";
+import { ptaApi } from "../../utils/api";
 
 export class ProblemView {
-
     public id: string = "";
     public label: string = "";
     public title: string = "";
@@ -40,7 +37,11 @@ export class ProblemView {
             return this.instance;
         }
         const problem = await ptaApi.getProblem(this.problemSetId, this.id, ptaManager.getUserSession()?.cookie);
-        const problemInfo: IProblemInfo = await ptaApi.getProblemInfoByID(this.problemSetId, this.id, problem.type as ProblemType);
+        const problemInfo: IProblemInfo = await ptaApi.getProblemInfoByID(
+            this.problemSetId,
+            this.id,
+            problem.type as ProblemType
+        );
 
         this.problem = problem;
         this.id = problem.id;
@@ -60,8 +61,12 @@ export class ProblemView {
         this.acceptCount = problemInfo.acceptCount;
         this.submitCount = problemInfo.submitCount;
         [this.lastSubmittedLang, this.lastProgram] = await this.getLastSubmittedProgram();
-        [this.problemNote, this.lastProgram] = this.parseProblemNote(this.lastProgram, "@pintia note=start", "@pintia note=end");
-        return this.instance = this;
+        [this.problemNote, this.lastProgram] = this.parseProblemNote(
+            this.lastProgram,
+            "@pintia note=start",
+            "@pintia note=end"
+        );
+        return (this.instance = this);
     }
 
     public static parseProblemConfig(problem: IProblem): IProblemConfig | undefined {
@@ -86,9 +91,16 @@ export class ProblemView {
             }
             return ["Verilog", content[Object.keys(content)[0]]];
         }
-        const lastSubmissionDetail = (await ptaApi.getLastSubmissions(this.problemSetId, this.id, ptaManager.getUserSession()?.cookie ?? ""))?.submissionDetails[0];
-        const lastSubmittedCompiler: string = (lastSubmissionDetail?.programmingSubmissionDetail ?? lastSubmissionDetail?.codeCompletionSubmissionDetail)?.compiler ?? this.problem.compiler;
-        const lastProgram = lastSubmissionDetail?.programmingSubmissionDetail?.program ?? lastSubmissionDetail?.codeCompletionSubmissionDetail?.program ?? "";
+        const lastSubmissionDetail = (
+            await ptaApi.getLastSubmissions(this.problemSetId, this.id, ptaManager.getUserSession()?.cookie ?? "")
+        )?.submissionDetails[0];
+        const lastSubmittedCompiler: string =
+            (lastSubmissionDetail?.programmingSubmissionDetail ?? lastSubmissionDetail?.codeCompletionSubmissionDetail)
+                ?.compiler ?? this.problem.compiler;
+        const lastProgram =
+            lastSubmissionDetail?.programmingSubmissionDetail?.program ??
+            lastSubmissionDetail?.codeCompletionSubmissionDetail?.program ??
+            "";
         return [this.parseCompiler2Lang(lastSubmittedCompiler), lastProgram];
     }
 
@@ -97,12 +109,13 @@ export class ProblemView {
             return ["", ""];
         }
         let note: string = "";
-        const lines: string[] = data.split('\n');
-        let startLine: number = -1, endLine: number = -1;
+        const lines: string[] = data.split("\n");
+        let startLine: number = -1,
+            endLine: number = -1;
         for (let i = 0; i < lines.length; i++) {
-            if (lines[i].indexOf(start) != -1) {
+            if (lines[i].indexOf(start) !== -1) {
                 startLine = i + 1;
-            } else if (lines[i].indexOf(end) != -1 && startLine != -1 && startLine < i) {
+            } else if (lines[i].indexOf(end) !== -1 && startLine !== -1 && startLine < i) {
                 const code: string = lines.slice(startLine, i).join("\n");
                 if (!code.trim().length) continue;
                 note = lines.slice(startLine, i).join("\n");
@@ -126,7 +139,7 @@ export class ProblemView {
             problemType: problem.type as ProblemType,
             compiler: compiler,
             label: problem.label,
-            title: problem.title
+            title: problem.title,
         };
     }
 }

@@ -29,13 +29,13 @@ export interface IPtaUser {
                 stage: string;
                 startAt: string;
                 endAt: string;
-            }
+            },
         ];
         experiences: [];
         image: string;
         intention: string;
         skill: string;
-        location: []
+        location: [];
     };
     info: string;
     activate: boolean;

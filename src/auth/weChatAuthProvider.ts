@@ -9,7 +9,6 @@ import { LoginView } from "../webview/views/LoginView";
 import { IUserAuthProvider } from "./IUserAuthProvider";
 
 class WeChatAuthProvider implements IUserAuthProvider {
-
     async signIn(): Promise<IUserSession | undefined> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -17,11 +16,11 @@ class WeChatAuthProvider implements IUserAuthProvider {
                 const ptaLoginProvider = PtaLoginProvider.createOrUpdate(new LoginView(auth.url));
                 await ptaLoginProvider.show();
                 let userSession: IUserSession | undefined;
-                let logged: boolean = false, cnt: number = 0;
+                let logged: boolean = false,
+                    cnt: number = 0;
                 let interval = setInterval(async () => {
                     const authState = await ptaApi.getWechatAuthState(auth.state);
                     if (authState.status === AuthStatus.SUCCESSFUL) {
-
                         const userState: IWechatUserState = await ptaApi.getWechatAuthUser(auth.state);
                         const userInfo: IWechatUserInfo = await ptaApi.getWechatUserInfo(auth.state, userState.id);
 
@@ -30,7 +29,7 @@ class WeChatAuthProvider implements IUserAuthProvider {
                             user: userInfo.user.nickname,
                             email: userInfo.user.email,
                             loginMethod: PtaLoginMethod.WeChat,
-                            cookie: userInfo.cookie
+                            cookie: userInfo.cookie,
                         };
                         logged = true;
                         ptaLoginProvider.dispose();
@@ -45,7 +44,10 @@ class WeChatAuthProvider implements IUserAuthProvider {
                 });
             } catch (error: any) {
                 ptaChannel.error(error.toString());
-                await promptForOpenOutputChannel(l10n.t("Failed to login PTA. Please check the output channel for details."), DialogType.error);
+                await promptForOpenOutputChannel(
+                    l10n.t("Failed to login PTA. Please check the output channel for details."),
+                    DialogType.error
+                );
                 resolve(undefined);
             }
         });

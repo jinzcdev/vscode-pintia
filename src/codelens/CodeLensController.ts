@@ -1,4 +1,3 @@
-
 import { ConfigurationChangeEvent, Disposable, languages, workspace } from "vscode";
 import { customCodeLensProvider, CustomCodeLensProvider } from "./CustomCodeLensProvider";
 

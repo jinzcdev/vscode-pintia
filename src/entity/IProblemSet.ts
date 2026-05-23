@@ -2,7 +2,6 @@
 import { IProblemSummary } from "./IProblemSummary";
 
 export interface IProblemSet extends ProblemSet {
-
     problemSetConfig: {
         compilers: string[]; // all compilers to be allowed to use in this problem set
         multipleChoiceMoreThanOneAnswerProblemScoringMethod?: string;

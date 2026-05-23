@@ -1,8 +1,7 @@
 import { IProblemSet } from "./IProblemSet";
 import { IProblemSummary } from "./IProblemSummary";
 
-interface ExamConfig {
-}
+interface ExamConfig {}
 
 interface Exam {
     id: string;
@@ -27,7 +26,6 @@ interface ProblemSetSummary {
         };
     };
 }
-
 
 export interface AlwaysAvailableProblemSet {
     problemSets: IProblemSet[];

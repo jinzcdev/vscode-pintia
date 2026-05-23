@@ -15,8 +15,8 @@ export function parseCodeInfo(data: string): IPtaCode | null {
     return {
         psID: matchResult[1],
         pID: matchResult[2],
-        compiler: matchResult[3]
-    }
+        compiler: matchResult[3],
+    };
 }
 
 /**
@@ -28,15 +28,15 @@ export function parseCodeInfo(data: string): IPtaCode | null {
  */
 export function parseCodeBlock(data: string, start: string, end: string): ICodeBlock[] {
     const codeblock: ICodeBlock[] = [];
-    const regex = new RegExp(`${start}([\\s\\S]*?)${end}`, 'g');
+    const regex = new RegExp(`${start}([\\s\\S]*?)${end}`, "g");
     let match;
     while ((match = regex.exec(data)) !== null) {
         const code = match[1].trim();
         if (code.length > 0) {
-            const startLine = data.substring(0, match.index).split('\n').length;
+            const startLine = data.substring(0, match.index).split("\n").length;
             codeblock.push({
                 lineNum: startLine,
-                code: code
+                code: code,
             });
         }
     }
@@ -61,23 +61,17 @@ export async function getPtaCodeFromActiveEditor(): Promise<IPtaCode | undefined
         vscode.window.showErrorMessage(vscode.l10n.t("No valid Pintia problem found in the current file!"));
         return undefined;
     }
-    const codeBlocks = parseCodeBlock(
-        content,
-        "@pintia\\s+code=start\\s*?\\n",
-        "\\n[^\\n]*?@pintia\\s+code=end"
-    );
+    const codeBlocks = parseCodeBlock(content, "@pintia\\s+code=start\\s*?\\n", "\\n[^\\n]*?@pintia\\s+code=end");
     if (codeBlocks.length === 0) {
-        vscode.window.showWarningMessage(vscode.l10n.t("The code must be wrapped in `@pintia code=start` and `@pintia code=end`"));
+        vscode.window.showWarningMessage(
+            vscode.l10n.t("The code must be wrapped in `@pintia code=start` and `@pintia code=end`")
+        );
         return undefined;
     }
 
     ptaCode.code = codeBlocks[0].code;
 
-    const customTests = parseCodeBlock(
-        content,
-        "@pintia\\s+test=start\\s*?\\n",
-        "\\n[^\\n]*?@pintia\\s+test=end"
-    );
+    const customTests = parseCodeBlock(content, "@pintia\\s+test=start\\s*?\\n", "\\n[^\\n]*?@pintia\\s+test=end");
     ptaCode.customTests = customTests.map((value) => value.code);
 
     return ptaCode;
@@ -126,19 +120,19 @@ export function getCodeLensRange(document: vscode.TextDocument, regex: RegExp): 
 export function updatePtaValidCodeContext(): void {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
-        vscode.commands.executeCommand('setContext', 'pintia.validCodeFile', false);
+        vscode.commands.executeCommand("setContext", "pintia.validCodeFile", false);
         return;
     }
 
     const document = editor.document;
-    if (document.uri.scheme !== 'file') {
-        vscode.commands.executeCommand('setContext', 'pintia.validCodeFile', false);
+    if (document.uri.scheme !== "file") {
+        vscode.commands.executeCommand("setContext", "pintia.validCodeFile", false);
         return;
     }
 
     const content = document.getText();
     const ptaCode = parseCodeInfo(content);
-    vscode.commands.executeCommand('setContext', 'pintia.validCodeFile', !!ptaCode);
+    vscode.commands.executeCommand("setContext", "pintia.validCodeFile", !!ptaCode);
 }
 
 export interface ICodeBlock {

@@ -1,4 +1,3 @@
-
 import { ConfigurationChangeEvent, Disposable, workspace } from "vscode";
 import { IUserSession } from "../entity/userLoginSession";
 import { ptaConfig } from "../ptaConfig";

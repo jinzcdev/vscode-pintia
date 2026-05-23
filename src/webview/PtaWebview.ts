@@ -4,7 +4,6 @@ import { ptaChannel } from "../ptaChannel";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 
 export abstract class PtaWebview<T> implements Disposable {
-
     private currentPanel: vscode.WebviewPanel | undefined = undefined;
     private listeners: Disposable[] = [];
     private callback?: (data?: any) => void;
@@ -14,8 +13,7 @@ export abstract class PtaWebview<T> implements Disposable {
     protected abstract getContent(): string;
     protected abstract loadViewData(view: T): Promise<void>;
 
-    protected constructor(private view: T) {
-    }
+    protected constructor(private view: T) {}
 
     public async show(focused: boolean = true): Promise<void> {
         try {
@@ -30,11 +28,11 @@ export abstract class PtaWebview<T> implements Disposable {
                 return;
             }
             this.currentPanel = vscode.window.createWebviewPanel(
-                'PTA',
+                "PTA",
                 `PTA: ${this.data.title}`,
                 vscode.ViewColumn.One,
                 {
-                    enableScripts: true
+                    enableScripts: true,
                 }
             );
             this.currentPanel.webview.html = await this.getWebviewContent();
@@ -90,12 +88,12 @@ export abstract class PtaWebview<T> implements Disposable {
         this.view = view;
     }
 
-    protected async onDidReceiveMessage(_msg: IWebViewMessage): Promise<void> { }
+    protected async onDidReceiveMessage(_msg: IWebViewMessage): Promise<void> {}
 }
 
 export function getNonce() {
-    let text = '';
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let text = "";
+    const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     for (let i = 0; i < 32; i++) {
         text += possible.charAt(Math.floor(Math.random() * possible.length));
     }

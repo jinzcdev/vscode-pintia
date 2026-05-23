@@ -1,7 +1,7 @@
 import { imgUrlPrefix } from "../shared";
 
-const hljs = require('highlight.js');
-const markdownEngine = require('markdown-it')({
+const hljs = require("highlight.js");
+const markdownEngine = require("markdown-it")({
     html: true,
     linkify: true,
     breaks: true,
@@ -10,16 +10,16 @@ const markdownEngine = require('markdown-it')({
         if (lang && hljs.getLanguage(lang)) {
             try {
                 return hljs.highlight(str, { language: lang }).value;
-            } catch (__) { }
+            } catch (__) {}
         }
         return str;
-    }
+    },
 })
-    .use(require('@vscode/markdown-it-katex').default)
-    .use(require('markdown-it-replace-link'), {
+    .use(require("@vscode/markdown-it-katex").default)
+    .use(require("markdown-it-replace-link"), {
         replaceLink: function (link: string, env: any) {
             return processLink(link);
-        }
+        },
     });
 
 function processLink(link: string): string {
@@ -34,14 +34,15 @@ function processLink(link: string): string {
 
 /**
  * Render markdown to html
- * @param markdown 
- * @returns 
+ * @param markdown
+ * @returns
  */
 export function render(markdown: string): string {
-    markdown = markdown.replace(/\${2}(.+?)\${2}/g,
-        (match: string, p1: string) => require("katex").renderToString(p1, { throwOnError: false })
+    markdown = markdown.replace(/\${2}(.+?)\${2}/g, (match: string, p1: string) =>
+        require("katex").renderToString(p1, { throwOnError: false })
     );
-    return markdownEngine.render(markdown)
+    return markdownEngine
+        .render(markdown)
         .replace(/!\[([^\]]*)\]\((.*?)\)/g, (_: string, alt: string, link: string) => {
             return `<img alt="${alt}" src="${processLink(link)}">`;
         });

@@ -5,9 +5,7 @@
         "ecmaVersion": 6,
         "sourceType": "module"
     },
-    "plugins": [
-        "@typescript-eslint"
-    ],
+    "plugins": ["@typescript-eslint"],
     "rules": {
         "@typescript-eslint/naming-convention": "warn",
         "@typescript-eslint/semi": "warn",
@@ -17,16 +15,10 @@
         "semi": "off",
         "forin": false,
         "object-literal-sort-keys": false,
-        "indent": [
-            true,
-            "spaces"
-        ],
+        "indent": [true, "spaces"],
         "no-string-literal": false,
         "no-namespace": false,
-        "max-line-length": [
-            false,
-            120
-        ],
+        "max-line-length": [false, 120],
         "typedef": [
             true,
             "call-signature",
@@ -37,14 +29,7 @@
             "variable-declaration",
             "member-variable-declaration"
         ],
-        "variable-name": [
-            true,
-            "allow-leading-underscore"
-        ]
+        "variable-name": [true, "allow-leading-underscore"]
     },
-    "ignorePatterns": [
-        "out",
-        "dist",
-        "**/*.d.ts"
-    ]
+    "ignorePatterns": ["out", "dist", "**/*.d.ts"]
 }

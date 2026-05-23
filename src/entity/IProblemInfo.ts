@@ -1,6 +1,4 @@
-
 export interface IProblemInfo {
-
     id: string;
     label: string;
     score: number;
@@ -14,5 +12,4 @@ export interface IProblemInfo {
     problemSetId: string;
     problemPoolIndex: number;
     indexInProblemPool: number;
-
 }

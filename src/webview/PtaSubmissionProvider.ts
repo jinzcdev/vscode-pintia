@@ -2,7 +2,15 @@ import * as vscode from "vscode";
 import { IProblem } from "../entity/IProblem";
 import { IProblemSubmissionResult } from "../entity/IProblemSubmissionResult";
 import { IProblemSubmissionDetail } from "../entity/problemSubmissionCode";
-import { ProblemJudgingStatusEnum, ProblemType, problemTypeInfoMapping, ptaCompiler, problemJudgingStatusMapping, UNKNOWN, NONE } from "../shared";
+import {
+    ProblemJudgingStatusEnum,
+    ProblemType,
+    problemTypeInfoMapping,
+    ptaCompiler,
+    problemJudgingStatusMapping,
+    UNKNOWN,
+    NONE,
+} from "../shared";
 import { ptaApi } from "../utils/api";
 import { PtaWebviewWithCodeStyle } from "./PtaWebviewWithCodeStyle";
 import * as markdownEngine from "./markdownEngine";
@@ -12,7 +20,6 @@ import { ProblemView } from "./views/ProblemView";
 import { defaultIfBlank } from "../utils/stringUtils";
 
 export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmissionResult> {
-
     private static instance: PtaSubmissionProvider | null = null;
 
     public static createOrUpdate(view: IProblemSubmissionResult): PtaSubmissionProvider {
@@ -26,18 +33,22 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
     protected async loadViewData(result: IProblemSubmissionResult): Promise<void> {
         const submissionDetail: IProblemSubmissionDetail = result.submission.submissionDetails[0];
         const judgeResponseContent = result.submission.judgeResponseContents[0];
-        const codeJudgeResponseContent = judgeResponseContent.programmingJudgeResponseContent ??
+        const codeJudgeResponseContent =
+            judgeResponseContent.programmingJudgeResponseContent ??
             judgeResponseContent.codeCompletionJudgeResponseContent;
         const testcaseJudgeResults = codeJudgeResponseContent!.testcaseJudgeResults;
 
-        const psID = result.submission.problemSetId, pID = result.submission.problemSetProblemId;
+        const psID = result.submission.problemSetId,
+            pID = result.submission.problemSetProblemId;
         const problem: IProblem = await ptaApi.getProblem(psID, pID);
 
         const problemConfig = ProblemView.parseProblemConfig(problem);
-        const testCases = problemConfig && typeof problemConfig === 'object' ? problemConfig.cases : [];
+        const testCases = problemConfig && typeof problemConfig === "object" ? problemConfig.cases : [];
 
         const hints = result.submission.hints;
-        const isHint: boolean = Object.values(hints).some((hint: any) => typeof hint === "string" && hint.trim().length > 0);
+        const isHint: boolean = Object.values(hints).some(
+            (hint: any) => typeof hint === "string" && hint.trim().length > 0
+        );
         this.data = {
             title: `提交结果 | ${problem.title}`,
             isHint: isHint,
@@ -57,10 +68,11 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
                 time: result.submission.time,
                 memory: result.submission.memory,
                 compilationOutput: defaultIfBlank(codeJudgeResponseContent?.compilationResult?.log, NONE),
-                program: result.submission.problemType === ProblemType.PROGRAMMING ?
-                    submissionDetail.programmingSubmissionDetail!.program :
-                    submissionDetail.codeCompletionSubmissionDetail!.program
-            }
+                program:
+                    result.submission.problemType === ProblemType.PROGRAMMING
+                        ? submissionDetail.programmingSubmissionDetail!.program
+                        : submissionDetail.codeCompletionSubmissionDetail!.program,
+            },
         };
     }
 
@@ -75,8 +87,11 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
         for (const i in content.testcaseJudgeResults) {
             const testcaseJudgeResult = content.testcaseJudgeResults[i];
             const testCase = content.testCases[i];
-            const scoreText = testCase !== undefined ? `${testcaseJudgeResult.testcaseScore} / ${testCase.score}` : testcaseJudgeResult.testcaseScore;
-            const testcaseJudgingStatus = problemJudgingStatusMapping.get(testcaseJudgeResult.result)
+            const scoreText =
+                testCase !== undefined
+                    ? `${testcaseJudgeResult.testcaseScore} / ${testCase.score}`
+                    : testcaseJudgeResult.testcaseScore;
+            const testcaseJudgingStatus = problemJudgingStatusMapping.get(testcaseJudgeResult.result);
             cases += `
             <tr>
                 <td>${i}</td>
@@ -90,9 +105,13 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
         }
 
         const scoreText = content.totalScore ? `${content.score} / ${content.totalScore}` : content.score;
-        const timeText = content.timeLimit ? `${(content.time * 1000).toFixed()} / ${content.timeLimit}ms` : `${(content.time * 1000).toFixed()}ms`;
+        const timeText = content.timeLimit
+            ? `${(content.time * 1000).toFixed()} / ${content.timeLimit}ms`
+            : `${(content.time * 1000).toFixed()}ms`;
 
-        const copyButtonScriptUri = this.getWebview()?.asWebviewUri(vscode.Uri.joinPath(getGlobalContext().extensionUri, "media", "main.js"));
+        const copyButtonScriptUri = this.getWebview()?.asWebviewUri(
+            vscode.Uri.joinPath(getGlobalContext().extensionUri, "media", "main.js")
+        );
         const problemJudgingStatus = problemJudgingStatusMapping.get(content.status);
         return `
         <div>
@@ -147,11 +166,11 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
 
         <h2>代码</h2>
         <div class="code-block code-preview">
-            ${markdownEngine.render(["```" + compiler.language, content.program.replace(/```/g, '\\```'), "```"].join("\n"))}
+            ${markdownEngine.render(["```" + compiler.language, content.program.replace(/```/g, "\\```"), "```"].join("\n"))}
         </div>
 
         <script nonce="${getNonce()}" src="${copyButtonScriptUri}"></script>
-        `
+        `;
     }
 
     protected async onDidReceiveMessage(msg: IWebViewMessage): Promise<void> {
@@ -170,7 +189,7 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
             hour = date.getHours(),
             minute = date.getMinutes(),
             second = date.getSeconds();
-        const f = (e: number) => e < 10 ? '0' + e : e;
+        const f = (e: number) => (e < 10 ? "0" + e : e);
         return `${year}/${month}/${day} ${f(hour)}:${f(minute)}:${f(second)}`;
     }
 }
@@ -178,11 +197,11 @@ export class PtaSubmissionProvider extends PtaWebviewWithCodeStyle<IProblemSubmi
 function escapeHtml(unsafe: string): string {
     return unsafe.replace(/[&<"'>]/g, function (match) {
         const escapeMap = new Map<string, string>([
-            ['&', '&amp;'],
-            ['<', '&lt;'],
-            ['>', '&gt;'],
-            ['"', '&quot;'],
-            ["'", '&#039;']
+            ["&", "&amp;"],
+            ["<", "&lt;"],
+            [">", "&gt;"],
+            ['"', "&quot;"],
+            ["'", "&#039;"],
         ]);
         return escapeMap.get(match) ?? match;
     });

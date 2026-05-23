@@ -1,13 +1,11 @@
-
 import * as vscode from "vscode";
 import { ptaManager } from "../ptaManager";
 import { ProblemBasicInfo } from "../entity/ProblemBasicInfo";
 import { favoriteProblemsManager } from "./favoriteProblemsManager";
 
-
 export class FavoritesTreeDataProvider implements vscode.TreeDataProvider<ProblemBasicInfo>, vscode.Disposable {
-
-    private onDidChangeTreeDataEvent: vscode.EventEmitter<ProblemBasicInfo | undefined | null> = new vscode.EventEmitter<ProblemBasicInfo | undefined | null>();
+    private onDidChangeTreeDataEvent: vscode.EventEmitter<ProblemBasicInfo | undefined | null> =
+        new vscode.EventEmitter<ProblemBasicInfo | undefined | null>();
 
     public readonly onDidChangeTreeData: vscode.Event<any> = this.onDidChangeTreeDataEvent.event;
 
@@ -15,7 +13,7 @@ export class FavoritesTreeDataProvider implements vscode.TreeDataProvider<Proble
         if (!element) {
             return {
                 label: "",
-                collapsibleState: vscode.TreeItemCollapsibleState.None
+                collapsibleState: vscode.TreeItemCollapsibleState.None,
             };
         }
         return {
@@ -24,10 +22,10 @@ export class FavoritesTreeDataProvider implements vscode.TreeDataProvider<Proble
             command: {
                 title: "Preview Problem",
                 command: "pintia.previewProblem",
-                arguments: [element.psID, element.pID]
+                arguments: [element.psID, element.pID],
             },
             tooltip: element.psName,
-            contextValue: "problem-favorite"
+            contextValue: "problem-favorite",
         };
     }
 
@@ -37,13 +35,14 @@ export class FavoritesTreeDataProvider implements vscode.TreeDataProvider<Proble
         }
         if (!element) {
             // root directory
-            const favoriteProblems = favoriteProblemsManager.getFavoriteProblems(favoriteProblemsManager.getCurrentUserId());
+            const favoriteProblems = favoriteProblemsManager.getFavoriteProblems(
+                favoriteProblemsManager.getCurrentUserId()
+            );
             const modifiedProblems = favoriteProblems.map((problem, index) => ({
                 ...problem,
-                displayTitle: `[${index + 1}] ${problem.title}`
+                displayTitle: `[${index + 1}] ${problem.title}`,
             }));
             return modifiedProblems;
-
         }
 
         return null;
@@ -56,7 +55,6 @@ export class FavoritesTreeDataProvider implements vscode.TreeDataProvider<Proble
     public dispose() {
         this.onDidChangeTreeDataEvent.dispose();
     }
-
 }
 
 export const favoritesTreeDataProvider = new FavoritesTreeDataProvider();

@@ -1,4 +1,4 @@
-import { pinyin } from 'pinyin-pro';
+import { pinyin } from "pinyin-pro";
 
 /**
  * 转换中文字符为拼音
@@ -6,7 +6,7 @@ import { pinyin } from 'pinyin-pro';
  * @param separator 拼音之间的分隔符, 默认为'-'
  * @returns 转换后的拼音字符串，只将连续的中文转为拼音
  */
-export function convertChineseToPinyin(text: string, separator: string = '-'): string {
+export function convertChineseToPinyin(text: string, separator: string = "-"): string {
     if (!text || !/[\u4e00-\u9fa5]/.test(text)) {
         return text;
     }
@@ -15,9 +15,9 @@ export function convertChineseToPinyin(text: string, separator: string = '-'): s
 
     return text.replace(chinesePattern, (match) => {
         return pinyin(match, {
-            toneType: 'none',
-            type: 'string',
-            separator: separator
+            toneType: "none",
+            type: "string",
+            separator: separator,
         }).toLowerCase();
     });
 }

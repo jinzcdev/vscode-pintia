@@ -1,9 +1,7 @@
-
 import { IPtaNode, IPtaNodeValue, ProblemSubmissionState, PtaNodeType } from "../shared";
 
 export class PtaNode {
-
-    constructor(private data: IPtaNode) { }
+    constructor(private data: IPtaNode) {}
 
     public get dashID(): number {
         return this.data.dashID;
@@ -52,5 +50,4 @@ export class PtaNode {
     public get isMyProblemSet(): boolean {
         return this.data.isMyProblemSet;
     }
-
 }

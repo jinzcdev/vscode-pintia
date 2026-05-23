@@ -1,15 +1,13 @@
+import * as fs from "fs-extra";
+import * as path from "path";
+import { Disposable, l10n } from "vscode";
+import { ptaChannel } from "../ptaChannel";
 
-import * as fs from 'fs-extra';
-import * as path from 'path';
-import { Disposable, l10n } from 'vscode';
-import { ptaChannel } from '../ptaChannel';
-
-import { favoriteProblemsPath } from '../shared';
-import { DialogType, promptForOpenOutputChannel } from '../utils/uiUtils';
-import { ptaManager } from '../ptaManager';
-import { ProblemBasicInfo } from '../entity/ProblemBasicInfo';
-import { favoritesTreeDataProvider } from './favoritesTreeDataProvider';
-
+import { favoriteProblemsPath } from "../shared";
+import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
+import { ptaManager } from "../ptaManager";
+import { ProblemBasicInfo } from "../entity/ProblemBasicInfo";
+import { favoritesTreeDataProvider } from "./favoritesTreeDataProvider";
 
 class FavoriteProblemsManager implements Disposable {
     private static instance: FavoriteProblemsManager;
@@ -40,7 +38,7 @@ class FavoriteProblemsManager implements Disposable {
     public removeFavoriteProblem(userId: string, pID: string) {
         const problems = this.favoriteProblems[userId];
         if (problems) {
-            const index = problems.findIndex(p => p.pID === pID);
+            const index = problems.findIndex((p) => p.pID === pID);
             if (index >= 0) {
                 problems.splice(index, 1);
                 this.save();
@@ -54,7 +52,7 @@ class FavoriteProblemsManager implements Disposable {
 
     public isFavoriteProblem(userId: string, pID: string): boolean {
         const problems = this.favoriteProblems[userId] || [];
-        return problems.some(p => p.pID === pID);
+        return problems.some((p) => p.pID === pID);
     }
 
     private async load() {
@@ -63,15 +61,17 @@ class FavoriteProblemsManager implements Disposable {
                 fs.mkdirSync(path.dirname(this.filePath), { recursive: true });
                 fs.writeFileSync(this.filePath, JSON.stringify({}));
             } else {
-                const data = fs.readFileSync(this.filePath, 'utf-8');
+                const data = fs.readFileSync(this.filePath, "utf-8");
                 this.favoriteProblems = JSON.parse(data);
             }
         } catch (error: any) {
             ptaChannel.error(error.toString());
-            await promptForOpenOutputChannel(l10n.t("Failed to load favorite problems. Please check the output channel for details."), DialogType.error);
+            await promptForOpenOutputChannel(
+                l10n.t("Failed to load favorite problems. Please check the output channel for details."),
+                DialogType.error
+            );
         }
     }
-
 
     private async save() {
         try {
@@ -79,14 +79,16 @@ class FavoriteProblemsManager implements Disposable {
             fs.writeFileSync(this.filePath, JSON.stringify(this.favoriteProblems));
         } catch (error: any) {
             ptaChannel.error(error.toString());
-            await promptForOpenOutputChannel(l10n.t("Failed to save favorite problems. Please check the output channel for details."), DialogType.error);
+            await promptForOpenOutputChannel(
+                l10n.t("Failed to save favorite problems. Please check the output channel for details."),
+                DialogType.error
+            );
         }
     }
 
     public getCurrentUserId(): string {
         return ptaManager.getUserSession()?.id ?? "";
     }
-
 
     public async dispose() {
         await this.save();

@@ -5,7 +5,6 @@ import { l10n } from "vscode";
 import { parseCodeBlock, parseCodeInfo, getCodeLensRange, ICodeBlock } from "../utils/editorUtils";
 
 export class CustomCodeLensProvider implements vscode.CodeLensProvider<PtaCodeLens> {
-
     private onDidChangeCodeLensesEmitter: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
 
     get onDidChangeCodeLenses(): vscode.Event<void> {
@@ -29,7 +28,9 @@ export class CustomCodeLensProvider implements vscode.CodeLensProvider<PtaCodeLe
         }
 
         const range: vscode.Range = getCodeLensRange(document, /@pintia\s+code=end/g)[0];
-        const codeLens: PtaCodeLens[] = shortcuts.map(shortcut => new PtaCodeLens(range, document.uri.fsPath, content, shortcut));
+        const codeLens: PtaCodeLens[] = shortcuts.map(
+            (shortcut) => new PtaCodeLens(range, document.uri.fsPath, content, shortcut)
+        );
 
         const customTestRanges: vscode.Range[] = getCodeLensRange(document, /@pintia\s+test=start/g);
         for (let i = 0; i < customTestRanges.length; i++) {
@@ -45,11 +46,19 @@ export class CustomCodeLensProvider implements vscode.CodeLensProvider<PtaCodeLe
             if (!ptaCode) {
                 return codeLens;
             }
-            const code: ICodeBlock[] = parseCodeBlock(codeLens.codeContent, "@pintia\\s+code=start\\s*?\\n", "\\n[^\\n]*?@pintia\\s+code=end");
+            const code: ICodeBlock[] = parseCodeBlock(
+                codeLens.codeContent,
+                "@pintia\\s+code=start\\s*?\\n",
+                "\\n[^\\n]*?@pintia\\s+code=end"
+            );
             if (code.length !== 0) {
                 ptaCode.code = code[0].code;
             }
-            const customTests: ICodeBlock[] = parseCodeBlock(codeLens.codeContent, "@pintia\\s+test=start\\s*?\\n", "\\n[^\\n]*?@pintia\\s+test=end");
+            const customTests: ICodeBlock[] = parseCodeBlock(
+                codeLens.codeContent,
+                "@pintia\\s+test=start\\s*?\\n",
+                "\\n[^\\n]*?@pintia\\s+test=end"
+            );
             ptaCode.customTests = customTests.map((value, _) => value.code);
 
             if (command === "Submit") {

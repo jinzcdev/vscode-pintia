@@ -1,4 +1,3 @@
-
 export interface ProblemBasicInfo {
     pID: string;
     psID: string;
