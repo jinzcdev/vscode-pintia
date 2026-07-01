@@ -8,10 +8,19 @@
 
 <p align="center">
   <a href="https://marketplace.visualstudio.com/items?itemName=jinzcdev.vscode-pintia">
-    <img src="https://img.shields.io/visual-studio-marketplace/d/jinzcdev.vscode-pintia?style=flat-square" alt="">
+    <img src="https://vsmarketplacebadges.dev/version-short/jinzcdev.vscode-pintia.svg?label=VS%20Code&style=flat&color=blue" alt="VS Code">
+  </a>
+  <a href="https://open-vsx.org/extension/jinzcdev/vscode-pintia">
+    <img src="https://img.shields.io/open-vsx/v/jinzcdev/vscode-pintia?label=Open%20VSX&style=flat&color=purple" alt="Open VSX">
+  </a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=jinzcdev.vscode-pintia">
+    <img src="https://vsmarketplacebadges.dev/downloads-short/jinzcdev.vscode-pintia.svg?label=Downloads&style=flat&color=green" alt="Downloads">
+  </a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=jinzcdev.vscode-pintia">
+    <img src="https://vsmarketplacebadges.dev/installs-short/jinzcdev.vscode-pintia.svg?label=Installs&style=flat&color=green" alt="Installs">
   </a>
   <a href="./LICENSE">
-    <img src="https://img.shields.io/github/license/jinzcdev/vscode-pintia?style=flat-square" alt="">
+    <img src="https://img.shields.io/github/license/jinzcdev/vscode-pintia?label=License&style=flat&color=orange" alt="License">
   </a>
 </p>
 
