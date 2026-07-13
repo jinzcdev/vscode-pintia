@@ -2,29 +2,14 @@
 
 > Solve PTA problems in VS Code
 
-<p align="center">
-  <img style="width: 65%; max-width: 75%;" src="./imgs/vscode-pintia-logo.png" alt="">
-</p>
+<img style="width: 65%; max-width: 75%;" src="./imgs/vscode-pintia-logo.png" alt="Pintia Logo">
 
-<p align="center">
-  <a href="https://marketplace.visualstudio.com/items?itemName=jinzcdev.vscode-pintia">
-    <img src="https://vsmarketplacebadges.dev/version-short/jinzcdev.vscode-pintia.svg?label=VS%20Code&style=flat&color=blue" alt="VS Code">
-  </a>
-  <a href="https://open-vsx.org/extension/jinzcdev/vscode-pintia">
-    <img src="https://img.shields.io/open-vsx/v/jinzcdev/vscode-pintia?label=Open%20VSX&style=flat&color=purple" alt="Open VSX">
-  </a>
-  <a href="https://marketplace.visualstudio.com/items?itemName=jinzcdev.vscode-pintia">
-    <img src="https://vsmarketplacebadges.dev/downloads-short/jinzcdev.vscode-pintia.svg?label=Downloads&style=flat&color=green" alt="Downloads">
-  </a>
-  <a href="https://marketplace.visualstudio.com/items?itemName=jinzcdev.vscode-pintia">
-    <img src="https://vsmarketplacebadges.dev/installs-short/jinzcdev.vscode-pintia.svg?label=Installs&style=flat&color=green" alt="Installs">
-  </a>
-  <a href="./LICENSE">
-    <img src="https://img.shields.io/github/license/jinzcdev/vscode-pintia?label=License&style=flat&color=orange" alt="License">
-  </a>
-</p>
-
-- English Document | [中文文档](../README.md)
+[![VS Code](https://vsmarketplacebadges.dev/version-short/jinzcdev.vscode-pintia.svg?label=VS%20Code&style=flat&color=blue)](https://marketplace.visualstudio.com/items?itemName=jinzcdev.vscode-pintia)
+[![Open VSX](https://img.shields.io/open-vsx/v/jinzcdev/vscode-pintia?label=Open%20VSX&style=flat&color=purple)](https://open-vsx.org/extension/jinzcdev/vscode-pintia)
+[![Downloads](https://vsmarketplacebadges.dev/downloads-short/jinzcdev.vscode-pintia.svg?label=Downloads&style=flat&color=green)](https://marketplace.visualstudio.com/items?itemName=jinzcdev.vscode-pintia)
+[![Installs](https://vsmarketplacebadges.dev/installs-short/jinzcdev.vscode-pintia.svg?label=Installs&style=flat&color=green)](https://marketplace.visualstudio.com/items?itemName=jinzcdev.vscode-pintia)
+[![Chinese Document](https://img.shields.io/badge/Docs-Chinese-blue?style=flat)](../README.md)
+[![License](https://img.shields.io/github/license/jinzcdev/vscode-pintia?label=License&style=flat&color=orange)](../LICENSE)
 
 ‼️ If you are in China, you can visit [Gitee](https://gitee.com/jinzcdev/vscode-pintia). ‼️
 
@@ -38,9 +23,7 @@
 
 ### 1.1 Sign In/Out
 
-<p align="center">
-  <img style="width: 65%;" src="./imgs/signin.png" alt="Sign in" />
-</p>
+<img style="width: 65%;" src="./imgs/signin.png" alt="Sign in">
 
 - Simply click `Sign in PTA` in the `Pintia Explorer` will let you **sign in** with your Pintia account. (Currently, only **WeChat QR** codes are supported for signin)
 - You can also use the following command to sign in/out:
@@ -51,9 +34,7 @@
 
 ### 1.2 Preview a Problem
 
-<p align="center">
-  <img style="width: 85%;" src="./imgs/preview.png" alt="Preview Problem" />
-</p>
+<img style="width: 85%;" src="./imgs/preview.png" alt="Preview Problem">
 
 - Directly click on the problem to see the problem description.
 
@@ -66,9 +47,7 @@
 
 ### 1.3 Editor Shortcuts
 
-<p align="center">
-  <img style="width: 65%;" src="./imgs/shortcuts.png" alt="Editor Shortcuts" />
-</p>
+<img style="width: 65%;" src="./imgs/shortcuts.png" alt="Editor Shortcuts">
 
 - The extension supports 3 editor shortcuts (aka Code Lens):
     - `Submit`: Submit your answer to Pintia.
@@ -79,9 +58,7 @@
 
 ### 1.4 Custom Test Samples
 
-<p align="center">
-  <img style="width: 85%;" src="./imgs/snippets.png" alt="Custom Test Samples" />
-</p>
+<img style="width: 85%;" src="./imgs/snippets.png" alt="Custom Test Samples">
 
 - You can put your codes between `@pintia code=start` and `@pintia code=end` (enter `ptacode` to quickly add them).
 - Also, you can put your custom test samples between `@pintia test=start` and `@pintia test=end` (enter `ptatest` to quickly add them).
@@ -94,9 +71,7 @@
 
 Click the `Search` icon at the top of the `Pintia` view or open the `Command Palette` to use shortcut command `Pintia: Search Problem`.
 
-<p align="center">
-  <img style="width: 85%;" src="./imgs/search-whole.png" alt="SearchProblem" />
-</p>
+<img style="width: 85%;" src="./imgs/search-whole.png" alt="SearchProblem">
 
 ---
 
@@ -104,9 +79,7 @@ Click the `Search` icon at the top of the `Pintia` view or open the `Command Pal
 
 you can type `ptanote` in the code editor to generate a **note block**, where you can enter your notes, and the next time you preview the problem, the notes will be parsed and previewed in Markdown.
 
-<p align="center">
-  <img style="width: 85%;" src="./imgs/note.png" alt="Note" />
-</p>
+<img style="width: 85%;" src="./imgs/note.png" alt="Note">
 
 > :star: **Note:** Your notes are submitted to PTA along with the code, not stored locally. After submitting the code, re-click `Preview` in the editor, or the next time you preview problems, your notes will be displayed on the preview page of the problem.
 

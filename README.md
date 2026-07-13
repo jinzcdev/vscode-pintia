@@ -2,29 +2,14 @@
 
 > 在 VS Code 中练习拼题 A 编程类习题
 
-<p align="center">
-  <img style="width: 65%; max-width: 75%;" src="./docs/imgs/vscode-pintia-logo.png" alt="">
-</p>
+<img style="width: 65%; max-width: 75%;" src="./docs/imgs/vscode-pintia-logo.png" alt="Pintia Logo">
 
-<p align="center">
-  <a href="https://marketplace.visualstudio.com/items?itemName=jinzcdev.vscode-pintia">
-    <img src="https://vsmarketplacebadges.dev/version-short/jinzcdev.vscode-pintia.svg?label=VS%20Code&style=flat&color=blue" alt="VS Code">
-  </a>
-  <a href="https://open-vsx.org/extension/jinzcdev/vscode-pintia">
-    <img src="https://img.shields.io/open-vsx/v/jinzcdev/vscode-pintia?label=Open%20VSX&style=flat&color=purple" alt="Open VSX">
-  </a>
-  <a href="https://marketplace.visualstudio.com/items?itemName=jinzcdev.vscode-pintia">
-    <img src="https://vsmarketplacebadges.dev/downloads-short/jinzcdev.vscode-pintia.svg?label=Downloads&style=flat&color=green" alt="Downloads">
-  </a>
-  <a href="https://marketplace.visualstudio.com/items?itemName=jinzcdev.vscode-pintia">
-    <img src="https://vsmarketplacebadges.dev/installs-short/jinzcdev.vscode-pintia.svg?label=Installs&style=flat&color=green" alt="Installs">
-  </a>
-  <a href="./LICENSE">
-    <img src="https://img.shields.io/github/license/jinzcdev/vscode-pintia?label=License&style=flat&color=orange" alt="License">
-  </a>
-</p>
-
-- [English Document](./docs/README_en-US.md) | 中文文档
+[![VS Code](https://vsmarketplacebadges.dev/version-short/jinzcdev.vscode-pintia.svg?label=VS%20Code&style=flat&color=blue)](https://marketplace.visualstudio.com/items?itemName=jinzcdev.vscode-pintia)
+[![Open VSX](https://img.shields.io/open-vsx/v/jinzcdev/vscode-pintia?label=Open%20VSX&style=flat&color=purple)](https://open-vsx.org/extension/jinzcdev/vscode-pintia)
+[![Downloads](https://vsmarketplacebadges.dev/downloads-short/jinzcdev.vscode-pintia.svg?label=Downloads&style=flat&color=green)](https://marketplace.visualstudio.com/items?itemName=jinzcdev.vscode-pintia)
+[![Installs](https://vsmarketplacebadges.dev/installs-short/jinzcdev.vscode-pintia.svg?label=Installs&style=flat&color=green)](https://marketplace.visualstudio.com/items?itemName=jinzcdev.vscode-pintia)
+[![English Document](https://img.shields.io/badge/Docs-English-blue?style=flat)](./docs/README_en-US.md)
+[![License](https://img.shields.io/github/license/jinzcdev/vscode-pintia?label=License&style=flat&color=orange)](./LICENSE)
 
 ‼️ 国内可访问 [Gitee 镜像仓库](https://gitee.com/jinzcdev/vscode-pintia). ‼️
 
@@ -38,9 +23,7 @@
 
 ### 1.1 登录/登出
 
-<p align="center">
-  <img style="width: 65%;" src="./docs/imgs/signin.png" alt="登录" />
-</p>
+<img style="width: 65%;" src="./docs/imgs/signin.png" alt="登录">
 
 - 只需在 `Pintia Explorer` 中点击 `登录拼题A/Sign in PTA` ，即可登录拼题A。(目前，支持 **微信二维码**、**Cookie** 登录）。
 - 你也可以使用以下命令来登录/退出。
@@ -51,9 +34,7 @@
 
 ### 1.2 预览题目
 
-<p align="center">
-  <img style="width: 85%;" src="./docs/imgs/preview.png" alt="预览问题" />
-</p>
+<img style="width: 85%;" src="./docs/imgs/preview.png" alt="预览问题">
 
 - 点击问题，即可查看问题描述
 
@@ -66,9 +47,7 @@
 
 ### 1.3 编辑器快捷键
 
-<p align="center">
-  <img style="width: 65%;" src="./docs/imgs/shortcuts.png" alt="编辑器快捷键" />
-</p>
+<img style="width: 65%;" src="./docs/imgs/shortcuts.png" alt="编辑器快捷键">
 
 - 该插件支持 3 个编辑器快捷键
     - `提交/Submit`：向拼题 A 提交你的答案
@@ -79,9 +58,7 @@
 
 ### 1.4 自定义测试样例
 
-<p align="center">
-  <img style="width: 85%;" src="./docs/imgs/snippets.png" alt="自定义测试样例" />
-</p>
+<img style="width: 85%;" src="./docs/imgs/snippets.png" alt="自定义测试样例">
 
 - 你可以把你的代码放在 `@pintia code=start` 和 `@pintia code=end` 之间（在编辑区中输入 `ptacode` 来快速添加）
 - 另外，你可以把你的 **自定义测试样例** 放在 `@pintia test=start` 和 `@pintia test=end` 之间（输入 `ptatest` 可以快速添加），并点击 `Test custom sample {i}` 以快速测试你的代码。
@@ -94,9 +71,7 @@
 
 点击 Pintia 视图顶部的 `搜索` 图标，或者打开 命令面板，使用 `PTA: Search Problem` 快捷命令。
 
-<p align="center">
-  <img style="width: 85%;" src="./docs/imgs/search-whole.png" alt="搜索题目" />
-</p>
+<img style="width: 85%;" src="./docs/imgs/search-whole.png" alt="搜索题目">
 
 ---
 
@@ -104,9 +79,7 @@
 
 你可以在代码编辑区键入 `ptanote` 生成笔记块，在其中输入你的笔记，下次预览题目时，笔记会以 Markdown 的形式解析并预览。
 
-<p align="center">
-  <img style="width: 85%;" src="./docs/imgs/note.png" alt="笔记" />
-</p>
+<img style="width: 85%;" src="./docs/imgs/note.png" alt="笔记">
 
 > ⭐️ **Note:** 笔记是随着代码一起提交到 拼题 A 的，并不存在本地。提交代码后，重新点击编辑器的 `Preview`，或者下次预览本题时，会显示你的笔记。
 
