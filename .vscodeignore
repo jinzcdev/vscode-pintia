@@ -12,6 +12,8 @@ vsc-extension-quickstart.md
 **/*.ts
 
 test/**
+scripts/**
+out/scripts-build/**
 package-lock.json
 .github
 resources/pta_template

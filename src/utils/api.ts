@@ -193,7 +193,23 @@ class PtaAPI {
 
     /**
      *
+     * 直连分页获取题目列表（不经过本地 cache），供搜索索引构建使用
      * https://pintia.cn/api/problem-sets/{psID}/exam-problem-list?problem_type=PROGRAMMING
+     */
+    public async fetchExamProblemPage(
+        psID: string,
+        problemType: ProblemType | string,
+        page: number,
+        limit: number = 200,
+        cookie?: string
+    ): Promise<IProblemInfo[]> {
+        const url = `${this.problemUrl}/${psID}/exam-problem-list?problem_type=${problemType}&page=${page}&limit=${limit}`;
+        const json = await httpGet(url, cookie ?? ptaManager.getUserSession()?.cookie ?? "");
+        return (json?.["problemSetProblems"] as IProblemInfo[]) ?? [];
+    }
+
+    /**
+     * 从本地缓存分页读取题目列表 https://pintia.cn/api/problem-sets/{psID}/exam-problem-list?problem_type=PROGRAMMING
      *
      * @param psID ProblemSetID
      * @param problemType ProblemType in ('PROGRAMMING', 'CODE_COMPLETION')
@@ -506,49 +522,6 @@ class PtaAPI {
         return await httpGet("https://pintia.cn/api/users/rewards/DAILY_CHECK_IN", cookie);
     }
 
-    public async getProblemSearchIndex(problemSetIDs: string[]): Promise<any> {
-        let allProblems: any = {};
-        try {
-            for (const psID of problemSetIDs) {
-                const problemList: Array<any> = [];
-                const psName: string = await this.getProblemSetName(psID);
-                const summaries: IProblemSummary = await this.getProblemSummary(psID);
-                const problemTypes = Object.keys(summaries);
-                let data: IProblemInfo[] = [];
-                for (const problemType of problemTypes) {
-                    const totalProblems: number = summaries[problemType as keyof IProblemSummary]?.total ?? 0;
-                    const pages: number = Math.ceil(totalProblems / 200);
-                    for (let i = 0; i < pages; i++) {
-                        const problemInfo = await this.getProblemInfoListByPage(
-                            psID,
-                            problemType as ProblemType,
-                            i,
-                            200
-                        );
-                        data = data.concat(problemInfo);
-                        await delay(600);
-                    }
-                }
-                for (const item of data) {
-                    problemList.push({
-                        pID: item["id"],
-                        title: item["title"],
-                        label: item["label"],
-                        score: item["score"],
-                        type: item["type"],
-                    });
-                }
-                allProblems = Object.assign(allProblems, {
-                    [`${psID}|${psName}`]: problemList,
-                });
-            }
-            return allProblems;
-        } catch (error: any) {
-            ptaChannel.error(`${error.toString()}. The delay is too short.`);
-        }
-        return {};
-    }
-
     public getProblemURL(psID: string, pID: string, problemType: string): string {
         if (!problemType || problemType.trim() === "") {
             return `https://pintia.cn/problem-sets/${psID}`;
@@ -562,10 +535,6 @@ class PtaAPI {
     public getProblemSetURL(psID: string): string {
         return `https://pintia.cn/problem-sets/${psID}`;
     }
-}
-
-function delay(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export const ptaApi = new PtaAPI();

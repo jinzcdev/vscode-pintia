@@ -1,0 +1,13 @@
+{
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        "rootDir": "..",
+        "outDir": "../out/scripts-build"
+    },
+    "include": [
+        "./build-search-index.ts",
+        "../src/searchIndex/**/*",
+        "../src/entity/IProblemSummary.ts",
+        "../src/entity/IProblemSearchItem.ts"
+    ]
+}

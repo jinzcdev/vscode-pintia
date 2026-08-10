@@ -9,6 +9,7 @@ import {
     langCompilerMapping,
     ProblemType,
     problemTypeInfoMapping,
+    ptaCache,
     ptaCompiler,
     searchIndexPath,
     UNKNOWN,
@@ -23,6 +24,8 @@ import { IProblem } from "../entity/IProblem";
 import { ptaManager } from "../ptaManager";
 import { IUserSession } from "../entity/userLoginSession";
 import { IProblemSearchItem } from "../entity/IProblemSearchItem";
+import { getSearchIndexStore } from "../searchIndex";
+import { SEARCH_INDEX_CACHE_KEY } from "./cache";
 import { l10n } from "vscode";
 import { convertChineseCharacters } from "../utils/chineseUtils";
 
@@ -176,10 +179,16 @@ export async function searchProblem(): Promise<void> {
 }
 
 async function fetchProblemIndex(): Promise<Array<IProblemSearchItem>> {
+    const cached = ptaCache.get(SEARCH_INDEX_CACHE_KEY) as IProblemSearchItem[] | undefined;
+    if (cached) {
+        return cached;
+    }
+
     const problems: Array<IProblemSearchItem> = [];
     try {
-        const searchIndex = await fs.readJSON(searchIndexPath);
-        ptaChannel.info("Fetched the problem search index from the local");
+        const store = getSearchIndexStore(searchIndexPath);
+        const allProblems = store.listProblems();
+        ptaChannel.info("Fetched the problem search index from the local JSON file");
 
         const ignoredLocked: boolean = ptaConfig.getSearchIndexIgnoreLockedProblemSets();
         const ignoredZOJ: boolean = ptaConfig.getSearchIndexIgnoreZOJ();
@@ -189,17 +198,15 @@ async function fetchProblemIndex(): Promise<Array<IProblemSearchItem>> {
             .getUnlockedProblemSetIDs(ptaManager.getUserSession()?.cookie!)
             .then((psIDs) => psIDs.forEach((psID) => Unlocked.set(psID, true)));
 
-        for (const ps in searchIndex) {
-            const [psID, psName] = ps.split("|");
-            if ((ignoredZOJ && psID === ZOJ_PROBLEM_SET_ID) || (ignoredLocked && !Unlocked.get(psID))) {
+        for (const problem of allProblems) {
+            if ((ignoredZOJ && problem.psID === ZOJ_PROBLEM_SET_ID) || (ignoredLocked && !Unlocked.get(problem.psID))) {
                 continue;
             }
-            for (let problem of searchIndex[ps]) {
-                problem["psName"] = psName;
-                problem["psID"] = psID;
-                problems.push(problem);
-            }
+            problems.push(problem);
         }
+
+        // 缓存 5 分钟，减少重复读取 JSON
+        ptaCache.put(SEARCH_INDEX_CACHE_KEY, problems, 5 * 60 * 1000);
     } catch (e: any) {
         ptaChannel.error(e.toString());
         await promptForOpenOutputChannel(
