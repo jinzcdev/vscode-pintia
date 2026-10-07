@@ -216,6 +216,18 @@ describe("ExplorerNodeManager", () => {
 
             assert.deepStrictEqual(await explorerNodeManager.getRootNodes(), []);
         });
+
+        it("应以缓存模式读取我的题集列表——issue #24 回归", async () => {
+            sinon.stub(ptaApi, "getDashSections").resolves([]);
+            sinon.stub(ptaApi, "getAlwaysAvailableProblemSets").resolves([]);
+            const getMyProblemSetsStub = sinon.stub(ptaApi, "getMyProblemSets").resolves([]);
+            sinon.stub(ptaConfig, "getShowLocked").returns(true);
+
+            await explorerNodeManager.getRootNodes();
+
+            // 第三个参数必须为 true，否则每次刷新都会重发 1+N+M 次请求
+            assert.deepStrictEqual(getMyProblemSetsStub.firstCall.args, ["PTASession=c", true, true]);
+        });
     });
 
     describe("getProblemNodes", () => {

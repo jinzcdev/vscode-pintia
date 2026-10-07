@@ -30,6 +30,21 @@ import { ILastSubmission } from "../entity/ILastSubmission";
 import { ptaManager } from "../ptaManager";
 import { AlwaysAvailableProblemSet } from "../entity/AlwaysAvailableProblemSet";
 
+/**
+ * 题集列表（含每套题的权限与摘要）缓存的有效期。
+ *
+ * 读取该列表的代价是 1+N+M 次请求（列表本身 + 每套题 `/exams` + 每套题 `/problem-summaries`），
+ * 而它在每次刷新资源管理器时都会被读取，因此必须缓存；但也不能永久缓存，
+ * 否则用户在网站上新加入的题集不会出现。超时后回源即可。
+ */
+export const MY_PROBLEM_SETS_CACHE_TTL_MS = 5 * 60 * 1000;
+
+const MY_PROBLEM_SETS_ACTIVE_CACHE_FILE = "my_problem_sets_active.json";
+const MY_PROBLEM_SETS_ALL_CACHE_FILE = "my_problem_sets_all.json";
+
+/** psID → 题集名 的内存缓存键 */
+const PS_ID_TO_NAME_CACHE_KEY = "psID2name";
+
 class PtaAPI {
     private readonly problemUrl: string = "https://pintia.cn/api/problem-sets";
     private readonly examUrl: string = "https://pintia.cn/api/exams";
@@ -124,12 +139,12 @@ class PtaAPI {
     ): Promise<IProblemSet[]> {
         const filePath = path.join(
             cacheDirPath,
-            onlyActive ? "my_problem_sets_active.json" : "my_problem_sets_all.json"
+            onlyActive ? MY_PROBLEM_SETS_ACTIVE_CACHE_FILE : MY_PROBLEM_SETS_ALL_CACHE_FILE
         );
-        if (cached && (await fs.pathExists(filePath))) {
-            ptaChannel.info(`Read the cache of my problem sets from the "${filePath}"`);
-            const problemSets: IProblemSet[] = (await fs.readJSON(filePath)) ?? [];
-            if (problemSets.length > 0) {
+        if (cached) {
+            const problemSets = await this.readCacheIfFresh<IProblemSet[]>(filePath, MY_PROBLEM_SETS_CACHE_TTL_MS);
+            if (problemSets && problemSets.length > 0) {
+                ptaChannel.info(`Read the cache of my problem sets from the "${filePath}"`);
                 return problemSets;
             }
         }
@@ -157,6 +172,41 @@ class PtaAPI {
         await fs.createFile(filePath);
         await fs.writeJson(filePath, problemSet);
         return problemSet;
+    }
+
+    /**
+     * 让题集列表及其派生缓存失效，下次读取时回源。
+     *
+     * 需在「用户手动刷新」与「切换账号」时调用：题集列表是按账号的数据，
+     * 而缓存路径是全局的，不失效会串号或长期看不到新加入的题集。
+     */
+    public async invalidateProblemSetsCache(): Promise<void> {
+        ptaCache.del(PS_ID_TO_NAME_CACHE_KEY);
+        for (const cacheFile of [MY_PROBLEM_SETS_ACTIVE_CACHE_FILE, MY_PROBLEM_SETS_ALL_CACHE_FILE]) {
+            await fs.remove(path.join(cacheDirPath, cacheFile));
+        }
+        ptaChannel.info("Invalidate the cache of my problem sets.");
+    }
+
+    /**
+     * 读取仍然新鲜的缓存；文件缺失、读取失败或已超过 ttl 时返回 undefined（调用方回源）。
+     */
+    private async readCacheIfFresh<T>(filePath: string, ttlMs: number): Promise<T | undefined> {
+        try {
+            if (!(await fs.pathExists(filePath))) {
+                return undefined;
+            }
+            const stats = await fs.stat(filePath);
+            if (Date.now() - stats.mtimeMs > ttlMs) {
+                ptaChannel.info(`The cache is stale and will be refreshed: "${filePath}"`);
+                return undefined;
+            }
+            return ((await fs.readJSON(filePath)) as T) ?? undefined;
+        } catch (error: any) {
+            // 缓存不可读不应让业务失败，视为未命中即可
+            ptaChannel.info(`Failed to read the cache from the "${filePath}": ${error?.toString()}`);
+            return undefined;
+        }
     }
 
     public async getProblemSetPermission(psID: string, cookie?: string): Promise<number | undefined> {
@@ -394,14 +444,14 @@ class PtaAPI {
     }
 
     public async getProblemSetName(psID: string): Promise<string> {
-        let psID2name: Map<string, string> = ptaCache.get("psID2name");
+        let psID2name: Map<string, string> = ptaCache.get(PS_ID_TO_NAME_CACHE_KEY);
         if (!psID2name) {
             psID2name = new Map<string, string>();
             const problemSets: IProblemSet[] = await this.getAlwaysAvailableProblemSets();
             for (const item of problemSets) {
                 psID2name.set(item.id, item.name);
             }
-            ptaCache.put<Map<string, string>>("psID2name", psID2name);
+            ptaCache.put<Map<string, string>>(PS_ID_TO_NAME_CACHE_KEY, psID2name);
         }
         const psName = psID2name.get(psID);
         if (psName) {

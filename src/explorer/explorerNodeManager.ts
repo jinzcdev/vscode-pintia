@@ -35,8 +35,13 @@ class ExplorerNodeManager implements Disposable {
         const publicProblemSetList: IProblemSet[] = await ptaApi.getAlwaysAvailableProblemSets(
             ptaManager.getUserSession()?.cookie
         );
+        // 走磁盘缓存（TTL 见 MY_PROBLEM_SETS_CACHE_TTL_MS）：该列表的读取代价是 1+N+M 次请求
+        // （列表 + 每套题 /exams + 每套题 /problem-summaries），而每次刷新资源管理器都会走到这里，
+        // 不缓存极易触发服务端的 429 限流
         const myProblemSetList: IProblemSet[] = await ptaApi.getMyProblemSets(
-            ptaManager.getUserSession()?.cookie ?? ""
+            ptaManager.getUserSession()?.cookie ?? "",
+            true,
+            true
         );
         const showLocked: boolean = ptaConfig.getShowLocked();
 

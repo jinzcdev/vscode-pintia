@@ -82,7 +82,11 @@ export async function activate(context: vscode.ExtensionContext) {
         }),
         vscode.commands.registerCommand("pintia.openPintiaHome", () => user.openPintiaHome()),
         vscode.commands.registerCommand("pintia.openExtensionRepo", () => user.openExtensionRepo()),
-        vscode.commands.registerCommand("pintia.refreshExplorer", () => explorerController.refreshTreeData()),
+        vscode.commands.registerCommand("pintia.refreshExplorer", async () => {
+            // 手动刷新的语义是「拉取最新的」，因此先让题集列表缓存失效
+            await ptaApi.invalidateProblemSetsCache();
+            explorerController.refreshTreeData();
+        }),
         vscode.commands.registerCommand("pintia.clearCache", () => cache.clearCache()),
         vscode.commands.registerCommand("pintia.signIn", () => ptaManager.signIn()),
         vscode.commands.registerCommand("pintia.signOut", () => ptaManager.signOut()),

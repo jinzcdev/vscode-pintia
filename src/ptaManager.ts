@@ -78,6 +78,9 @@ class PtaManager extends EventEmitter {
                             );
                             this.userSession = userSession;
                             this.userStatus = UserStatus.SignedIn;
+                            // 题集列表按账号区分，而缓存路径是全局的：不失效会在切换账号后
+                            // 于 TTL 内看到上一个账号的题集
+                            await ptaApi.invalidateProblemSetsCache();
 
                             ptaChannel.info(`Login successfully and save \`user.json\` to ${path}`);
 

@@ -41,6 +41,8 @@ const searchIndexApi: ISearchIndexApi = {
 export async function clearCache(): Promise<void> {
     try {
         await ptaExecutor.clearCache();
+        // ptaExecutor 只删除磁盘缓存目录，ptaCache 中的 psID → 名称映射需要单独失效
+        await ptaApi.invalidateProblemSetsCache();
         vscode.window.showInformationMessage(l10n.t("Clear the cache of pintia successfully!"));
     } catch (error) {
         await promptForOpenOutputChannel(
