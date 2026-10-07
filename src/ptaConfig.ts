@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { OpenOptionEnum } from "./utils/workspaceUtils";
+import { DEFAULT_INVALID_CHAR_REPLACEMENT } from "./utils/stringUtils";
 import { ptaChannel } from "./ptaChannel";
 import { DialogType, promptForOpenOutputChannel } from "./utils/uiUtils";
 
@@ -93,6 +94,14 @@ class PtaConfig {
 
     public setConvertChineseCharacters(convert: boolean) {
         this.update("file.convertChineseCharacters", convert);
+    }
+
+    public getInvalidCharReplacement(): string {
+        return this.getConfiguration().get<string>("file.invalidCharReplacement", DEFAULT_INVALID_CHAR_REPLACEMENT);
+    }
+
+    public setInvalidCharReplacement(replacement: string) {
+        this.update("file.invalidCharReplacement", replacement);
     }
 
     public getCustomProblemSetName(): Record<string, string> {

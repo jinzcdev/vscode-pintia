@@ -129,23 +129,24 @@
 
 ## 3. 插件主要配置
 
-| 设置名称                                     | 描述                                                                                                                       | 默认值                          |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| `pintia.workspaceFolder`                     | 工作区文件夹的路径（存储题目源文件）。                                                                                     | `""`                            |
-| `pintia.defaultLanguage`                     | 设置答题时默认使用的编程语言。                                                                                             | `C++ (g++)`                     |
-| `pintia.previewProblem.openAndCodeIt`        | 指定是否在预览题目时自动打开代码编辑器，开启时建议不要将 `#pintia.previewProblem.defaultOpenedMethod#` 设置为 `总是询问`。 | `false`                         |
-| `pintia.paging.pageSize`                     | 指定当题目集较大时候，是否对题目列表分页。pageSize 为 0 表示不分页。                                                       | `100`                           |
-| `pintia.autoCreateProblemSetFolder`          | 指定创建题目源文件时是否自动创建其习题集文件夹并将源代码文件放入相应的文件夹中。                                           | `true`                          |
-| `pintia.editor.shortcuts`                    | 自定义编码时的编辑器快捷键。                                                                                               | `["Submit"，"Test", "Preview"]` |
-| `pintia.autoCheckIn`                         | 指定是否在激活插件时自动签到 PTA 教育商店。                                                                                | `true`                          |
-| `pintia.file.problemFileNameFormat`          | 设置题目文件的命名格式。支持变量：`{label}`（题目标签）、`{title}`（题目标题）、`{pid}`（题目ID）、`{psid}`（题目集ID）。  | `{label} {title}`               |
-| `pintia.file.replaceSpaceWithUnderscore`     | 指定是否将题目文件名中的空格替换为下划线。启用后，"A1001 Hello World" 将变为 "A1001_Hello_World"。                         | `false`                         |
-| `pintia.file.convertChineseCharacters`       | 将题目文件名中的中文字符转换为拼音，中文标点符号转换为英文标点，可避免某些编译器无法编译或调试源文件。                     | `false`                         |
-| `pintia.file.customProblemSetName`           | 自定义题目集文件夹名称。接受一个 JSON 字符串，将题目集 ID 映射到自定义名称并具有最高优先级。                               | `{}`                            |
-| `pintia.searchIndex.ignoreZOJ`               | 指定搜索题目时，是否忽略 **_ZOJ Problem Set_** 题集。                                                                      | `true`                          |
-| `pintia.searchIndex.ignoreLockedProblemSets` | 指定搜索题目时，是否忽略 **_未被解锁的_** 题集。                                                                           | `true`                          |
-| `pintia.searchIndex.autoRefresh`             | 指定是否在激活插件时自动刷新题目搜索索引（不推荐，增量刷新仍可能较耗时）。                                                 | `false`                         |
-| `pintia.problemHistoryListSize`              | 指定题目预览历史列表的大小。                                                                                               | `200`                           |
+| 设置名称                                     | 描述                                                                                                                                        | 默认值                          |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| `pintia.workspaceFolder`                     | 工作区文件夹的路径（存储题目源文件）。                                                                                                      | `""`                            |
+| `pintia.defaultLanguage`                     | 设置答题时默认使用的编程语言。                                                                                                              | `C++ (g++)`                     |
+| `pintia.previewProblem.openAndCodeIt`        | 指定是否在预览题目时自动打开代码编辑器，开启时建议不要将 `#pintia.previewProblem.defaultOpenedMethod#` 设置为 `总是询问`。                  | `false`                         |
+| `pintia.paging.pageSize`                     | 指定当题目集较大时候，是否对题目列表分页。pageSize 为 0 表示不分页。                                                                        | `100`                           |
+| `pintia.autoCreateProblemSetFolder`          | 指定创建题目源文件时是否自动创建其习题集文件夹并将源代码文件放入相应的文件夹中。                                                            | `true`                          |
+| `pintia.editor.shortcuts`                    | 自定义编码时的编辑器快捷键。                                                                                                                | `["Submit"，"Test", "Preview"]` |
+| `pintia.autoCheckIn`                         | 指定是否在激活插件时自动签到 PTA 教育商店。                                                                                                 | `true`                          |
+| `pintia.file.problemFileNameFormat`          | 设置题目文件的命名格式。支持变量：`{label}`（题目标签）、`{title}`（题目标题）、`{pid}`（题目ID）、`{psid}`（题目集ID）。                   | `{label} {title}`               |
+| `pintia.file.replaceSpaceWithUnderscore`     | 指定是否将题目文件名中的空格替换为下划线。启用后，"A1001 Hello World" 将变为 "A1001_Hello_World"。                                          | `false`                         |
+| `pintia.file.convertChineseCharacters`       | 将题目文件名中的中文字符转换为拼音，中文标点符号转换为英文标点，可避免某些编译器无法编译或调试源文件。                                      | `false`                         |
+| `pintia.file.customProblemSetName`           | 自定义题目集文件夹名称。接受一个 JSON 字符串，将题目集 ID 映射到自定义名称并具有最高优先级。                                                | `{}`                            |
+| `pintia.file.invalidCharReplacement`         | 用于替换文件名与题集文件夹名中非法字符（`<>:"/\|?*`）的字符。设为空字符串表示直接删除这些字符；若该值本身包含非法字符或空白，将回退为 `_`。 | `_`                             |
+| `pintia.searchIndex.ignoreZOJ`               | 指定搜索题目时，是否忽略 **_ZOJ Problem Set_** 题集。                                                                                       | `true`                          |
+| `pintia.searchIndex.ignoreLockedProblemSets` | 指定搜索题目时，是否忽略 **_未被解锁的_** 题集。                                                                                            | `true`                          |
+| `pintia.searchIndex.autoRefresh`             | 指定是否在激活插件时自动刷新题目搜索索引（不推荐，增量刷新仍可能较耗时）。                                                                  | `false`                         |
+| `pintia.problemHistoryListSize`              | 指定题目预览历史列表的大小。                                                                                                                | `200`                           |
 
 ### 题目搜索索引（开发者）
 

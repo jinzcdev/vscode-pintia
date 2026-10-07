@@ -402,6 +402,13 @@
                         "scope": "resource",
                         "markdownDescription": "%configuration.pintia.file.customProblemSetName%",
                         "order": 3
+                    },
+                    "pintia.file.invalidCharReplacement": {
+                        "type": "string",
+                        "default": "_",
+                        "scope": "resource",
+                        "markdownDescription": "%configuration.pintia.file.invalidCharReplacement%",
+                        "order": 4
                     }
                 }
             },

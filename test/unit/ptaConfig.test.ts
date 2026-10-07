@@ -19,6 +19,7 @@ describe("ptaConfig", () => {
             assert.strictEqual(ptaConfig.getProblemFileName(), "{label} {title}");
             assert.strictEqual(ptaConfig.getReplaceSpaceWithUnderscore(), false);
             assert.strictEqual(ptaConfig.getConvertChineseCharacters(), false);
+            assert.strictEqual(ptaConfig.getInvalidCharReplacement(), "_");
             assert.strictEqual(ptaConfig.getFilePath(), "");
         });
 

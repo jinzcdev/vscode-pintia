@@ -19,7 +19,6 @@ import { ptaChannel } from "../ptaChannel";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import { ptaConfig } from "../ptaConfig";
 import { ptaApi } from "../utils/api";
-import * as stringUtils from "../utils/stringUtils";
 import { IProblem } from "../entity/IProblem";
 import { ptaManager } from "../ptaManager";
 import { IUserSession } from "../entity/userLoginSession";
@@ -27,7 +26,7 @@ import { IProblemSearchItem } from "../entity/IProblemSearchItem";
 import { getSearchIndexStore } from "../searchIndex";
 import { SEARCH_INDEX_CACHE_KEY } from "./cache";
 import { l10n } from "vscode";
-import { convertChineseCharacters } from "../utils/chineseUtils";
+import { resolveProblemFilePath } from "../utils/problemFilePath";
 
 export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
     try {
@@ -69,41 +68,30 @@ export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
 
         const ext: string = ptaCompiler[defaultCompiler as keyof typeof ptaCompiler].ext;
 
-        const fileNameFormat = ptaConfig.getProblemFileName();
+        const autoCreateProblemSetFolder: boolean = ptaConfig.getAutoCreateProblemSetFolder();
+        const { filePath: finalPath, customProblemSetNameInvalid } = resolveProblemFilePath({
+            workspaceFolder,
+            problemFileNameFormat: ptaConfig.getProblemFileName(),
+            label: ptaCode.label,
+            title: ptaCode.title,
+            pID: ptaCode.pID,
+            psID: ptaCode.psID,
+            ext,
+            psName: ptaCode.psName,
+            autoCreateProblemSetFolder,
+            // 仅在启用该功能时才解析自定义题集名，避免未使用时也弹出 JSON 解析失败提示
+            customProblemSetName: autoCreateProblemSetFolder ? ptaConfig.getCustomProblemSetName() : {},
+            replaceSpaceWithUnderscore: ptaConfig.getReplaceSpaceWithUnderscore(),
+            convertChineseCharacters: ptaConfig.getConvertChineseCharacters(),
+            invalidCharReplacement: ptaConfig.getInvalidCharReplacement(),
+        });
 
-        let fileName =
-            fileNameFormat
-                .replace(/{label}/g, ptaCode.label ?? "")
-                .replace(/{title}/g, ptaCode.title ?? "")
-                .replace(/{pid}/g, ptaCode.pID)
-                .replace(/{psid}/g, ptaCode.psID)
-                .replace(/[<>:"/\\|?*]/g, "_")
-                .trim() ?? `${ptaCode.label} ${ptaCode.title}`;
-
-        if (ptaConfig.getReplaceSpaceWithUnderscore()) {
-            fileName = fileName.replace(/\s+/g, "_");
-        }
-        if (ptaConfig.getConvertChineseCharacters()) {
-            fileName = convertChineseCharacters(fileName);
-        }
-
-        let finalPath: string = path.join(workspaceFolder, `${fileName}.${ext}`);
-        if (ptaConfig.getAutoCreateProblemSetFolder() && ptaCode.psName) {
-            // 如果题集名称包含中文且启用了转换中文字符
-            let psName = ptaConfig.getConvertChineseCharacters()
-                ? convertChineseCharacters(ptaCode.psName)
-                : ptaCode.psName;
-            const customName = ptaConfig.getCustomProblemSetName()[ptaCode.psID];
-            if (customName && stringUtils.isValidFileName(customName)) {
-                psName = customName;
-            } else if (customName) {
-                vscode.window.showWarningMessage(
-                    l10n.t(
-                        "The custom problem set name contains invalid characters. The default problem set name will be used."
-                    )
-                );
-            }
-            finalPath = path.join(workspaceFolder, psName, `${fileName}.${ext}`);
+        if (customProblemSetNameInvalid) {
+            vscode.window.showWarningMessage(
+                l10n.t(
+                    "The custom problem set name contains invalid characters. The default problem set name will be used."
+                )
+            );
         }
 
         const fileUri = vscode.Uri.file(finalPath);
