@@ -1,12 +1,12 @@
 import * as assert from "assert";
 import * as sinon from "sinon";
-import { PtaTreeDataProvider } from "../../src/explorer/PtaTreeDataProvider";
-import { PtaNode } from "../../src/explorer/PtaNode";
-import { explorerNodeManager } from "../../src/explorer/explorerNodeManager";
-import { defaultPtaNode, PtaNodeType } from "../../src/shared";
-import { ptaApi } from "../../src/utils/api";
-import { ptaManager } from "../../src/ptaManager";
-import { ptaConfig } from "../../src/ptaConfig";
+import { PtaTreeDataProvider } from "../../../src/explorer/PtaTreeDataProvider";
+import { PtaNode } from "../../../src/explorer/PtaNode";
+import { explorerNodeManager } from "../../../src/explorer/explorerNodeManager";
+import { defaultPtaNode, PtaNodeType } from "../../../src/shared";
+import { ptaApi } from "../../../src/utils/api";
+import { ptaManager } from "../../../src/ptaManager";
+import { ptaConfig } from "../../../src/ptaConfig";
 
 describe("PtaTreeDataProvider - summaries 懒加载", () => {
     let provider: PtaTreeDataProvider;

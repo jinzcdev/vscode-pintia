@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { ptaConfig } from "../ptaConfig";
 import { colorThemeMapping } from "../shared";
 import { IWebViewMessage, PtaWebview } from "./PtaWebview";
-import { getGlobalContext } from "../extension";
+import { getGlobalContext } from "../globalContext";
 import * as path from "path";
 
 export abstract class PtaWebviewWithCodeStyle<T> extends PtaWebview<T> {

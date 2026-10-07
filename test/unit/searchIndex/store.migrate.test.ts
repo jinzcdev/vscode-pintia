@@ -2,8 +2,8 @@ import * as assert from "assert";
 import * as fs from "fs-extra";
 import * as os from "os";
 import * as path from "path";
-import { SEARCH_INDEX_VERSION } from "../../src/searchIndex/constants";
-import { isSearchIndexV2, migrateLegacyIndexToV2, SearchIndexStore } from "../../src/searchIndex/store";
+import { SEARCH_INDEX_VERSION } from "../../../src/searchIndex/constants";
+import { isSearchIndexV2, migrateLegacyIndexToV2, SearchIndexStore } from "../../../src/searchIndex/store";
 
 describe("SearchIndex migration", () => {
     let tmpDir: string;

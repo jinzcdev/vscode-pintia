@@ -1,9 +1,9 @@
 import * as assert from "assert";
 import * as sinon from "sinon";
 import fetch from "node-fetch";
-import { HttpRequestError, httpGet, shouldShowHttpError } from "../../src/utils/httpUtils";
-import * as uiUtils from "../../src/utils/uiUtils";
-import { ptaManager } from "../../src/ptaManager";
+import { HttpRequestError, httpGet, shouldShowHttpError } from "../../../src/utils/httpUtils";
+import * as uiUtils from "../../../src/utils/uiUtils";
+import { ptaManager } from "../../../src/ptaManager";
 
 describe("httpUtils", () => {
     describe("shouldShowHttpError", () => {

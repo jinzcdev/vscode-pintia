@@ -1,0 +1,12 @@
+// 仅用于让 VS Code 的 TS 语言服务认领 test/ 下的文件。
+//
+// tsserver 只按文件名向上查找 tsconfig.json（不认 tsconfig.test.json），而根 tsconfig.json
+// 又 exclude 了 test/，导致测试文件没有归属工程、拿不到 @types/mocha 的全局声明
+// （表现为 "Cannot find name 'describe'... ts(2593)"）。
+//
+// 本文件不做任何 include/rootDir 的声明：全部继承自根 tsconfig.test.json（其中的相对路径
+// 按其声明所在的根目录解析）。命令行构建仍走 `tsc -p ./tsconfig.test.json`，不经过这里。
+// 请勿删除——删掉后 IDE 报错会立刻回来。
+{
+    "extends": "../tsconfig.test.json"
+}

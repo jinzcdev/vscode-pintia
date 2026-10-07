@@ -2,11 +2,11 @@ import * as assert from "assert";
 import * as fs from "fs-extra";
 import * as os from "os";
 import * as path from "path";
-import { SearchIndexBuilder } from "../../src/searchIndex/builder";
-import { SEARCH_INDEX_VERSION } from "../../src/searchIndex/constants";
-import { SearchIndexStore } from "../../src/searchIndex/store";
-import { ISearchIndexApi } from "../../src/searchIndex/types";
-import { IProblemSummary } from "../../src/entity/IProblemSummary";
+import { SearchIndexBuilder } from "../../../src/searchIndex/builder";
+import { SEARCH_INDEX_VERSION } from "../../../src/searchIndex/constants";
+import { SearchIndexStore } from "../../../src/searchIndex/store";
+import { ISearchIndexApi } from "../../../src/searchIndex/types";
+import { IProblemSummary } from "../../../src/entity/IProblemSummary";
 
 /**
  * 创建 mock API：单个题集、单题型，支持分页

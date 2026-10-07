@@ -188,7 +188,7 @@ async function fetchProblemIndex(): Promise<Array<IProblemSearchItem>> {
     try {
         const store = getSearchIndexStore(searchIndexPath);
         const allProblems = store.listProblems();
-        ptaChannel.info("Fetched the problem search index from the local JSON file");
+        ptaChannel.info("Fetched the problem search index from the local JSON file: " + searchIndexPath);
 
         const ignoredLocked: boolean = ptaConfig.getSearchIndexIgnoreLockedProblemSets();
         const ignoredZOJ: boolean = ptaConfig.getSearchIndexIgnoreZOJ();
