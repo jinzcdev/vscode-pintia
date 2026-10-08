@@ -24,13 +24,6 @@ class PtaConfig {
     public setWorkspaceFolder(workspaceFolder: string) {
         this.update("workspaceFolder", workspaceFolder);
     }
-    public getHideSolved(): boolean {
-        return this.getConfiguration().get<boolean>("hideSolved", false);
-    }
-
-    public setHideSolved(hideSolved: boolean) {
-        this.update("hideSolved", hideSolved);
-    }
 
     public getShowLocked(): boolean {
         return this.getConfiguration().get<boolean>("showLocked", true);
@@ -41,7 +34,7 @@ class PtaConfig {
     }
 
     public getDefaultLanguage(): string {
-        return this.getConfiguration().get<string>("defaultLanguage", "");
+        return this.getConfiguration().get<string>("defaultLanguage", "C++ (g++)");
     }
 
     public setDefaultLanguage(defaultLanguage: string) {
@@ -57,19 +50,11 @@ class PtaConfig {
     }
 
     public getAutoCheckIn(): boolean {
-        return this.getConfiguration().get<boolean>("autoCheckIn", false);
+        return this.getConfiguration().get<boolean>("autoCheckIn", true);
     }
 
     public setAutoCheckIn(autoCheckIn: boolean) {
         this.update("autoCheckIn", autoCheckIn);
-    }
-
-    public getFilePath(): string {
-        return this.getConfiguration().get<string>("filePath", "");
-    }
-
-    public setFilePath(filePath: string) {
-        this.update("filePath", filePath);
     }
 
     public getProblemFileName(): string {
@@ -130,7 +115,7 @@ class PtaConfig {
     }
 
     public getEditorShortcuts(): string[] {
-        return this.getConfiguration().get<string[]>("editor.shortcuts", []);
+        return this.getConfiguration().get<string[]>("editor.shortcuts", ["Submit", "Test", "Preview"]);
     }
 
     public setEditorShortcuts(editorShortcuts: string[]) {
@@ -194,7 +179,7 @@ class PtaConfig {
     }
 
     public getPreviewProblemAndCodeIt(): boolean {
-        return this.getConfiguration().get<boolean>("previewProblem.openAndCodeIt", true);
+        return this.getConfiguration().get<boolean>("previewProblem.openAndCodeIt", false);
     }
 
     public setPreviewProblemAndCodeIt(previewProblemAndCodeIt: boolean) {

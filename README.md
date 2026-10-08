@@ -136,7 +136,7 @@
 | `pintia.previewProblem.openAndCodeIt`        | 指定是否在预览题目时自动打开代码编辑器，开启时建议不要将 `#pintia.previewProblem.defaultOpenedMethod#` 设置为 `总是询问`。                  | `false`                         |
 | `pintia.paging.pageSize`                     | 指定当题目集较大时候，是否对题目列表分页。pageSize 为 0 表示不分页。                                                                        | `100`                           |
 | `pintia.autoCreateProblemSetFolder`          | 指定创建题目源文件时是否自动创建其习题集文件夹并将源代码文件放入相应的文件夹中。                                                            | `true`                          |
-| `pintia.editor.shortcuts`                    | 自定义编码时的编辑器快捷键。                                                                                                                | `["Submit"，"Test", "Preview"]` |
+| `pintia.editor.shortcuts`                    | 自定义编码时的编辑器快捷键。                                                                                                                | `["Submit", "Test", "Preview"]` |
 | `pintia.autoCheckIn`                         | 指定是否在激活插件时自动签到 PTA 教育商店。                                                                                                 | `true`                          |
 | `pintia.file.problemFileNameFormat`          | 设置题目文件的命名格式。支持变量：`{label}`（题目标签）、`{title}`（题目标题）、`{pid}`（题目ID）、`{psid}`（题目集ID）。                   | `{label} {title}`               |
 | `pintia.file.replaceSpaceWithUnderscore`     | 指定是否将题目文件名中的空格替换为下划线。启用后，"A1001 Hello World" 将变为 "A1001_Hello_World"。                                          | `false`                         |
