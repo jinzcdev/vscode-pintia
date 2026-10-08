@@ -1,10 +1,10 @@
 import * as assert from "assert";
 import * as sinon from "sinon";
 import * as fs from "fs-extra";
-import * as httpUtils from "../../src/utils/httpUtils";
-import { ptaApi } from "../../src/utils/api";
-import { ptaManager } from "../../src/ptaManager";
-import { ProblemSetExamStatus } from "../../src/shared";
+import * as httpUtils from "../../../src/utils/httpUtils";
+import { ptaApi } from "../../../src/utils/api";
+import { ptaManager } from "../../../src/ptaManager";
+import { ProblemSetExamStatus } from "../../../src/shared";
 
 describe("api - 未开始题集 403 处理", () => {
     let httpGetStub: sinon.SinonStub;

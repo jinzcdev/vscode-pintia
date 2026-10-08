@@ -1,7 +1,7 @@
 import * as assert from "assert";
-import { IProblemSetExam } from "../../src/entity/IProblemSetExam";
-import { ProblemSetExamStatus } from "../../src/shared";
-import { isExamNotAccessible } from "../../src/utils/problemSetAccess";
+import { IProblemSetExam } from "../../../src/entity/IProblemSetExam";
+import { ProblemSetExamStatus } from "../../../src/shared";
+import { isExamNotAccessible } from "../../../src/utils/problemSetAccess";
 
 describe("problemSetAccess", () => {
     /** 构造考试状态 mock 数据 */

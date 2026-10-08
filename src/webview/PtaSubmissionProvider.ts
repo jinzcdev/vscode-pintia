@@ -15,7 +15,7 @@ import { ptaApi } from "../utils/api";
 import { PtaWebviewWithCodeStyle } from "./PtaWebviewWithCodeStyle";
 import * as markdownEngine from "./markdownEngine";
 import { getNonce, IWebViewMessage } from "./PtaWebview";
-import { getGlobalContext } from "../extension";
+import { getGlobalContext } from "../globalContext";
 import { ProblemView } from "./views/ProblemView";
 import { defaultIfBlank } from "../utils/stringUtils";
 

@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { IProblemConfig } from "../entity/IProblem";
-import { getGlobalContext } from "../extension";
+import { getGlobalContext } from "../globalContext";
 import { compilerLangMapping } from "../shared";
 import { ptaApi } from "../utils/api";
 import { getNonce, IWebViewMessage } from "./PtaWebview";

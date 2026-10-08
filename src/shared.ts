@@ -1,17 +1,25 @@
-import { IProblemSummary } from "./entity/IProblemSummary";
+import { SEARCH_INDEX_JSON_FILE, SEARCH_INDEX_V2_JSON_FILE, ZOJ_PROBLEM_SET_ID } from "./searchIndex/constants";
 
 import * as os from "os";
 import * as path from "path";
 import * as vscode from "vscode";
 import { IProblemInfo } from "./entity/IProblemInfo";
+import { IProblemSummary } from "./entity/IProblemSummary";
 
 export const configPath: string = path.join(os.homedir(), ".pintia");
 export const cacheDirPath: string = path.join(configPath, "cache");
-export const searchIndexPath: string = path.join(configPath, "search_index.json");
+/**
+ * 新版题目搜索索引路径（v2）
+ */
+export const searchIndexPath: string = path.join(configPath, SEARCH_INDEX_V2_JSON_FILE);
+/**
+ * 旧版扁平索引路径；新版仅作迁移源，永不写入
+ */
+export const legacySearchIndexPath: string = path.join(configPath, SEARCH_INDEX_JSON_FILE);
 export const favoriteProblemsPath: string = path.join(configPath, "favorites.json");
 export const viewedProblemPath: string = path.join(configPath, "view_history.json");
 export const imgUrlPrefix: string = "https://images.ptausercontent.com";
-export const ZOJ_PROBLEM_SET_ID: string = "91827364500";
+export { ZOJ_PROBLEM_SET_ID } from "./searchIndex/constants";
 
 export import ptaCache = require("memory-cache");
 

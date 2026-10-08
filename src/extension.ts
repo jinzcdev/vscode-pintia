@@ -17,6 +17,7 @@ import { ptaConfig } from "./ptaConfig";
 import { ptaExecutor } from "./ptaExecutor";
 import { ptaManager } from "./ptaManager";
 import { configPath, IPtaCode, UserStatus } from "./shared";
+import { setGlobalContext } from "./globalContext";
 import { ptaStatusBarController } from "./statusbar/ptaStatusBarController";
 import { ptaApi } from "./utils/api";
 import { executeSubmitSolution, executeTestSolution, updatePtaValidCodeContext } from "./utils/editorUtils";
@@ -26,10 +27,8 @@ import { PtaPreviewProvider } from "./webview/PtaPreviewProvider";
 import { PtaSubmissionProvider } from "./webview/PtaSubmissionProvider";
 import { ProblemView } from "./webview/views/ProblemView";
 
-let globalContext: vscode.ExtensionContext;
-
 export async function activate(context: vscode.ExtensionContext) {
-    globalContext = context;
+    setGlobalContext(context);
 
     ptaManager.on("statusChanged", async () => {
         const userStatus: UserStatus = ptaManager.getStatus();
@@ -83,7 +82,11 @@ export async function activate(context: vscode.ExtensionContext) {
         }),
         vscode.commands.registerCommand("pintia.openPintiaHome", () => user.openPintiaHome()),
         vscode.commands.registerCommand("pintia.openExtensionRepo", () => user.openExtensionRepo()),
-        vscode.commands.registerCommand("pintia.refreshExplorer", () => explorerController.refreshTreeData()),
+        vscode.commands.registerCommand("pintia.refreshExplorer", async () => {
+            // 手动刷新的语义是「拉取最新的」，因此先让题集列表缓存失效
+            await ptaApi.invalidateProblemSetsCache();
+            explorerController.refreshTreeData();
+        }),
         vscode.commands.registerCommand("pintia.clearCache", () => cache.clearCache()),
         vscode.commands.registerCommand("pintia.signIn", () => ptaManager.signIn()),
         vscode.commands.registerCommand("pintia.signOut", () => ptaManager.signOut()),
@@ -154,8 +157,6 @@ export async function activate(context: vscode.ExtensionContext) {
     );
 }
 
-export function getGlobalContext(): vscode.ExtensionContext {
-    return globalContext;
-}
+export { getGlobalContext } from "./globalContext";
 
 export function deactivate() {}

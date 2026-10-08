@@ -1,19 +1,41 @@
+# 开发环境
 .vscode/**
 .vscode-test/**
+.husky/**
+
+# 测试编译产物（tsconfig.test.json 的 outDir）；改动该产物路径时必须同步这里，
+# 否则测试产物会被打进 VSIX（曾因此让发布物体积翻倍）
+out-test/**
+# 旧版模板路径，保留以防产物路径回退
 out/test/**
 
+# 源码与脚本：运行时只用 out/
 src/**
+test/**
+scripts/**
+out/scripts-build/**
+
+# 开发侧配置
+# 注意：名称类模式必须带 `**/` 前缀。vsce 对 node_modules 下的匹配按 minimatch 语义处理，
+# 不带 `**/` 的裸模式匹配不到嵌套路径（曾因此把 node_modules/**/.eslintrc.json 放进发布物）
+**/tsconfig*.json
+**/.eslintrc*
+**/eslint.config.*
+**/.mocharc.json
+**/.prettierrc.json
+**/.prettierignore
+
+# 其它
 .gitignore
 .yarnrc
 vsc-extension-quickstart.md
-**/tsconfig.json
-**/.eslintrc.json
 **/*.map
 **/*.ts
-
-test/**
 package-lock.json
 .github
 resources/pta_template
 tmp/
 *.vsix
+
+# 本地工具索引（仅开发机存在）；若不想让仓库配置提及它，删掉这行即可
+.codegraph/**
