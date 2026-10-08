@@ -134,9 +134,13 @@
 | `pintia.workspaceFolder`                     | 工作区文件夹的路径（存储题目源文件）。                                                                                                      | `""`                            |
 | `pintia.defaultLanguage`                     | 设置答题时默认使用的编程语言。                                                                                                              | `C++ (g++)`                     |
 | `pintia.previewProblem.openAndCodeIt`        | 指定是否在预览题目时自动打开代码编辑器，开启时建议不要将 `#pintia.previewProblem.defaultOpenedMethod#` 设置为 `总是询问`。                  | `false`                         |
+| `pintia.previewProblem.defaultOpenedMethod`  | 指定预览题目时打开代码编辑器的方式，默认为 `总是询问`。                                                                                     | `Always ask`                    |
 | `pintia.paging.pageSize`                     | 指定当题目集较大时候，是否对题目列表分页。pageSize 为 0 表示不分页。                                                                        | `100`                           |
+| `pintia.showLocked`                          | 指定是否显示未解锁的题集（一些教材题目集）。                                                                                                | `true`                          |
 | `pintia.autoCreateProblemSetFolder`          | 指定创建题目源文件时是否自动创建其习题集文件夹并将源代码文件放入相应的文件夹中。                                                            | `true`                          |
 | `pintia.editor.shortcuts`                    | 自定义编码时的编辑器快捷键。                                                                                                                | `["Submit", "Test", "Preview"]` |
+| `pintia.enableStatusBar`                     | 指定是否显示 PTA 状态栏。                                                                                                                   | `true`                          |
+| `pintia.codeColorTheme`                      | 指定代码着色主题。                                                                                                                          | `atom-one`                      |
 | `pintia.autoCheckIn`                         | 指定是否在激活插件时自动签到 PTA 教育商店。                                                                                                 | `true`                          |
 | `pintia.file.problemFileNameFormat`          | 设置题目文件的命名格式。支持变量：`{label}`（题目标签）、`{title}`（题目标题）、`{pid}`（题目ID）、`{psid}`（题目集ID）。                   | `{label} {title}`               |
 | `pintia.file.replaceSpaceWithUnderscore`     | 指定是否将题目文件名中的空格替换为下划线。启用后，"A1001 Hello World" 将变为 "A1001_Hello_World"。                                          | `false`                         |

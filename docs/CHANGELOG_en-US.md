@@ -4,6 +4,32 @@
 
 ---
 
+## [Unreleased]
+
+### Features
+
+- **Problem Search Index**
+    - Adopted the v2 index format with cursor-based incremental sync: only newly added problems are fetched, and a problem type is reset when the remote total drops, greatly reducing the number of requests
+    - Rate-limited index requests to one page per second to lower the chance of hitting the server's rate limit (429)
+    - The legacy index file is kept as a migration source only, so you can always roll back to an older version of the extension
+
+### Bug Fixes
+
+- **File Naming** ([Issue #25](https://github.com/jinzcdev/vscode-pintia/issues/25))
+    - Fixed nested directories (and Git's `could not open directory` warnings) when a problem or problem set name contains `/` or `\` — problem set folder names were never sanitized
+    - Fixed sanitization running before Chinese transliteration, which let illegal characters produced from full-width punctuation (`／＼：？《》＊｜`) bypass it
+    - Added the `pintia.file.invalidCharReplacement` setting (default `_`) to customize the replacement character; leave it empty to remove those characters
+
+- **Network Requests** ([Issue #24](https://github.com/jinzcdev/vscode-pintia/issues/24))
+    - Fixed the Explorer re-fetching _My Problem Sets_ on every refresh (requests grew linearly with the number of problem sets) and frequently hitting 429; it now uses a 5-minute local cache, invalidated by the Refresh command, after sign-in, and when clearing the cache
+
+- **Settings**
+    - Corrected the fallback defaults of `pintia.autoCheckIn`, `pintia.previewProblem.openAndCodeIt`, `pintia.defaultLanguage` and `pintia.editor.shortcuts` so that they match what the Settings UI shows
+
+- **Packaging & Stability**
+    - Fixed compiled test artifacts (~1.1 MB) being shipped inside the VSIX, noticeably reducing the extension size
+    - Fixed a module circular dependency in the Webview layer that could crash the extension on startup depending on load order
+
 ## [0.9.2] - 2026/05/23
 
 ### Bug Fixes
