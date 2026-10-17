@@ -45,6 +45,19 @@ describe("CustomCodeLensProvider", () => {
         assert.strictEqual(customCodeLensProvider.provideCodeLenses(createFakeDocument("int main() {}")), undefined);
     });
 
+    it("有文件头但缺少 code=end 时不应提供 CodeLens", () => {
+        setConfigValue("editor.shortcuts", ["Submit", "Test", "Preview"]);
+        // 用户删掉围栏、或 snippet 只插了一半时就是这个状态：
+        // 文件头在、code=end 不在，此前会产出 range 为 undefined 的透镜
+        const source = [
+            "// @pintia psid=ps1 pid=p1 compiler=GXX",
+            "// @pintia code=start",
+            "int main() { return 0; }",
+        ].join("\n");
+
+        assert.strictEqual(customCodeLensProvider.provideCodeLenses(createFakeDocument(source)), undefined);
+    });
+
     it("应为每个快捷键与自定义样例生成 CodeLens", () => {
         setConfigValue("editor.shortcuts", ["Submit", "Test", "Preview"]);
 

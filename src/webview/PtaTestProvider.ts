@@ -4,7 +4,7 @@ import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import { PtaWebview } from "./PtaWebview";
 import { TestView } from "./views/TestView";
 import { NO_OFFICIAL_SOLUTION, NONE, ProblemJudgingStatusEnum, problemJudgingStatusMapping, UNKNOWN } from "../shared";
-import { defaultIfBlank } from "../utils/stringUtils";
+import { defaultIfBlank, escapeHtml } from "../utils/stringUtils";
 
 export class PtaTestProvider extends PtaWebview<TestView> {
     private static instance: PtaTestProvider | null = null;
@@ -29,7 +29,7 @@ export class PtaTestProvider extends PtaWebview<TestView> {
             const testcaseJudgeResults = codeJudgeResponseContent!.testcaseJudgeResults;
 
             this.data = {
-                title: `测试结果 | ${result.problem?.title ?? UNKNOWN}`,
+                title: `${l10n.t("Test Result")} | ${result.problem?.title ?? UNKNOWN}`,
                 testResult: {
                     testCase: result.submission.submissionDetails[0].customTestData?.content,
                     answer: !answer ? NO_OFFICIAL_SOLUTION : answer,
@@ -160,28 +160,28 @@ export class PtaTestProvider extends PtaWebview<TestView> {
         const testResult = this.data.testResult;
         return `
             <div class="test-container">
-                <h2>测试结果</h2>
+                <h2>${l10n.t("Test Result")}</h2>
     
                 <table>
                     <thead>
                         <tr>
-                            <th>测试用例</th>
-                            <th>运行结果</th>
-                            <th>预期结果</th>
+                            <th>${l10n.t("Test Case")}</th>
+                            <th>${l10n.t("Actual Output")}</th>
+                            <th>${l10n.t("Expected Output")}</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td><pre><code>${testResult.testCase}</code></pre></td>
-                            <td><pre><code>${testResult.myAnswer}</code></pre></td>
-                            <td><pre><code>${testResult.answer}</code></pre></td>
+                            <td><pre><code>${escapeHtml(testResult.testCase)}</code></pre></td>
+                            <td><pre><code>${escapeHtml(testResult.myAnswer)}</code></pre></td>
+                            <td><pre><code>${escapeHtml(testResult.answer)}</code></pre></td>
                         </tr>
                     </tbody>
                 </table>
-    
-                <h2>编译器输出</h2>
+
+                <h2>${l10n.t("Compiler Output")}</h2>
                 <div class="code-preview">
-                    <pre><code>${testResult.compilationOutput}</code></pre>
+                    <pre><code>${escapeHtml(testResult.compilationOutput)}</code></pre>
                 </div>
             </div>
         `;

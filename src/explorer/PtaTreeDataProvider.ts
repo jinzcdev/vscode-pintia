@@ -1,14 +1,8 @@
 import * as vscode from "vscode";
+import { l10n } from "vscode";
 import * as path from "path";
 import { PtaNode } from "./PtaNode";
-import {
-    defaultPtaNode,
-    IPtaNodeValue,
-    ProblemSubmissionState,
-    ProblemType,
-    PtaDashType,
-    PtaNodeType,
-} from "../shared";
+import { IPtaNodeValue, ProblemSubmissionState, ProblemType, PtaNodeType } from "../shared";
 import { ptaManager } from "../ptaManager";
 import { explorerNodeManager } from "./explorerNodeManager";
 import { ptaConfig } from "../ptaConfig";
@@ -51,10 +45,9 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
             return {
                 label: `— ${element.label} —`,
                 collapsibleState: vscode.TreeItemCollapsibleState.None,
-                iconPath:
-                    element.label === PtaDashType.MyProblemSet
-                        ? new vscode.ThemeIcon("smiley")
-                        : new vscode.ThemeIcon("book"),
+                // 用节点自身的标记判断，而不是拿 label 与分组标识比较：
+                // label 是本地化后的展示文案，与标识符不再相等
+                iconPath: element.isMyProblemSet ? new vscode.ThemeIcon("smiley") : new vscode.ThemeIcon("book"),
             };
         }
         let contextValue: string;
@@ -73,7 +66,7 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
             command:
                 element.type === PtaNodeType.Problem
                     ? {
-                          title: "Preview Problem",
+                          title: l10n.t("Preview Problem"),
                           command: "pintia.previewProblem",
                           arguments: [element.psID, element.pID],
                       }
@@ -97,6 +90,11 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
         const value: IPtaNodeValue = element.value;
         if (!value) {
             return null;
+        }
+        // 分页节点不需要 summaries（它的题目数来自 value.total），必须在懒加载
+        // 分支之前处理，否则每次展开分页都会白打一次 problem-summaries
+        if (element.type === PtaNodeType.ProblemPage) {
+            return explorerNodeManager.getProblemNodes(element, value.page, limit);
         }
         if (!value.summaries) {
             // summaries 为空时尝试懒加载；403 等失败返回 {}，避免反复重试
@@ -135,10 +133,6 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
             } else {
                 return explorerNodeManager.getProblemSetPageNodes(element, total, limit);
             }
-        }
-
-        if (element.type === PtaNodeType.ProblemPage) {
-            return explorerNodeManager.getProblemNodes(element, value.page, limit);
         }
 
         return null;

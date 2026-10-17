@@ -1,10 +1,17 @@
-import { SEARCH_INDEX_JSON_FILE, SEARCH_INDEX_V2_JSON_FILE, ZOJ_PROBLEM_SET_ID } from "./searchIndex/constants";
+import { LEGACY_SEARCH_INDEX_JSON_FILE, SEARCH_INDEX_V2_JSON_FILE } from "./searchIndex/constants";
 
 import * as os from "os";
 import * as path from "path";
 import * as vscode from "vscode";
+import { l10n } from "vscode";
 import { IProblemInfo } from "./entity/IProblemInfo";
 import { IProblemSummary } from "./entity/IProblemSummary";
+
+/**
+ * 注意：本模块的常量表在**模块加载期**就调用 `l10n.t`，因此 `shared` 现在会
+ * 在运行时 require("vscode")。纯 Node 的脚本（如 `scripts/build-search-index.ts`）
+ * 不得 import 本模块——那条链路只经过 searchIndex/* 与 entity/*。
+ */
 
 export const configPath: string = path.join(os.homedir(), ".pintia");
 export const cacheDirPath: string = path.join(configPath, "cache");
@@ -15,7 +22,7 @@ export const searchIndexPath: string = path.join(configPath, SEARCH_INDEX_V2_JSO
 /**
  * 旧版扁平索引路径；新版仅作迁移源，永不写入
  */
-export const legacySearchIndexPath: string = path.join(configPath, SEARCH_INDEX_JSON_FILE);
+export const legacySearchIndexPath: string = path.join(configPath, LEGACY_SEARCH_INDEX_JSON_FILE);
 export const favoriteProblemsPath: string = path.join(configPath, "favorites.json");
 export const viewedProblemPath: string = path.join(configPath, "view_history.json");
 export const imgUrlPrefix: string = "https://images.ptausercontent.com";
@@ -24,8 +31,8 @@ export { ZOJ_PROBLEM_SET_ID } from "./searchIndex/constants";
 export import ptaCache = require("memory-cache");
 
 export const UNKNOWN = "Unknown";
-export const NO_OFFICIAL_SOLUTION = "该测试样例无官方答案";
-export const NONE = "无";
+export const NO_OFFICIAL_SOLUTION = l10n.t("No official answer for this sample");
+export const NONE = l10n.t("None");
 
 export enum UserStatus {
     SignedIn = 1,
@@ -38,9 +45,18 @@ export enum PtaLoginMethod {
     Cookie = "Cookie",
 }
 
+/**
+ * 资源管理器里的分组标识。
+ *
+ * 值是**稳定标识符**而非展示文案：它同时被当作 map key 与比较依据
+ * （见 `explorerNodeManager`），一旦随语言变化就会让分组逻辑失效。
+ * 展示用的名字在拼装节点时由 `l10n.t` 生成。
+ *
+ * 也不能写成 `l10n.t(...)`——字符串枚举成员属于「计算成员」，TS 会拒绝（TS18033）。
+ */
 export enum PtaDashType {
-    MyProblemSet = "我的题目集",
-    Others = "其他",
+    MyProblemSet = "myProblemSet",
+    Others = "others",
 }
 
 export enum ProblemJudgingStatusEnum {
@@ -128,15 +144,14 @@ export interface IPtaNodeValue {
     problemInfo?: IProblemInfo;
 }
 
-export const defaultPtaNode: IPtaNode = {
-    dashID: 0,
-    pID: "",
-    psID: "",
-    title: "",
-    label: "",
-    type: PtaNodeType.ProblemSet,
-    isMyProblemSet: false,
-    value: {
+/**
+ * 构造默认的节点取值。
+ *
+ * 每次调用都新建 `summaries` 对象：`getChildren` 会把懒加载的结果写回
+ * `value.summaries`，共享同一个对象会让不同节点互相污染。
+ */
+export function createDefaultPtaNodeValue(partial: Partial<IPtaNodeValue> = {}): IPtaNodeValue {
+    return {
         summaries: {
             PROGRAMMING: {
                 total: 0,
@@ -161,13 +176,42 @@ export const defaultPtaNode: IPtaNode = {
         problemTotal: 0,
         problemType: ProblemType.PROGRAMMING,
         problemInfo: undefined,
-    },
-    isFavorite: false,
-    state: ProblemSubmissionState.PROBLEM_NO_ANSWER,
-    score: 0,
-    tag: [] as string[],
-    locked: false,
-};
+        ...partial,
+    };
+}
+
+/**
+ * `createDefaultPtaNode` 的入参：`value` 只给要覆盖的字段即可，其余走默认值。
+ */
+export type IPtaNodeInit = Omit<Partial<IPtaNode>, "value"> & { value?: Partial<IPtaNodeValue> };
+
+/**
+ * 构造默认节点。
+ *
+ * 刻意做成工厂而非共享常量：节点是会被就地修改的（`getChildren` 会写回
+ * `value.summaries` 与 `value.problemType`），共享同一个对象会让不同节点互相污染。
+ * `value` 必须逐个新建——对共享常量做浅拷贝并不能避免这个问题。
+ *
+ * `partial.value` 是与默认值**合并**而非整体替换，因此未显式给出的字段仍是确定值。
+ */
+export function createDefaultPtaNode(partial: IPtaNodeInit = {}): IPtaNode {
+    return {
+        dashID: 0,
+        pID: "",
+        psID: "",
+        title: "",
+        label: "",
+        type: PtaNodeType.ProblemSet,
+        isMyProblemSet: false,
+        isFavorite: false,
+        state: ProblemSubmissionState.PROBLEM_NO_ANSWER,
+        score: 0,
+        tag: [],
+        locked: false,
+        ...partial,
+        value: createDefaultPtaNodeValue(partial.value),
+    };
+}
 
 export type CallBack<T> = (msg: string, data?: T) => void;
 
@@ -177,23 +221,23 @@ export interface ProblemJudgingStatus {
 }
 
 export const problemJudgingStatusMapping: Map<string, ProblemJudgingStatus> = new Map([
-    ["OVERRIDDEN", { color: "", text: "已被覆盖" }],
-    ["WAITING", { color: "", text: "等待评测" }],
-    ["JUDGING", { color: "orange", text: "正在评测" }],
-    ["COMPILE_ERROR", { color: "#237aff", text: "编译错误" }],
-    ["ACCEPTED", { color: "#ff5555", text: "答案正确" }],
-    ["PARTIAL_ACCEPTED", { color: "#00b000", text: "部分正确" }],
-    ["PRESENTATION_ERROR", { color: "#00b000", text: "格式错误" }],
-    ["WRONG_ANSWER", { color: "#00b000", text: "答案错误" }],
-    ["MULTIPLE_ERROR", { color: "#00b000", text: "多种错误" }],
-    ["TIME_LIMIT_EXCEEDED", { color: "#00b000", text: "运行超时" }],
-    ["MEMORY_LIMIT_EXCEEDED", { color: "#00b000", text: "内存超限" }],
-    ["NON_ZERO_EXIT_CODE", { color: "#00b000", text: "非零返回" }],
-    ["SEGMENTATION_FAULT", { color: "#00b000", text: "段错误" }],
-    ["FLOAT_POINT_EXCEPTION", { color: "#00b000", text: "浮点错误" }],
-    ["OUTPUT_LIMIT_EXCEEDED", { color: "#00b000", text: "输出超限" }],
-    ["INTERNAL_ERROR", { color: "", text: "内部错误" }],
-    ["RUNTIME_ERROR", { color: "#00b000", text: "运行时错误" }],
+    ["OVERRIDDEN", { color: "", text: l10n.t("Overridden") }],
+    ["WAITING", { color: "", text: l10n.t("Waiting") }],
+    ["JUDGING", { color: "orange", text: l10n.t("Judging") }],
+    ["COMPILE_ERROR", { color: "#237aff", text: l10n.t("Compile Error") }],
+    ["ACCEPTED", { color: "#ff5555", text: l10n.t("Accepted") }],
+    ["PARTIAL_ACCEPTED", { color: "#00b000", text: l10n.t("Partially Accepted") }],
+    ["PRESENTATION_ERROR", { color: "#00b000", text: l10n.t("Presentation Error") }],
+    ["WRONG_ANSWER", { color: "#00b000", text: l10n.t("Wrong Answer") }],
+    ["MULTIPLE_ERROR", { color: "#00b000", text: l10n.t("Multiple Errors") }],
+    ["TIME_LIMIT_EXCEEDED", { color: "#00b000", text: l10n.t("Time Limit Exceeded") }],
+    ["MEMORY_LIMIT_EXCEEDED", { color: "#00b000", text: l10n.t("Memory Limit Exceeded") }],
+    ["NON_ZERO_EXIT_CODE", { color: "#00b000", text: l10n.t("Non-zero Exit Code") }],
+    ["SEGMENTATION_FAULT", { color: "#00b000", text: l10n.t("Segmentation Fault") }],
+    ["FLOAT_POINT_EXCEPTION", { color: "#00b000", text: l10n.t("Floating Point Exception") }],
+    ["OUTPUT_LIMIT_EXCEEDED", { color: "#00b000", text: l10n.t("Output Limit Exceeded") }],
+    ["INTERNAL_ERROR", { color: "", text: l10n.t("Internal Error") }],
+    ["RUNTIME_ERROR", { color: "#00b000", text: l10n.t("Runtime Error") }],
 ]);
 
 export const langCompilerMapping: Map<string, string> = new Map([
@@ -289,28 +333,54 @@ export const commentFormatMapping: Map<string, { single: string; start: string; 
     ]);
 
 export const problemTypeInfoMapping: Map<string, ProblemTypeInfo> = new Map([
-    ["TRUE_OR_FALSE", { name: "判断题", type: 1, prefix: "trueOrFalse", problemConfigKey: "trueOrFalseProblemConfig" }],
+    [
+        "TRUE_OR_FALSE",
+        { name: l10n.t("True or False"), type: 1, prefix: "trueOrFalse", problemConfigKey: "trueOrFalseProblemConfig" },
+    ],
     [
         "MULTIPLE_CHOICE",
-        { name: "单选题", type: 2, prefix: "multipleChoice", problemConfigKey: "multipleChoiceProblemConfig" },
+        {
+            name: l10n.t("Multiple Choice"),
+            type: 2,
+            prefix: "multipleChoice",
+            problemConfigKey: "multipleChoiceProblemConfig",
+        },
     ],
     [
         "FILL_IN_THE_BLANK_FOR_PROGRAMMING",
         {
-            name: "程序填空题",
+            name: l10n.t("Fill in the Blanks"),
             type: 5,
             prefix: "fillInTheBlankForProgramming",
             problemConfigKey: "fillInTheBlankForProgrammingProblemConfig",
         },
     ],
-    ["PROGRAMMING", { name: "编程题", type: 7, prefix: "programming", problemConfigKey: "programmingProblemConfig" }],
+    [
+        "PROGRAMMING",
+        {
+            name: l10n.t("Programming"),
+            type: 7,
+            prefix: "programming",
+            problemConfigKey: "programmingProblemConfig",
+        },
+    ],
     [
         "CODE_COMPLETION",
-        { name: "函数题", type: 6, prefix: "codeCompletion", problemConfigKey: "codeCompletionProblemConfig" },
+        {
+            name: l10n.t("Code Completion"),
+            type: 6,
+            prefix: "codeCompletion",
+            problemConfigKey: "codeCompletionProblemConfig",
+        },
     ],
     [
         "MULTIPLE_FILE",
-        { name: "多文件编程题", type: 9, prefix: "multipleFile", problemConfigKey: "multipleFileProblemConfig" },
+        {
+            name: l10n.t("Multiple File Programming"),
+            type: 9,
+            prefix: "multipleFile",
+            problemConfigKey: "multipleFileProblemConfig",
+        },
     ],
 ]);
 
@@ -330,6 +400,20 @@ export const colorThemeMapping: Map<string, string[]> = new Map([
     ["stackoverflow", ["stackoverflow-light.min.css", "stackoverflow-dark.min.css"]],
     ["kimbie", ["kimbie-light.min.css", "kimbie-dark.min.css"]],
 ]);
+
+/**
+ * 预览题目后如何打开工作区。
+ *
+ * 定义在 shared 而非 workspaceUtils：`ptaConfig` 要拿它当默认值，
+ * 而 workspaceUtils 又要读 ptaConfig——放在 workspaceUtils 里会让两者成环。
+ */
+export enum OpenOptionEnum {
+    alwaysAsk = "Always ask",
+    justOpenFile = "Just open the problem file",
+    openInCurrentWindow = "Open in current window",
+    openInNewWindow = "Open in new window",
+    addToWorkspace = "Add to workspace",
+}
 
 export enum DescriptionConfiguration {
     InWebView = "In Webview",

@@ -7,15 +7,15 @@ import { favoriteProblemsPath } from "../shared";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
 import { ptaManager } from "../ptaManager";
 import { ProblemBasicInfo } from "../entity/ProblemBasicInfo";
-import { favoritesTreeDataProvider } from "./favoritesTreeDataProvider";
 
-class FavoriteProblemsManager implements Disposable {
+export class FavoriteProblemsManager implements Disposable {
     private static instance: FavoriteProblemsManager;
     private favoriteProblems: Record<string, ProblemBasicInfo[]> = {};
-    private filePath: string;
+    private readonly filePath: string;
 
-    private constructor() {
-        this.filePath = favoriteProblemsPath;
+    /** `filePath` 可注入，便于用临时目录测试；生产走下方共享单例 */
+    public constructor(filePath: string = favoriteProblemsPath) {
+        this.filePath = filePath;
         this.load();
     }
 
@@ -26,24 +26,28 @@ class FavoriteProblemsManager implements Disposable {
         return FavoriteProblemsManager.instance;
     }
 
-    public addFavoriteProblem(userId: string, problem: ProblemBasicInfo) {
-        if (!this.isFavoriteProblem(userId, problem.pID)) {
-            if (!this.favoriteProblems[userId]) {
-                this.favoriteProblems[userId] = [];
-            }
-            this.favoriteProblems[userId].push(problem);
+    public async addFavoriteProblem(userId: string, problem: ProblemBasicInfo): Promise<void> {
+        if (this.isFavoriteProblem(userId, problem.pID)) {
+            return;
         }
+        if (!this.favoriteProblems[userId]) {
+            this.favoriteProblems[userId] = [];
+        }
+        this.favoriteProblems[userId].push(problem);
+        await this.save();
     }
 
-    public removeFavoriteProblem(userId: string, pID: string) {
+    public async removeFavoriteProblem(userId: string, pID: string): Promise<void> {
         const problems = this.favoriteProblems[userId];
-        if (problems) {
-            const index = problems.findIndex((p) => p.pID === pID);
-            if (index >= 0) {
-                problems.splice(index, 1);
-                this.save();
-            }
+        if (!problems) {
+            return;
         }
+        const index = problems.findIndex((p) => p.pID === pID);
+        if (index < 0) {
+            return;
+        }
+        problems.splice(index, 1);
+        await this.save();
     }
 
     public getFavoriteProblems(userId: string): ProblemBasicInfo[] {
@@ -55,28 +59,35 @@ class FavoriteProblemsManager implements Disposable {
         return problems.some((p) => p.pID === pID);
     }
 
-    private async load() {
+    private load(): void {
         try {
             if (!fs.existsSync(this.filePath)) {
-                fs.mkdirSync(path.dirname(this.filePath), { recursive: true });
-                fs.writeFileSync(this.filePath, JSON.stringify({}));
-            } else {
-                const data = fs.readFileSync(this.filePath, "utf-8");
-                this.favoriteProblems = JSON.parse(data);
+                // 刻意不在读取路径上创建文件：空文件由首次 save() 落盘，
+                // 否则仅仅激活一次扩展就会在用户目录里留下一个空 JSON
+                return;
             }
+            this.favoriteProblems = JSON.parse(fs.readFileSync(this.filePath, "utf-8"));
         } catch (error: any) {
             ptaChannel.error(error.toString());
-            await promptForOpenOutputChannel(
+            promptForOpenOutputChannel(
                 l10n.t("Failed to load favorite problems. Please check the output channel for details."),
                 DialogType.error
             );
         }
     }
 
-    private async save() {
+    /**
+     * 原子落盘：先写临时文件再改名，避免写到一半被中断时留下半截 JSON。
+     *
+     * 每次变更都立即保存——此前只在 dispose() 里保存，而 VS Code 退出时
+     * 不保证 await 扩展的 dispose，会话内新增的收藏会直接丢失。
+     */
+    private async save(): Promise<void> {
+        const tempPath = `${this.filePath}.tmp`;
         try {
-            fs.mkdirSync(path.dirname(this.filePath), { recursive: true });
-            fs.writeFileSync(this.filePath, JSON.stringify(this.favoriteProblems));
+            await fs.ensureDir(path.dirname(this.filePath));
+            await fs.writeJson(tempPath, this.favoriteProblems);
+            await fs.rename(tempPath, this.filePath);
         } catch (error: any) {
             ptaChannel.error(error.toString());
             await promptForOpenOutputChannel(
@@ -90,13 +101,17 @@ class FavoriteProblemsManager implements Disposable {
         return ptaManager.getUserSession()?.id ?? "";
     }
 
-    public async dispose() {
+    public async dispose(): Promise<void> {
         await this.save();
     }
 
+    /**
+     * 清空当前用户的收藏。刷新视图由命令层负责——本类不 import tree provider，
+     * 否则两者互相 import 成环。
+     */
     public async clearFavoriteProblems(): Promise<void> {
         this.favoriteProblems[this.getCurrentUserId()] = [];
-        await this.save().then(() => favoritesTreeDataProvider.refresh());
+        await this.save();
     }
 }
 

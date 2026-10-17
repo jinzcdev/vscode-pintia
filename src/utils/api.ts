@@ -14,7 +14,7 @@ import {
     ptaCache,
     supportedProblemTypes,
 } from "../shared";
-import { addUrlParams, httpGet, httpPost } from "./httpUtils";
+import { addUrlParams, HttpRequestError, httpGet, httpPost } from "./httpUtils";
 import { isExamNotAccessible } from "./problemSetAccess";
 
 import * as fs from "fs-extra";
@@ -27,7 +27,7 @@ import { IPtaUser } from "../entity/IPtaUser";
 import { IWechatAuth, IWechatAuthState, IWechatUserInfo, IWechatUserState } from "../entity/userLoginSession";
 import { ptaChannel } from "../ptaChannel";
 import { ILastSubmission } from "../entity/ILastSubmission";
-import { ptaManager } from "../ptaManager";
+import { getSession } from "../sessionStore";
 import { AlwaysAvailableProblemSet } from "../entity/AlwaysAvailableProblemSet";
 
 /**
@@ -236,7 +236,11 @@ class PtaAPI {
      * @returns
      */
     public async getProblemSummary(psID: string, cookie?: string): Promise<IProblemSummary> {
-        cookie = ptaManager.getUserSession()?.cookie ?? cookie;
+        // 刻意的例外：这里让会话 cookie 覆盖调用方传入的值（其余方法都是
+        // `cookie ?? 会话`）。搜索索引构建会传入会话 cookie，两者通常一致；
+        // 测试 `ptaApi - 请求构造与本地缓存 › 会话 cookie 应优先于传入的 cookie` 固化了该语义，
+        // 改之前请先确认那个用例的意图。
+        cookie = getSession()?.cookie ?? cookie;
         const json = await httpGet(`${this.problemUrl}/${psID}/problem-summaries`, cookie, this.silentForbiddenOptions);
         return json?.["summaries"] ?? {};
     }
@@ -254,7 +258,7 @@ class PtaAPI {
         cookie?: string
     ): Promise<IProblemInfo[]> {
         const url = `${this.problemUrl}/${psID}/exam-problem-list?problem_type=${problemType}&page=${page}&limit=${limit}`;
-        const json = await httpGet(url, cookie ?? ptaManager.getUserSession()?.cookie ?? "");
+        const json = await httpGet(url, cookie ?? getSession()?.cookie ?? "");
         return (json?.["problemSetProblems"] as IProblemInfo[]) ?? [];
     }
 
@@ -397,8 +401,9 @@ class PtaAPI {
         autoCreate: boolean = false
     ): Promise<IExamProblemStatus[] | undefined> {
         autoCreate && (await this.createProblemSetExam(psID, cookie));
+        // httpGet 失败时返回 undefined，这里必须容忍（否则会在 json[...] 上抛 TypeError）
         return await httpGet(`https://pintia.cn/api/problem-sets/${psID}/exam-problem-status`, cookie).then(
-            (json) => json["problemStatus"]
+            (json) => json?.["problemStatus"]
         );
     }
 
@@ -538,12 +543,18 @@ class PtaAPI {
                 },
             }
         );
-        let userInfo: IWechatUserInfo = (await response.json()) as IWechatUserInfo;
-        let cookie = response.headers.get("Set-Cookie")!;
-        for (const s of cookie.split(";")) {
-            if (s.includes("PTASession")) {
-                userInfo.cookie = s + ";";
-                break;
+        if (!response.ok) {
+            throw new HttpRequestError(response.status);
+        }
+        const userInfo: IWechatUserInfo = (await response.json()) as IWechatUserInfo;
+        // Set-Cookie 可能缺失（例如 state 已失效），此处不能直接 split
+        const setCookie = response.headers.get("Set-Cookie");
+        if (setCookie) {
+            for (const s of setCookie.split(";")) {
+                if (s.includes("PTASession")) {
+                    userInfo.cookie = s + ";";
+                    break;
+                }
             }
         }
         return userInfo;

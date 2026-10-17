@@ -1,9 +1,11 @@
 import * as vscode from "vscode";
+import { l10n } from "vscode";
 import { IProblemConfig } from "../entity/IProblem";
 import { getGlobalContext } from "../globalContext";
 import { compilerLangMapping } from "../shared";
 import { ptaApi } from "../utils/api";
-import { getNonce, IWebViewMessage } from "./PtaWebview";
+import { escapeHtml } from "../utils/stringUtils";
+import { IWebViewMessage } from "./PtaWebview";
 import { PtaWebviewWithCodeStyle } from "./PtaWebviewWithCodeStyle";
 import * as markdownEngine from "./markdownEngine";
 import { ProblemView } from "./views/ProblemView";
@@ -46,17 +48,17 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
         return `
         <div class="header">
             <div class="problem-title">
-            ${markdownEngine.render(`# [${problem.title}](${ptaApi.getProblemURL(problem.problemSetId, problem.id, problem.type)})`)}
+            <h1><a href="${ptaApi.getProblemURL(problem.problemSetId, problem.id, problem.type)}" target="_blank">${escapeHtml(problem.title)}</a></h1>
             </div>
             <div class="problem-set-name">
-            <a href="${ptaApi.getProblemSetURL(problem.problemSetId)}" target="_blank">${problem.problemSetName}</a>
+            <a href="${ptaApi.getProblemSetURL(problem.problemSetId)}" target="_blank">${escapeHtml(problem.problemSetName)}</a>
             </div>
         </div>
 
         <div class="banner">
             <div class="ques-info">
-            <div class="detail">分数 ${problem.score} &nbsp; 提交人数 ${problem.submitCount} &nbsp; 通过人数 ${problem.acceptCount} &nbsp; 通过率 ${problem.submitCount === 0 ? 0 : ((problem.acceptCount / problem.submitCount) * 100).toFixed(2)}%</div>
-            <div class="department">作者 ${problem.author} &nbsp;&nbsp;&nbsp; 单位 ${problem.organization}</div>
+            <div class="detail">${l10n.t("Score")} ${problem.score} &nbsp; ${l10n.t("Submissions")} ${problem.submitCount} &nbsp; ${l10n.t("Accepted Count")} ${problem.acceptCount} &nbsp; ${l10n.t("Acceptance Rate")} ${problem.submitCount === 0 ? 0 : ((problem.acceptCount / problem.submitCount) * 100).toFixed(2)}%</div>
+            <div class="department">${l10n.t("Author")} ${escapeHtml(problem.author)} &nbsp;&nbsp;&nbsp; ${l10n.t("Organization")} ${escapeHtml(problem.organization)}</div>
             </div>
             <hr class="banner-line"></hr>
         </div>
@@ -68,7 +70,7 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
             ${
                 problem.problemNote
                     ? `
-                <h3>我的笔记</h3>
+                <h3>${l10n.t("My Notes")}</h3>
                 <div class="pta-note">
                     ${markdownEngine.render(problem.problemNote)}
                 </div>
@@ -80,7 +82,7 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
                 performanceHtml
                     ? `
                 <details class="performance-details" open>
-                    <summary><strong>性能指标要求</strong></summary>
+                    <summary><strong>${l10n.t("Performance Requirements")}</strong></summary>
                     <div class="performance-content">
                         ${performanceHtml}
                     </div>
@@ -91,12 +93,13 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
 
             ${markdownEngine.render(
                 [
-                    "搜索一下: " +
+                    l10n.t("Search:") +
+                        " " +
                         [
-                            `[谷歌](https://www.google.com/search?q=${keyword})`,
-                            `[必应](https://cn.bing.com/search?q=${keyword})`,
-                            `[百度](https://www.baidu.com/s?wd=${keyword})`,
-                            `[参考代码(仅部分题目)](https://github.com/jinzcdev/PTA/tree/main/${this.formatProblemSetName(problem.problemSetName)})`,
+                            `[${l10n.t("Google")}](https://www.google.com/search?q=${keyword})`,
+                            `[${l10n.t("Bing")}](https://cn.bing.com/search?q=${keyword})`,
+                            `[${l10n.t("Baidu")}](https://www.baidu.com/s?wd=${keyword})`,
+                            `[${l10n.t("Reference Code (partial problems only)")}](https://github.com/jinzcdev/PTA/tree/main/${this.formatProblemSetName(problem.problemSetName)})`,
                         ].join(" | "),
                     "<hr>",
                 ].join("\n")
@@ -106,7 +109,7 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
                 problem.lastProgram.trim().length
                     ? markdownEngine.render(
                           [
-                              `### 最后一次提交 ${problem.lastSubmittedLang.trim().length ? "(" + problem.lastSubmittedLang + ")" : ""}`,
+                              `### ${l10n.t("Last Submission")} ${problem.lastSubmittedLang.trim().length ? "(" + problem.lastSubmittedLang + ")" : ""}`,
                               "```" + problem.lastSubmittedLang,
                               problem.lastProgram.replace(/```/g, "\\```"),
                               "```",
@@ -117,20 +120,20 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
         </div>
 
         <div class="button-container">
-            <button id="btnCheckLastSubmission">查看上次提交</button>
-            <button id="btnSolve" title="⌘/Ctrl+Enter">开始编程</button>
+            <button id="btnCheckLastSubmission">${l10n.t("View Last Submission")}</button>
+            <button id="btnSolve" title="⌘/Ctrl+Enter">${l10n.t("Start Coding")}</button>
             <div class="right-buttons">
                 <button id="btnMoreActions" class="more-actions-trigger">
                     <span class="more-actions-icon">⋯</span>
                 </button>
                 <div class="more-actions-menu">
-                    <button id="btnCopyProblemContent">复制题目原文</button>
-                    <button id="btnUpdate">刷新题目</button>
-                    <button id="btnOpenGuide">查看插件使用指南</button>
+                    <button id="btnCopyProblemContent">${l10n.t("Copy Problem Content")}</button>
+                    <button id="btnUpdate">${l10n.t("Refresh Problem")}</button>
+                    <button id="btnOpenGuide">${l10n.t("View User Guide")}</button>
                 </div>
             </div>
         </div>
-        <script nonce="${getNonce()}" src="${copyButtonScriptUri}"></script>`;
+        <script nonce="${this.nonce}" src="${copyButtonScriptUri}"></script>`;
     }
 
     private generatePerformanceHtml(problemConfig: IProblemConfig | undefined): string {
@@ -162,10 +165,10 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
             }
         };
 
-        generateLimitIfNeeded("codeSizeLimit", "代码长度限制", codeSizeLimit, "KB");
-        generateLimitIfNeeded("timeLimit", "时间限制", timeLimit, "ms");
-        generateLimitIfNeeded("memoryLimit", "内存限制", memoryLimit / 1024, "MB");
-        generateLimitIfNeeded("stackSizeLimit", "栈限制", stackSizeLimit, "KB");
+        generateLimitIfNeeded("codeSizeLimit", l10n.t("Code Size Limit"), codeSizeLimit, "KB");
+        generateLimitIfNeeded("timeLimit", l10n.t("Time Limit"), timeLimit, "ms");
+        generateLimitIfNeeded("memoryLimit", l10n.t("Memory Limit"), memoryLimit / 1024, "MB");
+        generateLimitIfNeeded("stackSizeLimit", l10n.t("Stack Limit"), stackSizeLimit, "KB");
 
         if (customizeLimits.length > 0) {
             // 添加每个自定义编译器的限制
@@ -186,10 +189,10 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
                     }
                 };
 
-                generateCustomLimitIfNeeded("timeLimit", "时间限制", limit.timeLimit, "ms");
-                generateCustomLimitIfNeeded("memoryLimit", "内存限制", limit.memoryLimit / 1024, "MB");
-                generateCustomLimitIfNeeded("stackSizeLimit", "栈限制", limit.stackSizeLimit, "KB");
-                generateCustomLimitIfNeeded("codeSizeLimit", "代码长度限制", limit.codeSizeLimit, "KB");
+                generateCustomLimitIfNeeded("timeLimit", l10n.t("Time Limit"), limit.timeLimit, "ms");
+                generateCustomLimitIfNeeded("memoryLimit", l10n.t("Memory Limit"), limit.memoryLimit / 1024, "MB");
+                generateCustomLimitIfNeeded("stackSizeLimit", l10n.t("Stack Limit"), limit.stackSizeLimit, "KB");
+                generateCustomLimitIfNeeded("codeSizeLimit", l10n.t("Code Size Limit"), limit.codeSizeLimit, "KB");
             });
 
             // 添加默认/其他编译器的限制
@@ -198,12 +201,12 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
             );
 
             if (hasDefaultLimits) {
-                result += `<div class="performance-compiler">其他编译器</div>`;
+                result += `<div class="performance-compiler">${l10n.t("Other Compilers")}</div>`;
 
-                generateLimitIfNeeded("timeLimit", "时间限制", timeLimit, "ms");
-                generateLimitIfNeeded("memoryLimit", "内存限制", memoryLimit / 1024, "MB");
-                generateLimitIfNeeded("stackSizeLimit", "栈限制", stackSizeLimit, "KB");
-                generateLimitIfNeeded("codeSizeLimit", "代码长度限制", codeSizeLimit, "KB");
+                generateLimitIfNeeded("timeLimit", l10n.t("Time Limit"), timeLimit, "ms");
+                generateLimitIfNeeded("memoryLimit", l10n.t("Memory Limit"), memoryLimit / 1024, "MB");
+                generateLimitIfNeeded("stackSizeLimit", l10n.t("Stack Limit"), stackSizeLimit, "KB");
+                generateLimitIfNeeded("codeSizeLimit", l10n.t("Code Size Limit"), codeSizeLimit, "KB");
             }
         }
 
@@ -238,7 +241,7 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
                 }
                 break;
             case "text":
-                vscode.window.showInformationMessage(vscode.l10n.t(msg.value));
+                vscode.window.showInformationMessage(msg.value);
                 break;
             default:
                 await super.onDidReceiveMessage(msg);

@@ -3,7 +3,7 @@ import {
     colorThemeMapping,
     commentFormatMapping,
     compilerLangMapping,
-    defaultPtaNode,
+    createDefaultPtaNode,
     langCompilerMapping,
     ProblemType,
     problemTypeInfoMapping,
@@ -97,11 +97,35 @@ describe("shared - 常量表不变量", () => {
         });
 
         it("默认节点中的题型应为合法值", () => {
+            const problemType = createDefaultPtaNode().value.problemType;
             assert.strictEqual(
-                Object.values(ProblemType).includes(defaultPtaNode.value.problemType),
+                Object.values(ProblemType).includes(problemType),
                 true,
-                `defaultPtaNode 的题型非法: ${defaultPtaNode.value.problemType}`
+                `默认节点的题型非法: ${problemType}`
             );
+        });
+
+        it("默认节点每次都应新建，节点之间不得共享 value 或 summaries", () => {
+            const first = createDefaultPtaNode();
+            const second = createDefaultPtaNode();
+
+            assert.notStrictEqual(first.value, second.value, "value 不应共享同一个对象");
+            assert.notStrictEqual(first.value.summaries, second.value.summaries, "summaries 不应共享");
+            assert.notStrictEqual(first.tag, second.tag, "tag 不应共享");
+
+            // 就地修改一个节点不应影响另一个（getChildren 会写回这两个字段）
+            first.value.problemType = ProblemType.CODE_COMPLETION;
+            first.value.summaries = {};
+            assert.strictEqual(second.value.problemType, ProblemType.PROGRAMMING);
+            assert.notDeepStrictEqual(second.value.summaries, {});
+        });
+
+        it("传入的 value 片段应与默认值合并，而不是整体替换", () => {
+            const node = createDefaultPtaNode({ value: { problemSet: "题集" } });
+
+            assert.strictEqual(node.value.problemSet, "题集");
+            assert.strictEqual(node.value.problemType, ProblemType.PROGRAMMING, "未给出的字段应保留默认值");
+            assert.ok(node.value.summaries, "summaries 不应因传入片段而丢失");
         });
     });
 

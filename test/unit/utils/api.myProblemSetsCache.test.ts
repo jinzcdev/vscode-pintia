@@ -3,7 +3,7 @@ import * as sinon from "sinon";
 import * as fs from "fs-extra";
 import * as httpUtils from "../../../src/utils/httpUtils";
 import { MY_PROBLEM_SETS_CACHE_TTL_MS, ptaApi } from "../../../src/utils/api";
-import { ptaManager } from "../../../src/ptaManager";
+import { setSession } from "../../../src/sessionStore";
 import { ptaCache } from "../../../src/shared";
 
 const COOKIE = "PTASession=test";
@@ -27,7 +27,7 @@ describe("ptaApi - 我的题集列表缓存", () => {
         sinon.stub(fs, "createFile").resolves();
         sinon.stub(fs, "writeJson").resolves();
         sinon.stub(fs, "readJSON");
-        sinon.stub(ptaManager, "getUserSession").returns(undefined);
+        setSession(undefined);
         ptaCache.clear();
     });
 

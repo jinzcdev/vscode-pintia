@@ -27,7 +27,14 @@ export class CustomCodeLensProvider implements vscode.CodeLensProvider<PtaCodeLe
             return undefined;
         }
 
-        const range: vscode.Range = getCodeLensRange(document, /@pintia\s+code=end/g)[0];
+        // 文件头存在但围栏还没写（例如用户删掉了 code=end）时不能构造 CodeLens：
+        // vscode.CodeLens 的 range 为 undefined 不会在构造时报错，会在 VS Code
+        // 序列化并渲染透镜时才炸，因此这里必须提前返回。
+        const codeEndRanges: vscode.Range[] = getCodeLensRange(document, /@pintia\s+code=end/g);
+        if (codeEndRanges.length === 0) {
+            return undefined;
+        }
+        const range: vscode.Range = codeEndRanges[0];
         const codeLens: PtaCodeLens[] = shortcuts.map(
             (shortcut) => new PtaCodeLens(range, document.uri.fsPath, content, shortcut)
         );
@@ -39,7 +46,10 @@ export class CustomCodeLensProvider implements vscode.CodeLensProvider<PtaCodeLe
         return codeLens;
     }
 
-    public resolveCodeLens(codeLens: PtaCodeLens, token: vscode.CancellationToken): vscode.ProviderResult<PtaCodeLens> {
+    public resolveCodeLens(
+        codeLens: PtaCodeLens,
+        _token: vscode.CancellationToken
+    ): vscode.ProviderResult<PtaCodeLens> {
         if (codeLens instanceof PtaCodeLens) {
             const command = codeLens.commandTitle;
             const ptaCode: IPtaCode | null = parseCodeInfo(codeLens.codeContent);

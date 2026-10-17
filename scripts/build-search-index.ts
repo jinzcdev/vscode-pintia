@@ -8,7 +8,7 @@ import * as fs from "fs-extra";
 import * as path from "path";
 import fetch from "node-fetch";
 import { buildSearchIndex } from "../src/searchIndex/builder";
-import { SEARCH_INDEX_JSON_FILE, SEARCH_INDEX_REQUEST_DELAY_MS } from "../src/searchIndex/constants";
+import { SEARCH_INDEX_REQUEST_DELAY_MS, SEARCH_INDEX_SEED_JSON_FILE } from "../src/searchIndex/constants";
 import { ISearchIndexApi } from "../src/searchIndex/types";
 import { IProblemSummary } from "../src/entity/IProblemSummary";
 
@@ -153,7 +153,7 @@ function normalizeCookie(cookie: string): string {
 function parseArgs(argv: string[]): CliOptions {
     const options: CliOptions = {
         cookie: process.env.PINTIA_COOKIE ?? "",
-        output: path.join(process.cwd(), "resources", SEARCH_INDEX_JSON_FILE),
+        output: path.join(process.cwd(), "resources", SEARCH_INDEX_SEED_JSON_FILE),
         mode: "incremental",
         delayMs: SEARCH_INDEX_REQUEST_DELAY_MS,
         ignoreZOJ: true,

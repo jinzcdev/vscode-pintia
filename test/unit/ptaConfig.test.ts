@@ -2,7 +2,7 @@ import * as assert from "assert";
 import * as path from "path";
 import * as fs from "fs-extra";
 import { ptaConfig } from "../../src/ptaConfig";
-import { OpenOptionEnum } from "../../src/utils/workspaceUtils";
+import { OpenOptionEnum } from "../../src/shared";
 import { resetConfigValues, setConfigValue } from "../setup";
 
 /**
@@ -16,9 +16,11 @@ import { resetConfigValues, setConfigValue } from "../setup";
 describe("ptaConfig - 与 package.json 声明的一致性", () => {
     const packageJson = fs.readJSONSync(path.resolve(__dirname, "../../../package.json"));
     const declaredDefaults: Record<string, unknown> = {};
+    const declaredScopes: Record<string, unknown> = {};
     for (const group of packageJson.contributes.configuration) {
-        for (const [key, schema] of Object.entries<{ default: unknown }>(group.properties)) {
+        for (const [key, schema] of Object.entries<{ default: unknown; scope: unknown }>(group.properties)) {
             declaredDefaults[key] = schema.default;
+            declaredScopes[key] = schema.scope;
         }
     }
 
@@ -62,6 +64,20 @@ describe("ptaConfig - 与 package.json 声明的一致性", () => {
             );
 
         assert.deepStrictEqual(mismatched, [], `默认值不一致:\n  ${mismatched.join("\n  ")}`);
+    });
+
+    /**
+     * `ptaConfig` 的读写都不带资源 URI（`getConfiguration("pintia")` +
+     * `update(..., ConfigurationTarget.Global)`），因此声明必须是 `window`。
+     * 若声明成 `resource`，多根工作区里「声明允许多文件夹覆盖」与
+     * 「实现永远读不到覆盖值」就会互相矛盾。
+     */
+    it("作用域应声明为 window，与 ptaConfig 不带资源 URI 的读写方式一致", () => {
+        const wrong = Object.entries(declaredScopes)
+            .filter(([, scope]) => scope !== "window")
+            .map(([key, scope]) => `${key}: ${JSON.stringify(scope)}`);
+
+        assert.deepStrictEqual(wrong, [], `以下设置的作用域与实现不符（应为 window）:\n  ${wrong.join("\n  ")}`);
     });
 
     /** 逐项比较，避免 assert 在第一个不一致处就中断，从而能一次报出全部漂移 */
@@ -128,9 +144,19 @@ describe("ptaConfig", () => {
 
     describe("update", () => {
         it("写入的值应能被对应的 getter 读回", async () => {
-            await ptaConfig.setWorkspaceFolder("/tmp/written");
+            await ptaConfig.update("workspaceFolder", "/tmp/written");
 
             assert.strictEqual(ptaConfig.getWorkspaceFolder(), "/tmp/written");
+        });
+
+        it("写入的 key 应与 getter 读取的 key 一致", async () => {
+            // 回归：setter 层曾把这两个 key 写错（page.pageSize / previewProblemAndCodeIt），
+            // 因为没有调用点而长期无人发现。写入口收敛到 update 后由本用例守住。
+            await ptaConfig.update("paging.pageSize", 25);
+            await ptaConfig.update("previewProblem.openAndCodeIt", true);
+
+            assert.strictEqual(ptaConfig.getPageSize(), 25);
+            assert.strictEqual(ptaConfig.getPreviewProblemAndCodeIt(), true);
         });
     });
 

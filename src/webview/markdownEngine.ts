@@ -1,4 +1,5 @@
 import { imgUrlPrefix } from "../shared";
+import { escapeHtml } from "../utils/stringUtils";
 
 const hljs = require("highlight.js");
 const markdownEngine = require("markdown-it")({
@@ -17,7 +18,7 @@ const markdownEngine = require("markdown-it")({
 })
     .use(require("@vscode/markdown-it-katex").default)
     .use(require("markdown-it-replace-link"), {
-        replaceLink: function (link: string, env: any) {
+        replaceLink: function (link: string) {
             return processLink(link);
         },
     });
@@ -44,6 +45,8 @@ export function render(markdown: string): string {
     return markdownEngine
         .render(markdown)
         .replace(/!\[([^\]]*)\]\((.*?)\)/g, (_: string, alt: string, link: string) => {
-            return `<img alt="${alt}" src="${processLink(link)}">`;
+            // alt 与 src 都要转义：原始 HTML 块里的图片不会被 markdown-it 处理，
+            // 走到这里时内容里的引号会直接突破属性边界（如 alt="a"b"）
+            return `<img alt="${escapeHtml(alt)}" src="${escapeHtml(processLink(link))}">`;
         });
 }

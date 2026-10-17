@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import { convertChineseCharacters } from "../../../src/utils/chineseUtils";
-import { defaultIfBlank, isValidFileName, sanitizeFileName } from "../../../src/utils/stringUtils";
+import { defaultIfBlank, escapeHtml, isValidFileName, sanitizeFileName } from "../../../src/utils/stringUtils";
 
 describe("stringUtils", () => {
     describe("defaultIfBlank", () => {
@@ -85,5 +85,24 @@ describe("stringUtils", () => {
             assert.strictEqual(sanitizeFileName(convertChineseCharacters("A：B")), "A_B");
             assert.strictEqual(sanitizeFileName(convertChineseCharacters("A《B》")), "A_B_");
         });
+    });
+});
+
+describe("stringUtils - escapeHtml", () => {
+    it("应转义 & < > \" '", () => {
+        assert.strictEqual(escapeHtml(`<a href="x">&'</a>`), "&lt;a href=&quot;x&quot;&gt;&amp;&#039;&lt;/a&gt;");
+    });
+
+    it("普通文本应原样返回", () => {
+        assert.strictEqual(escapeHtml("hello world"), "hello world");
+    });
+
+    it("undefined 与空串应返回空串", () => {
+        assert.strictEqual(escapeHtml(undefined), "");
+        assert.strictEqual(escapeHtml(""), "");
+    });
+
+    it("应能挡住闭合标签注入", () => {
+        assert.ok(!escapeHtml("</td><script>alert(1)</script>").includes("<script>"));
     });
 });

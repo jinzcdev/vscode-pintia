@@ -53,3 +53,27 @@ export function isValidFileName(value: string): boolean {
     }
     return !INVALID_FILE_NAME_CHARS.test(value);
 }
+
+const HTML_ESCAPE_MAP: Record<string, string> = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;",
+};
+
+/**
+ * 转义 HTML 文本与属性值。
+ *
+ * 插值进 webview 的数据里，题目正文、测试样例、用户昵称都是远端可控的；
+ * 不转义就等于把 `</td><script>` 这类内容直接交给浏览器解析。
+ *
+ * 注意：刻意走 markdown 渲染的富文本（题目正文、笔记、代码）**不要**套这个函数，
+ * 否则会双重转义并破坏公式与高亮——那些内容由 webview 的 CSP 兜底。
+ */
+export function escapeHtml(value: string | undefined): string {
+    if (!value) {
+        return "";
+    }
+    return value.replace(/[&<>"']/g, (char) => HTML_ESCAPE_MAP[char]);
+}

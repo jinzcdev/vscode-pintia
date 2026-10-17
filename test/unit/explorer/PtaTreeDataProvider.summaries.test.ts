@@ -3,7 +3,7 @@ import * as sinon from "sinon";
 import { PtaTreeDataProvider } from "../../../src/explorer/PtaTreeDataProvider";
 import { PtaNode } from "../../../src/explorer/PtaNode";
 import { explorerNodeManager } from "../../../src/explorer/explorerNodeManager";
-import { defaultPtaNode, PtaNodeType } from "../../../src/shared";
+import { createDefaultPtaNode, PtaNodeType } from "../../../src/shared";
 import { ptaApi } from "../../../src/utils/api";
 import { ptaManager } from "../../../src/ptaManager";
 import { ptaConfig } from "../../../src/ptaConfig";
@@ -25,17 +25,17 @@ describe("PtaTreeDataProvider - summaries 懒加载", () => {
 
     /** 构造带指定 summaries 的题集节点 */
     function createProblemSetNode(summaries: Record<string, unknown> | undefined): PtaNode {
-        return new PtaNode({
-            ...defaultPtaNode,
-            psID: "2048056131767074816",
-            label: "期末考核",
-            type: PtaNodeType.ProblemSet,
-            value: {
-                ...defaultPtaNode.value,
-                problemSet: "期末考核",
-                summaries: summaries as never,
-            },
-        });
+        return new PtaNode(
+            createDefaultPtaNode({
+                psID: "2048056131767074816",
+                label: "期末考核",
+                type: PtaNodeType.ProblemSet,
+                value: {
+                    problemSet: "期末考核",
+                    summaries: summaries as never,
+                },
+            })
+        );
     }
 
     it("summaries 为空对象时直接返回空列表且不请求 API", async () => {
@@ -71,5 +71,46 @@ describe("PtaTreeDataProvider - summaries 懒加载", () => {
 
         assert.strictEqual(node.value.summaries.PROGRAMMING.total, 1);
         assert.strictEqual(getProblemNodesStub.calledOnce, true);
+    });
+
+    it("展开分页节点时不应请求 problem-summaries", async () => {
+        // 分页节点的题目数来自 value.total，本就不需要 summaries。
+        // 此前它没有 summaries，会掉进懒加载分支，每次展开都白打一次接口。
+        const getProblemNodesStub = sinon.stub(explorerNodeManager, "getProblemNodes").resolves([]);
+        const pageNode = new PtaNode(
+            createDefaultPtaNode({
+                psID: "ps1",
+                type: PtaNodeType.ProblemPage,
+                label: "1-100",
+                value: { total: 250, limit: 100, page: 1, problemSet: "期末考核" },
+            })
+        );
+
+        await provider.getChildren(pageNode);
+
+        assert.strictEqual(getSummaryStub.called, false, "分页节点不应请求 summaries");
+        assert.strictEqual(getProblemNodesStub.calledOnce, true);
+        assert.deepStrictEqual(getProblemNodesStub.firstCall.args.slice(1), [1, 100], "应带上页码与每页大小");
+    });
+
+    it("分页节点即使带有 summaries 也应按分页展开", async () => {
+        const getProblemNodesStub = sinon.stub(explorerNodeManager, "getProblemNodes").resolves([]);
+        const pageNode = new PtaNode(
+            createDefaultPtaNode({
+                psID: "ps1",
+                type: PtaNodeType.ProblemPage,
+                value: {
+                    total: 250,
+                    limit: 100,
+                    page: 2,
+                    summaries: { PROGRAMMING: { total: 250, totalScore: 0, totalInPools: 0 } },
+                },
+            })
+        );
+
+        await provider.getChildren(pageNode);
+
+        assert.strictEqual(getProblemNodesStub.calledOnce, true);
+        assert.strictEqual(getProblemNodesStub.firstCall.args[1], 2);
     });
 });

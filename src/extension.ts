@@ -43,6 +43,11 @@ export async function activate(context: vscode.ExtensionContext) {
         ptaStatusBarController.updateStatusBar(ptaManager.getUserSession());
     });
 
+    // 组合根接线：ptaManager 不 import commands/*，需要联动的事情靠事件转达
+    ptaManager.on("signedOut", () => void cache.clearCache());
+    // 仅「从磁盘恢复会话」时触发，交互式登录不会走到这里
+    ptaManager.on("sessionRestored", () => void user.autoCheckInPTA());
+
     await fs.mkdirs(configPath).then(() => {
         Promise.all([ptaManager.fetchLoginStatus(), cache.createProblemSearchIndex(context)]);
     });
@@ -96,8 +101,8 @@ export async function activate(context: vscode.ExtensionContext) {
                 const problem = await new ProblemView(psID, pID).fetch();
                 await PtaPreviewProvider.createOrUpdate(problem)
                     .show()
-                    .then(() => {
-                        historyManager.addProblem(historyManager.getCurrentUserId(), {
+                    .then(async () => {
+                        await historyManager.addProblem(historyManager.getCurrentUserId(), {
                             pID: problem.id,
                             psID: problem.problemSetId,
                             psName: problem.problemSetName,
@@ -131,10 +136,22 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand("pintia.removeFavorite", (ptaNode: PtaNode) =>
             star.removeFavoriteProblem(ptaNode.pID)
         ),
-        vscode.commands.registerCommand("pintia.clearViewedProblems", () => historyManager.clearViewedProblems()),
-        vscode.commands.registerCommand("pintia.clearFavoriteProblems", () =>
-            favoriteProblemsManager.clearFavoriteProblems()
-        ),
+        vscode.commands.registerCommand("pintia.clearViewedProblems", async () => {
+            await historyManager.clearViewedProblems();
+            historyTreeDataProvider.refresh();
+        }),
+        vscode.commands.registerCommand("pintia.clearFavoriteProblems", async () => {
+            await favoriteProblemsManager.clearFavoriteProblems();
+            favoritesTreeDataProvider.refresh();
+        }),
+        // 裁剪上限变化时重排历史视图。此前注册在 historyManager 内部，
+        // 那会让 manager 反向依赖 tree provider
+        vscode.workspace.onDidChangeConfiguration((e) => {
+            if (e.affectsConfiguration("pintia.problemHistoryListSize")) {
+                historyManager.trimAll();
+                historyTreeDataProvider.refresh();
+            }
+        }),
         vscode.commands.registerCommand("pintia.checkLastSubmission", async (ptaCode: IPtaCode) => {
             const cookie = ptaManager.getUserSession()?.cookie ?? "";
             const submissionId = (await ptaApi.getLastSubmissions(ptaCode.psID, ptaCode.pID, cookie))?.id;

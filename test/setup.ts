@@ -46,6 +46,8 @@ function createWebviewPanel() {
             html: "",
             onDidReceiveMessage: sinon.stub(),
             asWebviewUri: (uri: unknown) => uri,
+            /** 与真实 webview 一样给出资源 origin，供 CSP 拼装使用 */
+            cspSource: "https://test.vscode-cdn.net",
         },
         onDidDispose: sinon.stub(),
         reveal: sinon.stub(),
@@ -122,9 +124,17 @@ function createCommandsMock() {
     return { executeCommand: sinon.stub().resolves(undefined) };
 }
 
+function createEnvMock() {
+    return {
+        clipboard: { writeText: sinon.stub().resolves(undefined) },
+        openExternal: sinon.stub().resolves(true),
+    };
+}
+
 const windowMock = createWindowMock();
 const workspaceMock = createWorkspaceMock();
 const commandsMock = createCommandsMock();
+const envMock = createEnvMock();
 const languagesMock = { registerCodeLensProvider: sinon.stub().returns({ dispose: sinon.stub() }) };
 
 class UriMock {
@@ -214,6 +224,7 @@ const vscodeMock = {
     workspace: workspaceMock,
     commands: commandsMock,
     languages: languagesMock,
+    env: envMock,
 };
 
 /** 重置 mock：清空配置覆盖，并为所有 stub 重新安装默认行为与调用记录 */
@@ -223,6 +234,7 @@ export function resetVscodeMock(): void {
     Object.assign(windowMock, createWindowMock());
     Object.assign(workspaceMock, createWorkspaceMock());
     Object.assign(commandsMock, createCommandsMock());
+    Object.assign(envMock, createEnvMock());
     languagesMock.registerCodeLensProvider.reset();
     languagesMock.registerCodeLensProvider.returns({ dispose: sinon.stub() });
 }

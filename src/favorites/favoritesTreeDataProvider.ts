@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { l10n } from "vscode";
 import { ptaManager } from "../ptaManager";
 import { ProblemBasicInfo } from "../entity/ProblemBasicInfo";
 import { favoriteProblemsManager } from "./favoriteProblemsManager";
@@ -20,7 +21,7 @@ export class FavoritesTreeDataProvider implements vscode.TreeDataProvider<Proble
             label: element.displayTitle ?? "",
             collapsibleState: vscode.TreeItemCollapsibleState.None,
             command: {
-                title: "Preview Problem",
+                title: l10n.t("Preview Problem"),
                 command: "pintia.previewProblem",
                 arguments: [element.psID, element.pID],
             },

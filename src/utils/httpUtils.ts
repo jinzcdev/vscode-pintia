@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import fetch from "node-fetch";
 import { ptaChannel } from "../ptaChannel";
-import { ptaManager } from "../ptaManager";
+import { getSession } from "../sessionStore";
 import { DialogType, promptForOpenOutputChannel } from "./uiUtils";
 
 /** HTTP 请求可选配置 */
@@ -35,7 +35,7 @@ export async function httpGet(url: string, cookie: string = "", options?: HttpRe
             Accept: "application/json;charset=UTF-8",
             "Content-Type": "application/json;charset=UTF-8",
             "Accept-Language": "zh-CN",
-            Cookie: !cookie ? (ptaManager.getUserSession()?.cookie ?? "") : cookie,
+            Cookie: !cookie ? (getSession()?.cookie ?? "") : cookie,
         },
     })
         .then((response) => {
@@ -70,7 +70,7 @@ export async function httpPost(
             Accept: "application/json;charset=UTF-8",
             "Content-Type": "application/json;charset=UTF-8",
             "Accept-Language": "zh-CN",
-            Cookie: !cookie ? (ptaManager.getUserSession()?.cookie ?? "") : cookie,
+            Cookie: !cookie ? (getSession()?.cookie ?? "") : cookie,
         },
         body: JSON.stringify(body),
     })
