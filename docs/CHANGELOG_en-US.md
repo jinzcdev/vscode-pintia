@@ -4,6 +4,47 @@
 
 ---
 
+## [0.11.0] - 2026/10/24
+
+### Features
+
+- **Answer Timer**
+    - Start, pause and resume the timer for the current problem from the status bar; closing the problem file pauses it automatically with a prompt
+    - Record the elapsed time at the moment of an AC submission and show a congratulation notification; non-AC submissions are not recorded
+    - Added timer buttons to the editor CodeLens, with a confirmation when switching to another problem
+    - Added an answer-time statistics page: grouped by problem set, with per-problem trend charts and AC details, expandable rows, links to problem preview, and silent refresh after an AC
+
+- **Problem Preview**
+    - Added previous/next problem navigation to the preview page
+
+- **Explorer**
+    - Automatically reveal and expand the corresponding problem set tree node when opening a problem file
+
+### Bug Fixes
+
+- **Stability**
+    - Fixed submission polling that never terminated when the API kept failing, leaving the progress notification stuck; polling is now bounded and always ends on success, failure or timeout
+    - Fixed the sign-in prompt lingering for 3 minutes when a WeChat account is not bound to Pintia; the extension now reports it clearly and stops waiting
+
+- **Webview Security**
+    - Added `Content-Security-Policy` and `localResourceRoots`, and escaped interpolated values such as nicknames, test samples, compiler output and problem set names
+    - Fixed raw HTML passing through when problem titles were rendered as Markdown
+
+- **Data Persistence**
+    - Favorites and view history are now written atomically ("temp file + rename") on every change, so they survive VS Code exiting without awaiting extension disposal
+
+- **Settings & Editor**
+    - Fixed the mismatch between the declared scope of `pintia.*` settings and how they were read/written, and removed setters that wrote to incorrect keys
+    - Fixed `changeWorkspaceFolder` writing `/c:/...` on Windows by using `Uri.fsPath`
+    - Fixed CodeLens producing an invalid range when a file has no `code=end` marker
+
+- **Explorer**
+    - Fixed paging nodes re-requesting problem summaries and a shared mutable default node object
+    - Fixed duplicate `/exams` requests for _My Problem Sets_ and a race caused by not awaiting exam creation
+
+- **Localization**
+    - Localized all Webview, dialog and status bar strings, and fixed the sign-in confirmation options not using localized text
+
 ## [0.10.0] - 2026/10/08
 
 ### Features
