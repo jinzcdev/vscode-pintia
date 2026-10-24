@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { l10n } from "vscode";
 import { IProblemConfig } from "../entity/IProblem";
+import { IProblemInfo } from "../entity/IProblemInfo";
 import { getGlobalContext } from "../globalContext";
 import { compilerLangMapping } from "../shared";
 import { ptaApi } from "../utils/api";
@@ -27,6 +28,8 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
             title: `${problem.label} ${problem.title}`,
             ptaCode: ProblemView.toPtaNode(problem),
             problem: problem,
+            previous: problem.getAdjacentProblemInfo("previous"),
+            next: problem.getAdjacentProblemInfo("next"),
         };
     }
 
@@ -44,6 +47,7 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
         const problemConfig = problem.problemConfig as IProblemConfig;
 
         const performanceHtml = this.generatePerformanceHtml(problemConfig);
+        const navHtml = this.generateProblemNav(problem);
 
         return `
         <div class="header">
@@ -120,6 +124,7 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
         </div>
 
         <div class="button-container">
+            ${navHtml}
             <button id="btnCheckLastSubmission">${l10n.t("View Last Submission")}</button>
             <button id="btnSolve" title="⌘/Ctrl+Enter">${l10n.t("Start Coding")}</button>
             <div class="right-buttons">
@@ -134,6 +139,42 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
             </div>
         </div>
         <script nonce="${this.nonce}" src="${copyButtonScriptUri}"></script>`;
+    }
+
+    /**
+     * 上一题 / 下一题导航。
+     *
+     * 列表来自 ProblemView 的完整题型列表；当前题不在列表中或两侧都没有相邻题时
+     * 整条隐藏，只有一侧时禁用对应按钮。
+     */
+    private generateProblemNav(problem: ProblemView): string {
+        const previous = this.data.previous as IProblemInfo | undefined;
+        const next = this.data.next as IProblemInfo | undefined;
+        if (!previous && !next) {
+            return "";
+        }
+
+        const psID = escapeHtml(problem.problemSetId);
+        const prevAttrs = previous ? `data-psid="${psID}" data-pid="${escapeHtml(previous.id)}"` : "disabled";
+        const nextAttrs = next ? `data-psid="${psID}" data-pid="${escapeHtml(next.id)}"` : "disabled";
+        const prevLabel = escapeHtml(l10n.t("Previous Problem"));
+        const nextLabel = escapeHtml(l10n.t("Next Problem"));
+
+        return `
+            <div class="nav-buttons">
+                <button id="btnPrevProblem" class="nav-button" ${prevAttrs} title="${prevLabel}" aria-label="${prevLabel}">
+                    <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                        <path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.6"
+                            stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                </button>
+                <button id="btnNextProblem" class="nav-button" ${nextAttrs} title="${nextLabel}" aria-label="${nextLabel}">
+                    <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                        <path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6"
+                            stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                </button>
+            </div>`;
     }
 
     private generatePerformanceHtml(problemConfig: IProblemConfig | undefined): string {
@@ -229,6 +270,11 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
                         this.data.ptaCode.pID,
                         false
                     );
+                } else if (msg.value === "pintia.previewProblemById") {
+                    const [psID, pID] = (msg.args ?? []) as string[];
+                    if (psID && pID) {
+                        await vscode.commands.executeCommand("pintia.previewProblem", psID, pID, false);
+                    }
                 } else if (msg.value === "pintia.checkLastSubmission") {
                     await vscode.commands.executeCommand("pintia.checkLastSubmission", this.data.ptaCode);
                 } else if (msg.value === "pintia.copyContent") {

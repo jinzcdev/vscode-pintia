@@ -23,6 +23,8 @@ export class ProblemView {
     public acceptCount: number = 0;
     public problemNote: string = "";
     public problemConfig?: IProblemConfig;
+    /** 当前题型的完整题目列表（与题目集树顺序一致），用于上一题/下一题导航 */
+    public problemInfoList: IProblemInfo[] = [];
 
     private problem!: IProblem;
     /** 是否已加载过，使 `fetch()` 幂等；与「单例」无关 */
@@ -38,11 +40,17 @@ export class ProblemView {
             return this;
         }
         const problem = await ptaApi.getProblem(this.problemSetId, this.id, ptaManager.getUserSession()?.cookie);
-        const problemInfo: IProblemInfo = await ptaApi.getProblemInfoByID(
-            this.problemSetId,
-            this.id,
-            problem.type as ProblemType
-        );
+        const problemType = problem.type as ProblemType;
+        // 顺手取回完整题目列表：既用于 accept/submit 数，也用于上一题/下一题导航。
+        // 列表接口有磁盘缓存；失败时回退到单题查询，不影响预览本身。
+        try {
+            this.problemInfoList = await ptaApi.getAllProblemInfoList(problem.problemSetId, problemType);
+        } catch {
+            this.problemInfoList = [];
+        }
+        const problemInfo: IProblemInfo =
+            this.problemInfoList.find((item) => item.id === problem.id) ??
+            (await ptaApi.getProblemInfoByID(problem.problemSetId, problem.id, problemType));
 
         this.problem = problem;
         this.id = problem.id;
@@ -74,6 +82,20 @@ export class ProblemView {
     public static parseProblemConfig(problem: IProblem): IProblemConfig | undefined {
         const prefix: string = problemTypeInfoMapping.get(problem.type)?.prefix ?? "";
         return problem.problemConfig[`${prefix}ProblemConfig` as keyof typeof problem.problemConfig] as IProblemConfig;
+    }
+
+    /**
+     * 当前题目在列表中的相邻题。
+     *
+     * 列表来自 `getAllProblemInfoList`（同一题集、同一题型，API 顺序），
+     * 因此跨分页也能拿到上一题/下一题；当前题不在列表中时返回 undefined。
+     */
+    public getAdjacentProblemInfo(direction: "previous" | "next"): IProblemInfo | undefined {
+        const index = this.problemInfoList.findIndex((item) => item.id === this.id);
+        if (index < 0) {
+            return undefined;
+        }
+        return direction === "previous" ? this.problemInfoList[index - 1] : this.problemInfoList[index + 1];
     }
 
     private parseCompiler2Lang(compiler: string): string {
