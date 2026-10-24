@@ -78,7 +78,12 @@ function createWindowMock() {
         createOutputChannel: sinon.stub().callsFake(createOutputChannel),
         createStatusBarItem: sinon.stub().callsFake(createStatusBarItem),
         createWebviewPanel: sinon.stub().callsFake(createWebviewPanel),
-        createTreeView: sinon.stub().returns({ dispose: sinon.stub() }),
+        createTreeView: sinon.stub().callsFake(() => ({
+            dispose: sinon.stub(),
+            reveal: sinon.stub().resolves(undefined),
+            onDidChangeVisibility: sinon.stub().returns({ dispose: sinon.stub() }),
+            visible: true,
+        })),
         onDidChangeActiveTextEditor: sinon.stub().returns({ dispose: sinon.stub() }),
         onDidChangeActiveColorTheme: sinon.stub().returns({ dispose: sinon.stub() }),
         // 默认真正执行任务，便于测试 withProgress 包裹的业务逻辑

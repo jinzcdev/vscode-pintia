@@ -80,6 +80,27 @@
         };
     }
 
+    // 上一题 / 下一题：按钮自带目标 psID/pID，点击后在同一个预览面板切换
+    function bindProblemNav(id) {
+        const el = document.getElementById(id);
+        if (!el) {
+            return;
+        }
+        el.onclick = () => {
+            const psID = el.dataset.psid;
+            const pID = el.dataset.pid;
+            if (psID && pID) {
+                vscode.postMessage({
+                    type: "command",
+                    value: "pintia.previewProblemById",
+                    args: [psID, pID],
+                });
+            }
+        };
+    }
+    bindProblemNav("btnPrevProblem");
+    bindProblemNav("btnNextProblem");
+
     var lst_pre = document.getElementsByTagName("pre");
     for (const pre of lst_pre) {
         const copyButton = document.createElement("button");

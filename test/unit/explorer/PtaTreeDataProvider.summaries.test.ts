@@ -3,7 +3,7 @@ import * as sinon from "sinon";
 import { PtaTreeDataProvider } from "../../../src/explorer/PtaTreeDataProvider";
 import { PtaNode } from "../../../src/explorer/PtaNode";
 import { explorerNodeManager } from "../../../src/explorer/explorerNodeManager";
-import { createDefaultPtaNode, PtaNodeType } from "../../../src/shared";
+import { createDefaultPtaNode, ProblemType, PtaNodeType } from "../../../src/shared";
 import { ptaApi } from "../../../src/utils/api";
 import { ptaManager } from "../../../src/ptaManager";
 import { ptaConfig } from "../../../src/ptaConfig";
@@ -13,6 +13,7 @@ describe("PtaTreeDataProvider - summaries 懒加载", () => {
     let getSummaryStub: sinon.SinonStub;
 
     beforeEach(() => {
+        explorerNodeManager.clearCache();
         provider = new PtaTreeDataProvider({} as never);
         getSummaryStub = sinon.stub(ptaApi, "getProblemSummary");
         sinon.stub(ptaManager, "getUserSession").returns({ cookie: "cookie=test" } as never);
@@ -21,6 +22,7 @@ describe("PtaTreeDataProvider - summaries 懒加载", () => {
 
     afterEach(() => {
         sinon.restore();
+        explorerNodeManager.clearCache();
     });
 
     /** 构造带指定 summaries 的题集节点 */
@@ -112,5 +114,52 @@ describe("PtaTreeDataProvider - summaries 懒加载", () => {
 
         assert.strictEqual(getProblemNodesStub.calledOnce, true);
         assert.strictEqual(getProblemNodesStub.firstCall.args[1], 2);
+    });
+});
+
+describe("PtaTreeDataProvider - getParent", () => {
+    let provider: PtaTreeDataProvider;
+
+    beforeEach(() => {
+        explorerNodeManager.clearCache();
+        provider = new PtaTreeDataProvider({} as never);
+    });
+
+    afterEach(() => {
+        explorerNodeManager.clearCache();
+    });
+
+    it("根节点（题集）应返回 undefined", () => {
+        const set = new PtaNode(
+            createDefaultPtaNode({
+                psID: "ps1",
+                label: "期末考核",
+                type: PtaNodeType.ProblemSet,
+                value: { problemSet: "期末考核" },
+            })
+        );
+
+        assert.strictEqual(provider.getParent(set), undefined);
+    });
+
+    it("题目节点应还原到所属题集", async () => {
+        const problem = new PtaNode(
+            createDefaultPtaNode({
+                psID: "ps1",
+                pID: "p1",
+                type: PtaNodeType.Problem,
+                value: {
+                    problemSet: "期末考核",
+                    problemType: ProblemType.PROGRAMMING,
+                    parentType: PtaNodeType.ProblemSet,
+                },
+            })
+        );
+
+        const parent = (await provider.getParent(problem)) as PtaNode;
+
+        assert.strictEqual(parent.type, PtaNodeType.ProblemSet);
+        assert.strictEqual(parent.psID, "ps1");
+        assert.strictEqual(parent.label, "期末考核");
     });
 });

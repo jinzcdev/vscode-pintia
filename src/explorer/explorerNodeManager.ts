@@ -12,6 +12,7 @@ import { ptaConfig } from "../ptaConfig";
 import { ptaManager } from "../ptaManager";
 import {
     createDefaultPtaNode,
+    IPtaNode,
     IPtaNodeValue,
     ProblemPermissionEnum,
     ProblemSetExamStatus,
@@ -29,7 +30,154 @@ import { PtaNode } from "./PtaNode";
 import { IExam, IProblemSetExam } from "../entity/IProblemSetExam";
 
 class ExplorerNodeManager implements Disposable {
+    /**
+     * 节点实例缓存。
+     *
+     * `TreeView.reveal` 与 `getParent` 依赖对象身份：同一次树生命周期内，
+     * 同一个 key 必须返回同一个 PtaNode；否则 reveal 找不到目标节点。
+     */
+    private readonly nodeCache = new Map<string, PtaNode>();
+    /** 题目列表缓存：reveal 查找后，树展开同一页时不再重复请求接口 */
+    private readonly childrenCache = new Map<string, PtaNode[]>();
+
+    private getOrCreateNode(key: string, factory: () => PtaNode): PtaNode {
+        const cached = this.nodeCache.get(key);
+        if (cached) {
+            return cached;
+        }
+        const node = factory();
+        this.nodeCache.set(key, node);
+        return node;
+    }
+
+    private getOrUpdateNode(key: string, data: IPtaNode): PtaNode {
+        const cached = this.nodeCache.get(key);
+        if (cached) {
+            cached.update(data);
+            return cached;
+        }
+        const node = new PtaNode(data);
+        this.nodeCache.set(key, node);
+        return node;
+    }
+
+    /** 清空节点与列表缓存；刷新、登录/登出、重建树时调用 */
+    public clearCache(): void {
+        this.nodeCache.clear();
+        this.childrenCache.clear();
+    }
+
+    /**
+     * 根据节点的父级元数据还原父节点，供 `TreeDataProvider.getParent` 使用。
+     *
+     * 缓存未命中时构造一个最小节点并写入缓存；后续 `getRootNodes` 会就地更新它。
+     */
+    public getParentNode(element: PtaNode): PtaNode | undefined {
+        const value = element.value;
+        switch (value.parentType) {
+            case PtaNodeType.ProblemSet:
+                return this.getSetNode(element.psID, value.problemSet);
+            case PtaNodeType.ProblemSubSet:
+                return this.getSubSetNode(element.psID, value.problemType, value.problemSet);
+            case PtaNodeType.ProblemPage:
+                return this.getPageNode(
+                    element.psID,
+                    value.problemType,
+                    value.parentPage ?? 0,
+                    value.total,
+                    value.limit,
+                    value.problemSet,
+                    value.pageParentType ?? PtaNodeType.ProblemSet
+                );
+            default:
+                return undefined;
+        }
+    }
+
+    private getSetNode(psID: string, psName: string): PtaNode {
+        return this.getOrCreateNode(
+            `set:${psID}`,
+            () =>
+                new PtaNode(
+                    createDefaultPtaNode({
+                        psID,
+                        label: psName,
+                        type: PtaNodeType.ProblemSet,
+                        // 显式置空，让 getChildren 走懒加载拿真实 summaries；
+                        // 若留默认零值对象，会被误判为「已加载但没有题」
+                        value: { problemSet: psName, summaries: undefined as never },
+                    })
+                )
+        );
+    }
+
+    private getSubSetNode(psID: string, problemType: ProblemType, psName: string): PtaNode {
+        return this.getOrCreateNode(
+            `subset:${psID}:${problemType}`,
+            () =>
+                new PtaNode(
+                    createDefaultPtaNode({
+                        psID,
+                        type: PtaNodeType.ProblemSubSet,
+                        label: problemTypeInfoMapping.get(problemType)?.name ?? UNKNOWN,
+                        value: {
+                            problemSet: psName,
+                            problemType,
+                            parentType: PtaNodeType.ProblemSet,
+                            summaries: undefined as never,
+                        },
+                    })
+                )
+        );
+    }
+
+    private getPageNode(
+        psID: string,
+        problemType: ProblemType,
+        page: number,
+        total: number,
+        limit: number,
+        psName: string,
+        parentType: PtaNodeType
+    ): PtaNode {
+        const effectiveLimit = limit > 0 ? limit : 100;
+        const start = page * effectiveLimit + 1;
+        const end = total > 0 ? Math.min((page + 1) * effectiveLimit, total) : start;
+        return this.getOrUpdateNode(
+            `page:${psID}:${problemType}:${page}`,
+            createDefaultPtaNode({
+                psID,
+                type: PtaNodeType.ProblemPage,
+                label: `${start}-${end}`,
+                value: {
+                    total,
+                    limit: effectiveLimit,
+                    page,
+                    problemType,
+                    problemSet: psName,
+                    parentType,
+                },
+            })
+        );
+    }
+
+    private getProblemSetNode(item: IProblemSet, isMyProblemSet: boolean, locked: boolean): PtaNode {
+        const data = createDefaultPtaNode({
+            psID: item.id,
+            label: item.name,
+            type: PtaNodeType.ProblemSet,
+            locked,
+            value: { problemSet: item.name, summaries: item.summaries },
+            isMyProblemSet,
+        });
+        return this.getOrUpdateNode(`set:${item.id}`, data);
+    }
+
     public async getRootNodes(): Promise<PtaNode[]> {
+        const cachedRoots = this.childrenCache.get("root");
+        if (cachedRoots) {
+            return cachedRoots;
+        }
         const sections: IDashSection[] = await ptaApi.getDashSections();
         const ptaNodeList: PtaNode[] = [];
         const publicProblemSetList: IProblemSet[] = await ptaApi.getAlwaysAvailableProblemSets(
@@ -75,34 +223,29 @@ class ExplorerNodeManager implements Disposable {
                       ? l10n.t("Others")
                       : sectionTitle;
             ptaNodeList.push(
-                new PtaNode(
-                    createDefaultPtaNode({
-                        label,
-                        type: PtaNodeType.Dashboard,
-                        isMyProblemSet,
-                    })
+                this.getOrCreateNode(
+                    `dash:${sectionTitle}`,
+                    () =>
+                        new PtaNode(
+                            createDefaultPtaNode({
+                                label,
+                                type: PtaNodeType.Dashboard,
+                                isMyProblemSet,
+                            })
+                        )
                 )
             );
             pbsList.forEach((item) => {
                 ptaNodeList.push(
-                    new PtaNode(
-                        createDefaultPtaNode({
-                            psID: item.id,
-                            label: item.name,
-                            type: PtaNodeType.ProblemSet,
-                            locked:
-                                (item.permission?.permission ?? ProblemPermissionEnum.UNKNOWN) ===
-                                ProblemPermissionEnum.LOCKED,
-                            value: {
-                                problemSet: item.name,
-                                summaries: item.summaries,
-                            },
-                            isMyProblemSet: sectionTitle === PtaDashType.MyProblemSet,
-                        })
+                    this.getProblemSetNode(
+                        item,
+                        sectionTitle === PtaDashType.MyProblemSet,
+                        (item.permission?.permission ?? ProblemPermissionEnum.UNKNOWN) === ProblemPermissionEnum.LOCKED
                     )
                 );
             });
         }
+        this.childrenCache.set("root", ptaNodeList);
         return ptaNodeList;
     }
 
@@ -117,12 +260,17 @@ class ExplorerNodeManager implements Disposable {
                     continue;
                 }
                 nodeList.push(
-                    new PtaNode(
+                    this.getOrUpdateNode(
+                        `subset:${node.psID}:${problemType}`,
                         createDefaultPtaNode({
                             psID: node.psID,
                             type: PtaNodeType.ProblemSubSet,
                             label: problemTypeInfoMapping.get(problemType)?.name ?? UNKNOWN,
-                            value: { ...value, problemType: problemType as ProblemType },
+                            value: {
+                                ...value,
+                                problemType: problemType as ProblemType,
+                                parentType: PtaNodeType.ProblemSet,
+                            },
                         })
                     )
                 );
@@ -138,6 +286,11 @@ class ExplorerNodeManager implements Disposable {
                 element.value.problemSet,
                 element.value.problemType as ProblemType,
             ];
+            const cacheKey = `problems:${psID}:${problemType}:${page ?? "all"}`;
+            const cached = this.childrenCache.get(cacheKey);
+            if (cached) {
+                return cached;
+            }
             const userSession: IUserSession | undefined = ptaManager.getUserSession();
             if (!userSession) {
                 return [];
@@ -216,10 +369,12 @@ class ExplorerNodeManager implements Disposable {
             );
 
             const ptaNodeList: PtaNode[] = [];
+            const isPageParent = element.type === PtaNodeType.ProblemPage;
             for (let i = 0; i < problemList.length; i++) {
                 const pb: IProblemInfo = problemList[i];
                 ptaNodeList.push(
-                    new PtaNode(
+                    this.getOrUpdateNode(
+                        `problem:${psID}:${pb.id}`,
                         createDefaultPtaNode({
                             pID: pb.id,
                             psID: psID,
@@ -236,11 +391,21 @@ class ExplorerNodeManager implements Disposable {
                                 problemType: problemType,
                                 problemInfo: pb,
                                 problemSet: psName,
+                                parentType: element.type,
+                                ...(isPageParent
+                                    ? {
+                                          parentPage: element.value.page,
+                                          pageParentType: element.value.parentType,
+                                          total: element.value.total,
+                                          limit: element.value.limit,
+                                      }
+                                    : {}),
                             },
                         })
                     )
                 );
             }
+            this.childrenCache.set(cacheKey, ptaNodeList);
             return ptaNodeList;
         } catch (error: any) {
             ptaChannel.error(error.toString());
@@ -266,22 +431,7 @@ class ExplorerNodeManager implements Disposable {
         const pageNum: number = Math.ceil(total / limit);
 
         for (let i = 0; i < pageNum; i++) {
-            nodeList.push(
-                new PtaNode(
-                    createDefaultPtaNode({
-                        psID: psID,
-                        type: PtaNodeType.ProblemPage,
-                        label: `${i * limit + 1}-${i === pageNum - 1 ? total : (i + 1) * limit}`,
-                        value: {
-                            total: total,
-                            limit: limit,
-                            page: i,
-                            problemType: problemType,
-                            problemSet: psName,
-                        },
-                    })
-                )
-            );
+            nodeList.push(this.getPageNode(psID, problemType, i, total, limit, psName, element.type));
         }
         return nodeList;
     }

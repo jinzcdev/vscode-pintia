@@ -33,10 +33,12 @@ class PtaManager extends EventEmitter {
 
     public async signIn(): Promise<void> {
         if (this.userStatus === UserStatus.SignedIn) {
-            const choice: string | undefined = await vscode.window.showQuickPick(["Yes", "No"], {
+            const yes = l10n.t("Yes");
+            const no = l10n.t("No");
+            const choice: string | undefined = await vscode.window.showQuickPick([yes, no], {
                 placeHolder: l10n.t("You are already logged in. Do you want to log out of the current account?"),
             });
-            if (!choice || choice === "No") {
+            if (!choice || choice === no) {
                 return;
             }
             await this.signOut();

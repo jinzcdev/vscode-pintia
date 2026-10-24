@@ -233,6 +233,44 @@ pre:hover .copy-button {
     transform: translateY(0);
 }
 
+/* 上一题 / 下一题：放在固定底栏左侧，图标按钮与右侧「更多操作」对称 */
+.nav-buttons {
+    position: absolute;
+    left: 0.85rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.nav-buttons button {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--vscode-button-secondaryForeground);
+    background-color: var(--vscode-button-secondaryBackground);
+    border-radius: 50%;
+}
+
+.nav-buttons button:hover:not(:disabled) {
+    background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
+.nav-buttons button:disabled {
+    opacity: 0.4;
+    cursor: default;
+    pointer-events: none;
+    transform: none;
+    box-shadow: none;
+}
+
+.nav-buttons svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+}
+
 /* 更多操作按钮样式 */
 .more-actions {
     position: relative;

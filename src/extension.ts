@@ -23,7 +23,12 @@ import { ptaStatusBarController } from "./statusbar/ptaStatusBarController";
 import { timerController } from "./timer/timerController";
 import { timerManager } from "./timer/timerManager";
 import { ptaApi } from "./utils/api";
-import { executeSubmitSolution, executeTestSolution, updatePtaValidCodeContext } from "./utils/editorUtils";
+import {
+    executeSubmitSolution,
+    executeTestSolution,
+    getProblemFromDocument,
+    updatePtaValidCodeContext,
+} from "./utils/editorUtils";
 import { historyManager } from "./view-history/historyManager";
 import { historyTreeDataProvider } from "./view-history/historyTreeDataProvider";
 import { PtaPreviewProvider } from "./webview/PtaPreviewProvider";
@@ -33,10 +38,20 @@ import { ProblemView } from "./webview/views/ProblemView";
 export async function activate(context: vscode.ExtensionContext) {
     setGlobalContext(context);
 
+    /** 让题目集视图定位到当前活动编辑器对应的题目（不在题目文件时不做任何事） */
+    const scheduleActiveProblemReveal = (editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor) => {
+        const problem = editor ? getProblemFromDocument(editor.document) : undefined;
+        if (problem) {
+            explorerController.scheduleRevealProblem(problem.psID, problem.pID);
+        }
+    };
+
     ptaManager.on("statusChanged", async () => {
         const userStatus: UserStatus = ptaManager.getStatus();
         if (userStatus === UserStatus.SignedIn) {
             vscode.commands.executeCommand("setContext", "pintia.showWelcome", false);
+            // 先记录待定位题目：createTreeView 创建视图后若可见会立即执行
+            scheduleActiveProblemReveal();
             explorerController.createTreeView(context);
         } else {
             explorerController.dispose();
@@ -57,10 +72,15 @@ export async function activate(context: vscode.ExtensionContext) {
 
     // 初始化时设置当前编辑器的上下文
     updatePtaValidCodeContext();
+    scheduleActiveProblemReveal();
 
     // 监听编辑器变化
     context.subscriptions.push(
-        vscode.window.onDidChangeActiveTextEditor(() => updatePtaValidCodeContext()),
+        vscode.window.onDidChangeActiveTextEditor((editor) => {
+            updatePtaValidCodeContext();
+            // 打开题目文件时让左侧题目集视图展开并选中对应题目
+            scheduleActiveProblemReveal(editor);
+        }),
         vscode.workspace.onDidChangeTextDocument(() => {
             // 当文档内容变化时，只有当变化的是当前活动编辑器的文档时，才更新上下文
             if (
