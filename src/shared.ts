@@ -207,6 +207,12 @@ export interface IPtaNodeValue {
     problemTotal: number;
     problemType: ProblemType;
     problemInfo?: IProblemInfo;
+    /** 父节点类型，供 TreeView.getParent / reveal 还原路径 */
+    parentType?: PtaNodeType;
+    /** 父节点是分页节点时，分页节点自身的父类型（ProblemSet / ProblemSubSet） */
+    pageParentType?: PtaNodeType;
+    /** 父分页页码 */
+    parentPage?: number;
 }
 
 /**

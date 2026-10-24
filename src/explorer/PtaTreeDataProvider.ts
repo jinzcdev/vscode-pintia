@@ -26,7 +26,7 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
                     event.affectsConfiguration("pintia.paging.pageSize") ||
                     event.affectsConfiguration("pintia.showLocked")
                 ) {
-                    this.onDidChangeTreeDataEvent.fire(null);
+                    this.refresh();
                 }
             },
             this
@@ -138,6 +138,16 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
         return null;
     }
 
+    /**
+     * 供 `TreeView.reveal` 还原节点路径。
+     *
+     * 题目/分页/题型节点都带有父级元数据，由 explorerNodeManager 负责返回
+     * 缓存中的父节点，保证实例与树模型一致。
+     */
+    getParent(element: PtaNode): vscode.ProviderResult<PtaNode> {
+        return explorerNodeManager.getParentNode(element);
+    }
+
     private parseIconPathFromProblemState(element: PtaNode): string {
         if (!this.context) {
             return "";
@@ -161,6 +171,8 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
     }
 
     public refresh() {
+        // 节点会被就地缓存；刷新后题目状态/分页结构可能变化，必须换一批实例
+        explorerNodeManager.clearCache();
         this.onDidChangeTreeDataEvent.fire(null);
     }
 

@@ -50,4 +50,18 @@ export class PtaNode {
     public get isMyProblemSet(): boolean {
         return this.data.isMyProblemSet;
     }
+
+    /**
+     * 就地更新节点数据，保持实例不变。
+     *
+     * 节点会进入 `ExplorerNodeManager` 的缓存；刷新题集列表时若直接替换实例，
+     * 树模型与 `TreeView.reveal` 会拿到不同的对象，因此这里只合并字段。
+     */
+    public update(partial: Partial<IPtaNode>): void {
+        this.data = {
+            ...this.data,
+            ...partial,
+            value: { ...this.data.value, ...(partial.value ?? {}) },
+        };
+    }
 }

@@ -53,8 +53,14 @@ function createProblemInfos(count: number): IProblemInfo[] {
 }
 
 describe("ExplorerNodeManager", () => {
+    beforeEach(() => {
+        // 节点实例会跨用例缓存；每个用例从干净的缓存开始
+        explorerNodeManager.clearCache();
+    });
+
     afterEach(() => {
         sinon.restore();
+        explorerNodeManager.clearCache();
     });
 
     describe("getSubProblemSet", () => {
@@ -153,6 +159,94 @@ describe("ExplorerNodeManager", () => {
             const pages = await explorerNodeManager.getProblemSetPageNodes(node, 200, 100);
 
             assert.strictEqual(pages.length, 2);
+        });
+    });
+
+    describe("父级导航与节点缓存", () => {
+        const pageNode = (overrides: Partial<{ page: number; total: number; limit: number }> = {}): PtaNode =>
+            new PtaNode(
+                createDefaultPtaNode({
+                    psID: "ps1",
+                    type: PtaNodeType.ProblemPage,
+                    value: {
+                        total: overrides.total ?? 150,
+                        limit: overrides.limit ?? 100,
+                        page: overrides.page ?? 1,
+                        problemSet: "Test Set",
+                        problemType: ProblemType.PROGRAMMING,
+                        parentType: PtaNodeType.ProblemSet,
+                    },
+                })
+            );
+
+        beforeEach(() => {
+            sinon.stub(ptaManager, "getUserSession").returns({ cookie: "PTASession=c" } as never);
+            sinon.stub(ptaApi, "checkAndCreateProblemSetExam").resolves({ id: "exam-1" } as never);
+            sinon.stub(ptaApi, "getExamProblemStatus").resolves([] as never);
+            sinon.stub(favoriteProblemsManager, "getCurrentUserId").returns("u1");
+            sinon.stub(favoriteProblemsManager, "isFavoriteProblem").returns(false);
+        });
+
+        it("题型节点应记录父级为题集", async () => {
+            const set = createProblemSetNode({
+                summaries: {
+                    PROGRAMMING: { total: 1, totalScore: 10, totalInPools: 1 },
+                    CODE_COMPLETION: { total: 1, totalScore: 10, totalInPools: 1 },
+                },
+            });
+
+            const subsets = await explorerNodeManager.getSubProblemSet(set);
+            const parent = explorerNodeManager.getParentNode(subsets[0]);
+
+            assert.strictEqual(subsets[0].value.parentType, PtaNodeType.ProblemSet);
+            assert.strictEqual(parent?.type, PtaNodeType.ProblemSet);
+            assert.strictEqual(parent?.psID, "ps1");
+        });
+
+        it("分页节点应记录父级，并能还原到题集", async () => {
+            const set = createProblemSetNode();
+
+            const pages = await explorerNodeManager.getProblemSetPageNodes(set, 250, 100);
+            const parent = explorerNodeManager.getParentNode(pages[1]);
+
+            assert.strictEqual(pages[1].value.parentType, PtaNodeType.ProblemSet);
+            assert.strictEqual(parent?.type, PtaNodeType.ProblemSet);
+            assert.strictEqual(parent?.psID, "ps1");
+        });
+
+        it("题目节点应记录分页父级，getParent 能还原 page → set", async () => {
+            sinon.stub(ptaApi, "getProblemInfoListByPage").resolves(createProblemInfos(2));
+
+            const problems = await explorerNodeManager.getProblemNodes(pageNode(), 1, 100);
+            const parentPage = explorerNodeManager.getParentNode(problems[0]);
+            const parentSet = explorerNodeManager.getParentNode(parentPage!);
+
+            assert.strictEqual(problems[0].value.parentType, PtaNodeType.ProblemPage);
+            assert.strictEqual(problems[0].value.parentPage, 1);
+            assert.strictEqual(problems[0].value.pageParentType, PtaNodeType.ProblemSet);
+            assert.strictEqual(parentPage?.type, PtaNodeType.ProblemPage);
+            assert.strictEqual(parentPage?.value.page, 1);
+            assert.strictEqual(parentSet?.type, PtaNodeType.ProblemSet);
+            assert.strictEqual(parentSet?.psID, "ps1");
+        });
+
+        it("重复获取同一题目应返回同一节点实例", async () => {
+            sinon.stub(ptaApi, "getProblemInfoListByPage").resolves(createProblemInfos(2));
+
+            const first = await explorerNodeManager.getProblemNodes(pageNode(), 1, 100);
+            const second = await explorerNodeManager.getProblemNodes(pageNode(), 1, 100);
+
+            assert.strictEqual(first[0], second[0], "缓存命中时应复用节点实例");
+        });
+
+        it("clearCache 后应重新创建节点实例", async () => {
+            sinon.stub(ptaApi, "getProblemInfoListByPage").resolves(createProblemInfos(2));
+
+            const first = await explorerNodeManager.getProblemNodes(pageNode(), 1, 100);
+            explorerNodeManager.clearCache();
+            const second = await explorerNodeManager.getProblemNodes(pageNode(), 1, 100);
+
+            assert.notStrictEqual(first[0], second[0]);
         });
     });
 
