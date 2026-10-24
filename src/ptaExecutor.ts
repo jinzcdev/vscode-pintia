@@ -42,7 +42,7 @@ class PtaExecutor implements Disposable {
                     isJudgingFinished,
                     { maxAttempts: SUBMISSION_POLL_MAX_ATTEMPTS, timeoutMessage: "Submission timeout" }
                 );
-                callback("SUCCESS", data);
+                await callback("SUCCESS", data);
             }
         );
     }
@@ -72,7 +72,7 @@ class PtaExecutor implements Disposable {
                     isJudgingFinished,
                     { maxAttempts: TEST_POLL_MAX_ATTEMPTS, timeoutMessage: "Submission timeout" }
                 );
-                callback("SUCCESS", data);
+                await callback("SUCCESS", data);
             }
         );
     }

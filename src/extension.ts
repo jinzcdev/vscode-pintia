@@ -6,6 +6,7 @@ import * as language from "./commands/language";
 import * as show from "./commands/show";
 import * as star from "./commands/star";
 import * as submit from "./commands/submit";
+import * as timer from "./commands/timer";
 import * as user from "./commands/user";
 import * as workspace from "./commands/workspace";
 import { explorerController } from "./explorer/explorerController";
@@ -16,9 +17,11 @@ import { ptaChannel } from "./ptaChannel";
 import { ptaConfig } from "./ptaConfig";
 import { ptaExecutor } from "./ptaExecutor";
 import { ptaManager } from "./ptaManager";
-import { configPath, IPtaCode, UserStatus } from "./shared";
+import { configPath, IPtaCode, IPtaProblem, UserStatus } from "./shared";
 import { setGlobalContext } from "./globalContext";
 import { ptaStatusBarController } from "./statusbar/ptaStatusBarController";
+import { timerController } from "./timer/timerController";
+import { timerManager } from "./timer/timerManager";
 import { ptaApi } from "./utils/api";
 import { executeSubmitSolution, executeTestSolution, updatePtaValidCodeContext } from "./utils/editorUtils";
 import { historyManager } from "./view-history/historyManager";
@@ -71,6 +74,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         ptaStatusBarController,
+        timerController,
         codeLensController,
         ptaExecutor,
         ptaChannel,
@@ -169,6 +173,12 @@ export async function activate(context: vscode.ExtensionContext) {
                 vscode.window.showInformationMessage(vscode.l10n.t("No submission history found!"));
             }
         }),
+        vscode.commands.registerCommand("pintia.toggleTimer", () => timer.toggleTimer()),
+        vscode.commands.registerCommand("pintia.timerCodeLens", (problem: IPtaProblem) =>
+            timer.toggleTimerForProblem(problem)
+        ),
+        vscode.commands.registerCommand("pintia.timerMenu", () => timer.showTimerMenu()),
+        vscode.commands.registerCommand("pintia.showTimerStats", () => timer.showTimerStats()),
         vscode.commands.registerCommand("pintia.submitSolutionByShortcut", executeSubmitSolution),
         vscode.commands.registerCommand("pintia.testSolutionByShortcut", executeTestSolution)
     );
@@ -176,4 +186,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 export { getGlobalContext } from "./globalContext";
 
-export function deactivate() {}
+export function deactivate() {
+    // 运行中的计时器只在内存里推进，退出前把最后一段秒数落盘
+    return timerManager.dispose();
+}

@@ -46,6 +46,7 @@ describe("ptaConfig - 与 package.json 声明的一致性", () => {
         "pintia.searchIndex.ignoreLockedProblemSets": () => ptaConfig.getSearchIndexIgnoreLockedProblemSets(),
         "pintia.searchIndex.autoRefresh": () => ptaConfig.getSearchIndexAutoRefresh(),
         "pintia.autoCheckIn": () => ptaConfig.getAutoCheckIn(),
+        "pintia.timer.enableStatusBar": () => ptaConfig.getTimerEnableStatusBar(),
     };
 
     it("每个声明的设置项都应有对应的读取方法（新增设置时需同步本表）", () => {

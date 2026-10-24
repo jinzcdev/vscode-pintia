@@ -118,6 +118,10 @@ class PtaConfig {
     public getPreviewProblemDefaultOpenedMethod(): string {
         return this.getConfiguration().get<string>("previewProblem.defaultOpenedMethod", OpenOptionEnum.alwaysAsk);
     }
+
+    public getTimerEnableStatusBar(): boolean {
+        return this.getConfiguration().get<boolean>("timer.enableStatusBar", true);
+    }
 }
 
 export const ptaConfig: PtaConfig = new PtaConfig();

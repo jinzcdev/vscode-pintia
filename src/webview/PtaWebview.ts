@@ -147,4 +147,6 @@ export function getNonce() {
 export interface IWebViewMessage {
     type: string; // 'command' or 'text'
     value: string; // the value of `type`
+    /** 命令参数（如题目预览需要的 psID/pID） */
+    args?: unknown[];
 }

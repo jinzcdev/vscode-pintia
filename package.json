@@ -96,6 +96,11 @@
                     "group": "navigation@4"
                 },
                 {
+                    "command": "pintia.showTimerStats",
+                    "when": "view == pintiaExplorer",
+                    "group": "navigation@5"
+                },
+                {
                     "command": "pintia.signOut",
                     "when": "view == pintiaExplorer",
                     "group": "overflow@0"
@@ -271,6 +276,24 @@
                     "light": "resources/imgs/light/dislike.png",
                     "dark": "resources/imgs/dark/dislike.png"
                 }
+            },
+            {
+                "command": "pintia.toggleTimer",
+                "title": "%contributes.commands.pintia.toggleTimer%",
+                "category": "PTA",
+                "icon": "$(watch)"
+            },
+            {
+                "command": "pintia.timerMenu",
+                "title": "%contributes.commands.pintia.timerMenu%",
+                "category": "PTA",
+                "icon": "$(ellipsis)"
+            },
+            {
+                "command": "pintia.showTimerStats",
+                "title": "%contributes.commands.pintia.showTimerStats%",
+                "category": "PTA",
+                "icon": "$(graph)"
             }
         ],
         "configuration": [
@@ -532,6 +555,18 @@
                         "default": true,
                         "scope": "window",
                         "description": "%configuration.pintia.autoCheckIn%"
+                    }
+                }
+            },
+            {
+                "title": "%configuration.title.timer%",
+                "properties": {
+                    "pintia.timer.enableStatusBar": {
+                        "type": "boolean",
+                        "default": true,
+                        "scope": "window",
+                        "description": "%configuration.pintia.timer.enableStatusBar%",
+                        "order": 0
                     }
                 }
             }

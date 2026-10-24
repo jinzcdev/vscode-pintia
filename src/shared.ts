@@ -25,6 +25,8 @@ export const searchIndexPath: string = path.join(configPath, SEARCH_INDEX_V2_JSO
 export const legacySearchIndexPath: string = path.join(configPath, LEGACY_SEARCH_INDEX_JSON_FILE);
 export const favoriteProblemsPath: string = path.join(configPath, "favorites.json");
 export const viewedProblemPath: string = path.join(configPath, "view_history.json");
+/** 答题计时记录路径 */
+export const timerPath: string = path.join(configPath, "timer.json");
 export const imgUrlPrefix: string = "https://images.ptausercontent.com";
 export { ZOJ_PROBLEM_SET_ID } from "./searchIndex/constants";
 
@@ -33,6 +35,69 @@ export import ptaCache = require("memory-cache");
 export const UNKNOWN = "Unknown";
 export const NO_OFFICIAL_SOLUTION = l10n.t("No official answer for this sample");
 export const NONE = l10n.t("None");
+
+/** 计时记录文件格式版本 */
+export const TIMER_FILE_VERSION = 2;
+
+/** 答题计时的状态 */
+export enum TimerState {
+    /** 未计时（或已结束） */
+    Idle = "idle",
+    Running = "running",
+    Paused = "paused",
+}
+
+/**
+ * 一次 AC 的答题记录。
+ *
+ * 刻意不做按题累加：用户要的是「每次 AC 各花了多久」的列表，
+ * 后续统计页按题目取最近一次、明细表保留全部。
+ */
+export interface ITimerAttempt {
+    /** 提交 ID，用于去重与追溯 */
+    submissionId: string;
+    psID: string;
+    pID: string;
+    /** 题集名与题目名，开始计时时从题目文件头读出 */
+    psName: string;
+    title: string;
+    /** 本次 AC 的答题用时（只含计时运行中的时间） */
+    seconds: number;
+    /** 提交时间（ISO） */
+    acceptedAt: string;
+}
+
+/**
+ * 正在计时（或已暂停）的那一道题。同一时刻最多只有一个。
+ *
+ * 刻意不持久化运行中的 `startedAt`：重载窗口后恢复为「已暂停」，
+ * 否则关掉 VS Code 的那段时间也会被算进用时。
+ */
+export interface IActiveTimer {
+    psID: string;
+    pID: string;
+    psName: string;
+    title: string;
+    /** 运行中为本次开始的墙钟时间戳；已暂停为 null */
+    startedAt: number | null;
+    /** 本次开始前已累计的秒数（暂停期间不增长） */
+    elapsedBeforeStart: number;
+}
+
+/** timer.json 的结构 */
+export interface ITimerFile {
+    version: number;
+    attempts: ITimerAttempt[];
+    active?: IActiveTimer;
+}
+
+/** 当前编辑器对应的题目（供计时器等按题挂靠的功能使用） */
+export interface IPtaProblem {
+    psID: string;
+    pID: string;
+    title?: string;
+    psName?: string;
+}
 
 export enum UserStatus {
     SignedIn = 1,
@@ -213,7 +278,7 @@ export function createDefaultPtaNode(partial: IPtaNodeInit = {}): IPtaNode {
     };
 }
 
-export type CallBack<T> = (msg: string, data?: T) => void;
+export type CallBack<T> = (msg: string, data?: T) => void | Promise<void>;
 
 export interface ProblemJudgingStatus {
     color: string;

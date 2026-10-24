@@ -101,6 +101,7 @@ function createWorkspaceMock() {
     return {
         onDidChangeConfiguration: sinon.stub().returns({ dispose: sinon.stub() }),
         onDidChangeTextDocument: sinon.stub().returns({ dispose: sinon.stub() }),
+        onDidCloseTextDocument: sinon.stub().returns({ dispose: sinon.stub() }),
         getConfiguration: sinon.stub().callsFake(() => ({
             get: (section: string, defaultValue?: unknown): unknown =>
                 configurationValues.has(section) ? configurationValues.get(section) : defaultValue,
@@ -194,6 +195,12 @@ class ThemeIconMock {
     constructor(public readonly id: string) {}
 }
 
+class MarkdownStringMock {
+    public isTrusted?: boolean | { enabledCommands: readonly string[] };
+    public supportThemeIcons?: boolean;
+    constructor(public value: string = "") {}
+}
+
 class EventEmitterMock {
     public event = (): void => {};
     public fire(): void {}
@@ -214,6 +221,7 @@ const vscodeMock = {
     CodeLens: CodeLensMock,
     SnippetString: SnippetStringMock,
     ThemeIcon: ThemeIconMock,
+    MarkdownString: MarkdownStringMock,
     EventEmitter: EventEmitterMock,
     ProgressLocation: { Notification: 15 },
     ViewColumn: { One: 1, Two: 2, Three: 3 },

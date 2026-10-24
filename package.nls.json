@@ -90,5 +90,10 @@
     "walkthroughs.addTemplates.media.altText": "Add Templates",
     "walkthroughs.commandPalette.title": "Use Shortcut Commands",
     "walkthroughs.commandPalette.description": "Open the [Command Palette](command:workbench.action.showCommands) and run shortcut commands.\n1. ``Cmd+Shift+P`` (in Mac)\n2. ``Ctrl+Shift+P`` (in Windows/Linux)",
-    "walkthroughs.commandPalette.media.markdown": "docs/walkthroughs/CMDs_en-US.md"
+    "walkthroughs.commandPalette.media.markdown": "docs/walkthroughs/CMDs_en-US.md",
+    "contributes.commands.pintia.toggleTimer": "Start / Pause / Resume Timer",
+    "contributes.commands.pintia.timerMenu": "Timer Menu…",
+    "contributes.commands.pintia.showTimerStats": "Answer Time Statistics",
+    "configuration.title.timer": "Timer",
+    "configuration.pintia.timer.enableStatusBar": "Show the timer in the status bar while timing a Pintia problem."
 }

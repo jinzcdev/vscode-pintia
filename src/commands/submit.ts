@@ -14,6 +14,8 @@ import { PtaSubmissionProvider } from "../webview/PtaSubmissionProvider";
 import { PtaTestProvider } from "../webview/PtaTestProvider";
 import { TestView } from "../webview/views/TestView";
 import { l10n } from "vscode";
+import { timerController } from "../timer/timerController";
+import { timerManager } from "../timer/timerManager";
 
 export async function submitSolution(ptaCode: IPtaCode): Promise<void> {
     try {
@@ -24,6 +26,9 @@ export async function submitSolution(ptaCode: IPtaCode): Promise<void> {
             return;
         }
 
+        // 在提交前捕获本次计时：评测期间继续答题或暂停都不应改变这次提交的耗时
+        const acceptedSession = timerManager.getActiveSession(ptaCode.psID, ptaCode.pID);
+
         const solution: { compiler: string; code: string } = {
             compiler: ptaCode.compiler,
             code: ptaCode.code,
@@ -32,9 +37,24 @@ export async function submitSolution(ptaCode: IPtaCode): Promise<void> {
             ptaCode.psID,
             ptaCode.pID,
             solution,
-            (msg: string, data?: IProblemSubmissionResult) => {
+            async (msg: string, data?: IProblemSubmissionResult) => {
                 switch (msg) {
                     case "SUCCESS":
+                        if (acceptedSession && data!.submission.status === "ACCEPTED") {
+                            // 只有「提交时本题正在计时 + 完全通过」才记录并通知。
+                            // 计时记录失败不应让用户以为代码提交失败。
+                            try {
+                                await timerController.handleAccepted(
+                                    ptaCode.psID,
+                                    ptaCode.pID,
+                                    data!.submission.id,
+                                    acceptedSession,
+                                    data!.submission.submitAt
+                                );
+                            } catch (error: any) {
+                                ptaChannel.error(error?.toString?.() ?? String(error));
+                            }
+                        }
                         PtaSubmissionProvider.createOrUpdate(data!)
                             .show()
                             .then(() => {

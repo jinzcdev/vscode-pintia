@@ -90,5 +90,10 @@
     "walkthroughs.addTemplates.media.altText": "添加代码模板",
     "walkthroughs.commandPalette.title": "使用快捷命令",
     "walkthroughs.commandPalette.description": "打开 [命令面板](command:workbench.action.showCommands) 并运行快捷命令。\n1. ``Cmd+Shift+P`` (在 Mac 中)\n2. ``Ctrl+Shift+P`` (在Windows/Linux中)",
-    "walkthroughs.commandPalette.media.markdown": "docs/walkthroughs/CMDs.md"
+    "walkthroughs.commandPalette.media.markdown": "docs/walkthroughs/CMDs.md",
+    "contributes.commands.pintia.toggleTimer": "开始 / 暂停 / 继续计时",
+    "contributes.commands.pintia.timerMenu": "计时器操作…",
+    "contributes.commands.pintia.showTimerStats": "答题耗时统计",
+    "configuration.title.timer": "计时器",
+    "configuration.pintia.timer.enableStatusBar": "为拼题A 题目计时时，在状态栏显示计时器。"
 }
