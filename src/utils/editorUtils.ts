@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { submitSolution, testSolution } from "../commands/submit";
-import { IPtaCode } from "../shared";
+import { IPtaCode, IPtaProblem } from "../shared";
 
 /**
  * 从文本中解析 PTA 代码信息
@@ -111,6 +111,49 @@ export function getCodeLensRange(document: vscode.TextDocument, regex: RegExp): 
         textLine?.range && ranges.push(textLine.range);
     }
     return ranges;
+}
+
+/**
+ * 从题目文件头里读取题集名与题目名。
+ *
+ * 这两行由 `showCodingEditor` 写进文件头，读它们就不必为了显示一个名字去请求接口。
+ * 前缀（`//`、`#`、`*` 等）随语言而变，因此只要求「同一行里出现过 `Label:`」。
+ */
+export function parseProblemMeta(content: string): { psName?: string; title?: string } {
+    const readLine = (label: string): string | undefined => {
+        const matched = content.match(new RegExp(`^[^\\n]*?${label}:\\s*(.+?)\\s*$`, "m"));
+        return matched?.[1] || undefined;
+    };
+    return { psName: readLine("ProblemSet"), title: readLine("Title") };
+}
+
+/**
+ * 从文档内容解析题目。
+ *
+ * 关闭文档时 `activeTextEditor` 可能已经指向别的文件，因此关闭事件需要用
+ * 事件自带的 document 解析，不能复用 `getActiveProblem()`。
+ */
+export function getProblemFromDocument(document: vscode.TextDocument): IPtaProblem | undefined {
+    if (document.uri.scheme !== "file") {
+        return undefined;
+    }
+    const content = document.getText();
+    const ptaCode = parseCodeInfo(content);
+    if (!ptaCode) {
+        return undefined;
+    }
+    return { psID: ptaCode.psID, pID: ptaCode.pID, ...parseProblemMeta(content) };
+}
+
+/**
+ * 解析当前编辑器对应的题目，非题目文件时返回 undefined。
+ *
+ * 与 `getPtaCodeFromActiveEditor` 的区别是不弹任何提示——状态栏与计时器需要
+ * 在每次切换编辑器时静默判断，不能因此打扰用户。
+ */
+export function getActiveProblem(): IPtaProblem | undefined {
+    const editor = vscode.window.activeTextEditor;
+    return editor ? getProblemFromDocument(editor.document) : undefined;
 }
 
 /**

@@ -10,7 +10,7 @@ export async function changeDefaultLanguage(): Promise<void> {
     for (const language of languages) {
         languageItems.push({
             label: language,
-            description: defaultLanguage === language ? "Currently used" : undefined,
+            description: defaultLanguage === language ? l10n.t("Currently used") : undefined,
         });
     }
     // Put the default language at the top of the list

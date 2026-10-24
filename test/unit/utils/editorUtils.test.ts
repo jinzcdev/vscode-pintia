@@ -2,7 +2,9 @@ import * as assert from "assert";
 import * as sinon from "sinon";
 import * as vscode from "vscode";
 import {
+    getActiveProblem,
     getCodeLensRange,
+    getProblemFromDocument,
     getPtaCodeFromActiveEditor,
     parseCodeBlock,
     parseCodeInfo,
@@ -108,6 +110,88 @@ describe("editorUtils", () => {
 
         it("无匹配时应返回空数组", () => {
             assert.deepStrictEqual(getCodeLensRange(createFakeDocument("int a;"), /@pintia\s+code=end/g), []);
+        });
+    });
+
+    describe("getProblemFromDocument", () => {
+        const problemSource = [
+            "/*",
+            " * @pintia psid=ps1 pid=p1 compiler=GXX",
+            " * ProblemSet: 期末考核",
+            " * Title: 两数之和",
+            " */",
+            "int main() { return 0; }",
+        ].join("\n");
+
+        it("应解析出题目 ID、题集名与题目名", () => {
+            assert.deepStrictEqual(getProblemFromDocument(createFakeDocument(problemSource)), {
+                psID: "ps1",
+                pID: "p1",
+                psName: "期末考核",
+                title: "两数之和",
+            });
+        });
+
+        it("非 file scheme 的文档不应被视为题目", () => {
+            assert.strictEqual(
+                getProblemFromDocument(createFakeDocument(problemSource, { scheme: "untitled" })),
+                undefined
+            );
+        });
+
+        it("没有文件头时应返回 undefined", () => {
+            assert.strictEqual(getProblemFromDocument(createFakeDocument("int main() {}")), undefined);
+        });
+
+        it("缺少题集名/题目名时仍应返回 ID", () => {
+            assert.deepStrictEqual(
+                getProblemFromDocument(createFakeDocument("// @pintia psid=ps1 pid=p1 compiler=GXX")),
+                { psID: "ps1", pID: "p1", psName: undefined, title: undefined }
+            );
+        });
+    });
+
+    describe("getActiveProblem", () => {
+        it("没有活动编辑器时返回 undefined", () => {
+            setActiveTextEditor(undefined);
+
+            assert.strictEqual(getActiveProblem(), undefined);
+        });
+
+        it("应解析当前编辑器对应的题目", () => {
+            const content = [
+                "/*",
+                " * @pintia psid=ps1 pid=p1 compiler=GXX",
+                " * ProblemSet: 期末考核",
+                " * Title: 两数之和",
+                " */",
+                "int main() { return 0; }",
+            ].join("\n");
+            setActiveTextEditor(createFakeEditor(content));
+
+            assert.deepStrictEqual(getActiveProblem(), {
+                psID: "ps1",
+                pID: "p1",
+                psName: "期末考核",
+                title: "两数之和",
+            });
+        });
+
+        it("非题目文件返回 undefined 且不应弹提示", () => {
+            setActiveTextEditor(createFakeEditor("int main() {}"));
+
+            assert.strictEqual(getActiveProblem(), undefined);
+            assert.strictEqual((vscode.window.showErrorMessage as sinon.SinonStub).called, false);
+            assert.strictEqual((vscode.window.showWarningMessage as sinon.SinonStub).called, false);
+        });
+
+        it("非 file scheme 的文档不应被视为题目", () => {
+            const content = "// @pintia psid=ps1 pid=p1 compiler=GXX";
+            setActiveTextEditor({
+                document: createFakeDocument(content, { scheme: "untitled" }),
+            } as never);
+
+            assert.strictEqual(getActiveProblem(), undefined);
         });
     });
 

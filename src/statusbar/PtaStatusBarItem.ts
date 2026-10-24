@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { l10n } from "vscode";
 import { IUserSession } from "../entity/userLoginSession";
 
 export class PtaStatusBarItem implements vscode.Disposable {
@@ -13,7 +14,7 @@ export class PtaStatusBarItem implements vscode.Disposable {
         if (userSession) {
             this.statusBarItem.text = `PTA: ${userSession.user}`;
         } else {
-            this.statusBarItem.text = `PTA: Unknown`;
+            this.statusBarItem.text = `PTA: ${l10n.t("Unknown")}`;
         }
     }
 

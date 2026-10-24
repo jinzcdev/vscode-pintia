@@ -3,7 +3,7 @@ import * as sinon from "sinon";
 import * as fs from "fs-extra";
 import * as httpUtils from "../../../src/utils/httpUtils";
 import { ptaApi } from "../../../src/utils/api";
-import { ptaManager } from "../../../src/ptaManager";
+import { setSession } from "../../../src/sessionStore";
 import { ptaCache, ProblemPermissionEnum, ProblemType, ProblemSetExamStatus } from "../../../src/shared";
 import { IProblemInfo } from "../../../src/entity/IProblemInfo";
 
@@ -38,7 +38,7 @@ describe("ptaApi - 请求构造与本地缓存", () => {
         sinon.stub(fs, "createFile").resolves();
         sinon.stub(fs, "writeJson").resolves();
         sinon.stub(fs, "readJSON");
-        sinon.stub(ptaManager, "getUserSession").returns(undefined);
+        setSession(undefined);
         // 避免跨用例复用 psID → 名称等内存缓存
         ptaCache.clear();
         // 默认不存在任何本地缓存
@@ -87,7 +87,7 @@ describe("ptaApi - 请求构造与本地缓存", () => {
 
     describe("getProblemSummary", () => {
         it("会话 cookie 应优先于传入的 cookie", async () => {
-            (ptaManager.getUserSession as sinon.SinonStub).returns({ cookie: "PTASession=session" });
+            setSession({ cookie: "PTASession=session" } as never);
             httpGetStub.resolves({ summaries: {} });
 
             await ptaApi.getProblemSummary("ps1", "PTASession=param");
@@ -126,7 +126,7 @@ describe("ptaApi - 请求构造与本地缓存", () => {
         });
 
         it("未传 cookie 时应回退到会话 cookie", async () => {
-            (ptaManager.getUserSession as sinon.SinonStub).returns({ cookie: "PTASession=session" });
+            setSession({ cookie: "PTASession=session" } as never);
             httpGetStub.resolves({});
 
             await ptaApi.fetchExamProblemPage("ps1", ProblemType.PROGRAMMING, 0, 200);

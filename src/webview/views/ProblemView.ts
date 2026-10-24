@@ -25,7 +25,8 @@ export class ProblemView {
     public problemConfig?: IProblemConfig;
 
     private problem!: IProblem;
-    private instance?: ProblemView;
+    /** 是否已加载过，使 `fetch()` 幂等；与「单例」无关 */
+    private loaded = false;
 
     constructor(psID: string, pID: string) {
         this.id = pID;
@@ -33,8 +34,8 @@ export class ProblemView {
     }
 
     public async fetch(): Promise<ProblemView> {
-        if (this.instance) {
-            return this.instance;
+        if (this.loaded) {
+            return this;
         }
         const problem = await ptaApi.getProblem(this.problemSetId, this.id, ptaManager.getUserSession()?.cookie);
         const problemInfo: IProblemInfo = await ptaApi.getProblemInfoByID(
@@ -66,7 +67,8 @@ export class ProblemView {
             "@pintia note=start",
             "@pintia note=end"
         );
-        return (this.instance = this);
+        this.loaded = true;
+        return this;
     }
 
     public static parseProblemConfig(problem: IProblem): IProblemConfig | undefined {

@@ -16,7 +16,7 @@ import {
     migrateLegacyIndexToV2,
     SearchIndexStore,
 } from "../searchIndex";
-import { SEARCH_INDEX_JSON_FILE, SEARCH_INDEX_REQUEST_DELAY_MS } from "../searchIndex/constants";
+import { SEARCH_INDEX_REQUEST_DELAY_MS, SEARCH_INDEX_SEED_JSON_FILE } from "../searchIndex/constants";
 
 /**
  * 搜索索引内存缓存键
@@ -79,7 +79,7 @@ export async function createProblemSearchIndex(context: vscode.ExtensionContext)
     await fs.ensureDir(configPath);
 
     try {
-        const seedPath = context.asAbsolutePath(path.join("resources", SEARCH_INDEX_JSON_FILE));
+        const seedPath = context.asAbsolutePath(path.join("resources", SEARCH_INDEX_SEED_JSON_FILE));
         await ensureSearchIndexV2(seedPath);
     } catch (error: any) {
         ptaChannel.error(error.toString());

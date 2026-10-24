@@ -8,29 +8,29 @@ import { ptaApi } from "../../../src/utils/api";
 import { ptaConfig } from "../../../src/ptaConfig";
 import { ptaManager } from "../../../src/ptaManager";
 import {
-    defaultPtaNode,
+    createDefaultPtaNode,
+    problemTypeInfoMapping,
     ProblemPermissionEnum,
     ProblemSubmissionState,
     ProblemType,
-    PtaDashType,
     PtaNodeType,
 } from "../../../src/shared";
 
 /** 构造一个题集节点（含 summaries） */
 function createProblemSetNode(overrides: Partial<{ psID: string; summaries: Record<string, unknown> }> = {}): PtaNode {
-    return new PtaNode({
-        ...defaultPtaNode,
-        psID: overrides.psID ?? "ps1",
-        label: "Test Set",
-        type: PtaNodeType.ProblemSet,
-        value: {
-            ...defaultPtaNode.value,
-            problemSet: "Test Set",
-            summaries: (overrides.summaries ?? {
-                PROGRAMMING: { total: 1, totalScore: 10, totalInPools: 1 },
-            }) as never,
-        },
-    });
+    return new PtaNode(
+        createDefaultPtaNode({
+            psID: overrides.psID ?? "ps1",
+            label: "Test Set",
+            type: PtaNodeType.ProblemSet,
+            value: {
+                problemSet: "Test Set",
+                summaries: (overrides.summaries ?? {
+                    PROGRAMMING: { total: 1, totalScore: 10, totalInPools: 1 },
+                }) as never,
+            },
+        })
+    );
 }
 
 /** 构造若干题目元信息 */
@@ -69,9 +69,13 @@ describe("ExplorerNodeManager", () => {
 
             const nodes = await explorerNodeManager.getSubProblemSet(node);
 
+            // 题型名来自 problemTypeInfoMapping，这里跟着映射表断言以免与语言包漂移
             assert.deepStrictEqual(
                 nodes.map((n) => n.label),
-                ["编程题", "函数题"]
+                [
+                    problemTypeInfoMapping.get(ProblemType.PROGRAMMING)!.name,
+                    problemTypeInfoMapping.get(ProblemType.CODE_COMPLETION)!.name,
+                ]
             );
             assert.strictEqual(
                 nodes.every((n) => n.type === PtaNodeType.ProblemSubSet),
@@ -172,7 +176,7 @@ describe("ExplorerNodeManager", () => {
 
             assert.deepStrictEqual(
                 nodes.map((n) => n.label),
-                ["算法专题", "Dash Set", PtaDashType.Others, "Other"]
+                ["算法专题", "Dash Set", "Others", "Other"]
             );
         });
 
@@ -193,6 +197,31 @@ describe("ExplorerNodeManager", () => {
             );
         });
 
+        it("同一次展开产出的节点不应共享 value 对象", async () => {
+            // 回归：此前用 Object.assign({}, defaultPtaNode, ...) 浅拷贝一个模块级常量，
+            // 未覆盖 value 的节点（如 Dashboard）会共用同一个 value/summaries，
+            // 而 getChildren 会就地写回 value.summaries 与 value.problemType
+            sinon.stub(ptaApi, "getDashSections").resolves([]);
+            sinon.stub(ptaApi, "getAlwaysAvailableProblemSets").resolves([
+                { id: "ps-a", name: "A", permission: { permission: 15 }, summaries: {} },
+                { id: "ps-b", name: "B", permission: { permission: 15 }, summaries: {} },
+            ] as never);
+            sinon.stub(ptaApi, "getMyProblemSets").resolves([]);
+            sinon.stub(ptaConfig, "getShowLocked").returns(true);
+
+            const nodes = await explorerNodeManager.getRootNodes();
+            const dashboard = nodes.find((n) => n.type === PtaNodeType.Dashboard)!;
+            const [a, b] = nodes.filter((n) => n.type === PtaNodeType.ProblemSet);
+
+            assert.notStrictEqual(dashboard.value, a.value, "Dashboard 与题集节点不应共享 value");
+            assert.notStrictEqual(a.value, b.value, "两个题集节点不应共享 value");
+
+            a.value.problemType = ProblemType.CODE_COMPLETION;
+            a.value.summaries = {};
+            assert.strictEqual(b.value.problemType, ProblemType.PROGRAMMING, "修改一个节点不应影响另一个");
+            assert.strictEqual(dashboard.value.problemType, ProblemType.PROGRAMMING);
+        });
+
         it("我的题集应单独成组并标记 isMyProblemSet", async () => {
             sinon.stub(ptaApi, "getDashSections").resolves([]);
             sinon.stub(ptaApi, "getAlwaysAvailableProblemSets").resolves([]);
@@ -201,11 +230,31 @@ describe("ExplorerNodeManager", () => {
 
             const nodes = await explorerNodeManager.getRootNodes();
 
+            // Dashboard 的 label 是本地化后的展示名；分组标识本身只用于分组与判断
             assert.deepStrictEqual(
                 nodes.map((n) => n.label),
-                [PtaDashType.MyProblemSet, "Mine"]
+                ["My Problem Sets", "Mine"]
             );
+            assert.strictEqual(nodes[0].isMyProblemSet, true, "Dashboard 节点应带上 isMyProblemSet");
             assert.strictEqual(nodes[1].isMyProblemSet, true);
+        });
+
+        it("Dashboard 节点应带上 isMyProblemSet，供图标判断使用", async () => {
+            // 回归：图标此前靠 `element.label === PtaDashType.MyProblemSet` 判断，
+            // label 一旦本地化就永远选不中「我的题目集」的图标
+            sinon.stub(ptaApi, "getDashSections").resolves([]);
+            sinon
+                .stub(ptaApi, "getAlwaysAvailableProblemSets")
+                .resolves([{ id: "ps-open", name: "Open", permission: { permission: 15 }, summaries: {} }] as never);
+            sinon.stub(ptaApi, "getMyProblemSets").resolves([{ id: "ps-mine", name: "Mine", summaries: {} }] as never);
+            sinon.stub(ptaConfig, "getShowLocked").returns(true);
+
+            const nodes = await explorerNodeManager.getRootNodes();
+            const mine = nodes.find((n) => n.label === "My Problem Sets")!;
+            const others = nodes.find((n) => n.label === "Others")!;
+
+            assert.strictEqual(mine.isMyProblemSet, true, "「我的题目集」分组应标记");
+            assert.strictEqual(others.isMyProblemSet, false, "「其他」分组不应标记");
         });
 
         it("所有分组都为空时不应产生任何节点", async () => {
@@ -232,16 +281,16 @@ describe("ExplorerNodeManager", () => {
 
     describe("getProblemNodes", () => {
         const node = () =>
-            new PtaNode({
-                ...defaultPtaNode,
-                psID: "ps1",
-                type: PtaNodeType.ProblemSubSet,
-                value: {
-                    ...defaultPtaNode.value,
-                    problemSet: "Test Set",
-                    problemType: ProblemType.PROGRAMMING,
-                },
-            });
+            new PtaNode(
+                createDefaultPtaNode({
+                    psID: "ps1",
+                    type: PtaNodeType.ProblemSubSet,
+                    value: {
+                        problemSet: "Test Set",
+                        problemType: ProblemType.PROGRAMMING,
+                    },
+                })
+            );
 
         beforeEach(() => {
             sinon.stub(ptaApi, "checkAndCreateProblemSetExam").resolves({ id: "exam-1" } as never);
@@ -258,6 +307,32 @@ describe("ExplorerNodeManager", () => {
 
             assert.deepStrictEqual(await explorerNodeManager.getProblemNodes(node()), []);
             assert.strictEqual(getProblemsStub.called, false);
+        });
+
+        it("我的题目集已存在 exam 时不应重复请求 /exams", async () => {
+            // 回归：此前先 getProblemSetExams 再 checkAndCreateProblemSetExam，
+            // 同一个 /exams 在每次展开列表时被请求两次
+            sinon.stub(ptaManager, "getUserSession").returns({ cookie: "PTASession=c" } as never);
+            sinon.stub(ptaApi, "getAllProblemInfoList").resolves([]);
+            const examsStub = sinon.stub(ptaApi, "getProblemSetExams").resolves({ exam: { id: "e1" } } as never);
+
+            const myNode = new PtaNode(
+                createDefaultPtaNode({
+                    psID: "ps1",
+                    type: PtaNodeType.ProblemSubSet,
+                    isMyProblemSet: true,
+                    value: { problemSet: "Test Set", problemType: ProblemType.PROGRAMMING },
+                })
+            );
+
+            await explorerNodeManager.getProblemNodes(myNode);
+
+            assert.strictEqual(examsStub.callCount, 1);
+            assert.strictEqual(
+                (ptaApi.checkAndCreateProblemSetExam as sinon.SinonStub).called,
+                false,
+                "已经查过 /exams 就不该再查一次"
+            );
         });
 
         it("应带上提交状态与收藏标记", async () => {

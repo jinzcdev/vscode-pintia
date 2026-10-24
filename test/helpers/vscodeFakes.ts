@@ -7,7 +7,7 @@
 import * as vscode from "vscode";
 
 /** 构造只实现被测代码所需方法的最小文档对象 */
-export function createFakeDocument(text: string): vscode.TextDocument {
+export function createFakeDocument(text: string, uri: { fsPath?: string; scheme?: string } = {}): vscode.TextDocument {
     const lines = text.split("\n");
     return {
         getText: () => text,
@@ -19,7 +19,7 @@ export function createFakeDocument(text: string): vscode.TextDocument {
         lineAt: (line: number) => ({
             range: { start: { line, character: 0 }, end: { line, character: lines[line].length } },
         }),
-        uri: { fsPath: "/tmp/pintia/1-1-demo.cpp" },
+        uri: { fsPath: uri.fsPath ?? "/tmp/pintia/1-1-demo.cpp", scheme: uri.scheme ?? "file" },
     } as unknown as vscode.TextDocument;
 }
 

@@ -6,7 +6,7 @@ import * as os from "os";
 import * as path from "path";
 import * as vscode from "vscode";
 import { ptaConfig } from "../ptaConfig";
-import { IQuickPickItem } from "../shared";
+import { IQuickPickItem, OpenOptionEnum } from "../shared";
 import { showDirectorySelectDialog } from "./uiUtils";
 import { l10n } from "vscode";
 
@@ -148,12 +148,4 @@ export async function determinePintiaFolder(): Promise<string> {
     ptaConfig.update("workspaceFolder", result);
 
     return result;
-}
-
-export enum OpenOptionEnum {
-    alwaysAsk = "Always ask",
-    justOpenFile = "Just open the problem file",
-    openInCurrentWindow = "Open in current window",
-    openInNewWindow = "Open in new window",
-    addToWorkspace = "Add to workspace",
 }

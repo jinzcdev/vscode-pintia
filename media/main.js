@@ -1,5 +1,8 @@
 (function () {
     const vscode = acquireVsCodeApi();
+    // 文案由扩展侧通过 body 的 data 属性注入（webview 脚本拿不到 vscode.l10n）
+    const COPY_LABEL = document.body.dataset.copyLabel || "Copy";
+    const COPIED_MESSAGE = document.body.dataset.copiedLabel || "Successfully copied to the clipboard!";
     let button;
     if ((button = document.getElementById("btnCheckLastSubmission"))) {
         button.onclick = () => {
@@ -81,14 +84,14 @@
     for (const pre of lst_pre) {
         const copyButton = document.createElement("button");
         copyButton.className = "copy-button";
-        copyButton.innerText = "Copy";
+        copyButton.innerText = COPY_LABEL;
         copyButton.onclick = (event) => {
             event.stopPropagation();
             var content = pre.querySelector("code")?.innerText || "";
             navigator.clipboard.writeText(content).then(() => {
                 vscode.postMessage({
                     type: "text",
-                    value: "Successfully copied to the clipboard!",
+                    value: COPIED_MESSAGE,
                 });
             });
         };

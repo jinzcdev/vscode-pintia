@@ -1,4 +1,5 @@
 import * as QRCode from "qrcode";
+import { l10n } from "vscode";
 import { PtaWebview } from "./PtaWebview";
 import { LoginView } from "./views/LoginView";
 
@@ -15,7 +16,7 @@ export class PtaLoginProvider extends PtaWebview<LoginView> {
 
     protected async loadViewData(loginView: LoginView): Promise<void> {
         this.data = {
-            title: "QRCode",
+            title: l10n.t("QRCode"),
             qrcodeBase64: await QRCode.toDataURL(loginView.qrcode, {
                 type: "image/png",
             }),
@@ -51,7 +52,7 @@ export class PtaLoginProvider extends PtaWebview<LoginView> {
     protected getContent(): string {
         return `
             <div class="banner">
-                <h1>请使用微信扫码此二维码或<a href="https://pintia.cn/home/bindings">点此</a>绑定</p>
+                <h1>${l10n.t("Scan this QR code with WeChat, or")} <a href="https://pintia.cn/home/bindings">${l10n.t("click here")}</a> ${l10n.t("to bind")}</p>
                 <img class="qrcode"
                 src="${this.data.qrcodeBase64}">
             </div>

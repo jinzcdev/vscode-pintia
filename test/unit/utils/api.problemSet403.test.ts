@@ -3,7 +3,7 @@ import * as sinon from "sinon";
 import * as fs from "fs-extra";
 import * as httpUtils from "../../../src/utils/httpUtils";
 import { ptaApi } from "../../../src/utils/api";
-import { ptaManager } from "../../../src/ptaManager";
+import { setSession } from "../../../src/sessionStore";
 import { ProblemSetExamStatus } from "../../../src/shared";
 
 describe("api - 未开始题集 403 处理", () => {
@@ -14,7 +14,7 @@ describe("api - 未开始题集 403 处理", () => {
         sinon.stub(fs, "pathExists").resolves(false);
         sinon.stub(fs, "createFile").resolves();
         sinon.stub(fs, "writeJson").resolves();
-        sinon.stub(ptaManager, "getUserSession").returns(undefined);
+        setSession(undefined);
     });
 
     afterEach(() => {

@@ -6,6 +6,13 @@ import { PtaTreeDataProvider } from "./PtaTreeDataProvider";
 class ExplorerController<T> implements Disposable {
     private treeView?: vscode.TreeView<T>;
     private ptaTreeDataProvider?: PtaTreeDataProvider;
+    /**
+     * 是否已注册进 `context.subscriptions`。
+     *
+     * 登出会 dispose 掉 treeView，再次登录又会走到这里；不加这个标记，
+     * 每轮「登出→登录」都会往 subscriptions 里再塞一个同一个对象。
+     */
+    private registered = false;
 
     public createTreeView(context: vscode.ExtensionContext) {
         if (!this.treeView) {
@@ -14,7 +21,10 @@ class ExplorerController<T> implements Disposable {
                 treeDataProvider: this.ptaTreeDataProvider,
                 showCollapseAll: true,
             });
-            context.subscriptions.push(this);
+            if (!this.registered) {
+                context.subscriptions.push(this);
+                this.registered = true;
+            }
         }
     }
 

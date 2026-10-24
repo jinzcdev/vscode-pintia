@@ -11,7 +11,7 @@ import { ptaChannel } from "../ptaChannel";
 import { ptaConfig } from "../ptaConfig";
 import { ptaManager } from "../ptaManager";
 import {
-    defaultPtaNode,
+    createDefaultPtaNode,
     IPtaNodeValue,
     ProblemPermissionEnum,
     ProblemSetExamStatus,
@@ -26,7 +26,7 @@ import {
 import { ptaApi } from "../utils/api";
 import { DialogType, promptForOpenOutputChannel, showYesOrNoPick } from "../utils/uiUtils";
 import { PtaNode } from "./PtaNode";
-import { IProblemSetExam } from "../entity/IProblemSetExam";
+import { IExam, IProblemSetExam } from "../entity/IProblemSetExam";
 
 class ExplorerNodeManager implements Disposable {
     public async getRootNodes(): Promise<PtaNode[]> {
@@ -66,18 +66,27 @@ class ExplorerNodeManager implements Disposable {
             if (pbsList.length === 0) {
                 continue;
             }
+            // 分组标识是稳定标识符（见 shared.PtaDashType），展示名在这里生成
+            const isMyProblemSet = sectionTitle === PtaDashType.MyProblemSet;
+            const label =
+                sectionTitle === PtaDashType.MyProblemSet
+                    ? l10n.t("My Problem Sets")
+                    : sectionTitle === PtaDashType.Others
+                      ? l10n.t("Others")
+                      : sectionTitle;
             ptaNodeList.push(
                 new PtaNode(
-                    Object.assign({}, defaultPtaNode, {
-                        label: `${sectionTitle}`,
+                    createDefaultPtaNode({
+                        label,
                         type: PtaNodeType.Dashboard,
+                        isMyProblemSet,
                     })
                 )
             );
             pbsList.forEach((item) => {
                 ptaNodeList.push(
                     new PtaNode(
-                        Object.assign({}, defaultPtaNode, {
+                        createDefaultPtaNode({
                             psID: item.id,
                             label: item.name,
                             type: PtaNodeType.ProblemSet,
@@ -109,13 +118,11 @@ class ExplorerNodeManager implements Disposable {
                 }
                 nodeList.push(
                     new PtaNode(
-                        Object.assign({}, defaultPtaNode, {
+                        createDefaultPtaNode({
                             psID: node.psID,
                             type: PtaNodeType.ProblemSubSet,
                             label: problemTypeInfoMapping.get(problemType)?.name ?? UNKNOWN,
-                            value: Object.assign({}, value, {
-                                problemType: problemType as ProblemType,
-                            }),
+                            value: { ...value, problemType: problemType as ProblemType },
                         })
                     )
                 );
@@ -136,8 +143,10 @@ class ExplorerNodeManager implements Disposable {
                 return [];
             }
 
+            let exam: IExam | undefined;
             if (element.isMyProblemSet) {
                 const exams: IProblemSetExam = await ptaApi.getProblemSetExams(psID, userSession.cookie);
+                exam = exams?.exam;
                 if (exams && !exams.exam) {
                     if (exams.status === ProblemSetExamStatus.READY) {
                         // 私有题目集不应自动创建 exam, 询问用户是否创建
@@ -147,14 +156,16 @@ class ExplorerNodeManager implements Disposable {
                         if (!created) {
                             return [];
                         }
-                        vscode.window.withProgress(
+                        await vscode.window.withProgress(
                             {
                                 location: vscode.ProgressLocation.Notification,
                                 title: l10n.t("Creating exam for {0}...", psName),
                                 cancellable: false,
                             },
-                            async (p: vscode.Progress<{ message?: string; increment?: number }>) => {
-                                ptaApi.createProblemSetExam(psID);
+                            // 必须 await：否则下面的 checkAndCreateProblemSetExam 会与创建竞态，
+                            // 查不到 exam 时再 POST 一次
+                            async () => {
+                                await ptaApi.createProblemSetExam(psID, userSession.cookie);
                             }
                         );
                     } else if (exams.status === ProblemSetExamStatus.PENDING) {
@@ -165,7 +176,8 @@ class ExplorerNodeManager implements Disposable {
                     }
                 }
             }
-            const exam = await ptaApi.checkAndCreateProblemSetExam(psID, userSession.cookie);
+            // 上面已经查过 /exams 的题集不再重复请求——每次展开列表都会走到这里
+            exam ??= await ptaApi.checkAndCreateProblemSetExam(psID, userSession.cookie);
             if (!exam) {
                 promptForOpenOutputChannel(
                     l10n.t("Failed to create exam. Please check the output channel for details."),
@@ -191,19 +203,15 @@ class ExplorerNodeManager implements Disposable {
                     title: l10n.t("Fetching user's exams for {0}...", psName),
                     cancellable: false,
                 },
-                async (p: vscode.Progress<{ message?: string; increment?: number }>) => {
-                    return new Promise<void>(async (resolve: () => void, reject: (e: Error) => void): Promise<void> => {
-                        ptaChannel.info("Refetching user's exams");
-                        examProblemStatus = await ptaApi.getExamProblemStatus(psID, userSession.cookie);
-                        if (examProblemStatus) {
-                            for (const e of examProblemStatus!) {
-                                problemExamMapping.set(e.id, e.problemSubmissionStatus as ProblemSubmissionState);
-                            }
-                            resolve();
-                        } else {
-                            reject(Error(`The examStatus is undefined. ProblemSetID is ${psID}`));
-                        }
-                    });
+                async () => {
+                    ptaChannel.info("Refetching user's exams");
+                    examProblemStatus = await ptaApi.getExamProblemStatus(psID, userSession.cookie);
+                    if (!examProblemStatus) {
+                        throw new Error(`The examStatus is undefined. ProblemSetID is ${psID}`);
+                    }
+                    for (const e of examProblemStatus) {
+                        problemExamMapping.set(e.id, e.problemSubmissionStatus as ProblemSubmissionState);
+                    }
                 }
             );
 
@@ -212,7 +220,7 @@ class ExplorerNodeManager implements Disposable {
                 const pb: IProblemInfo = problemList[i];
                 ptaNodeList.push(
                     new PtaNode(
-                        Object.assign({}, defaultPtaNode, {
+                        createDefaultPtaNode({
                             pID: pb.id,
                             psID: psID,
                             title: `${pb.label} ${pb.title}`,
@@ -260,7 +268,7 @@ class ExplorerNodeManager implements Disposable {
         for (let i = 0; i < pageNum; i++) {
             nodeList.push(
                 new PtaNode(
-                    Object.assign({}, defaultPtaNode, {
+                    createDefaultPtaNode({
                         psID: psID,
                         type: PtaNodeType.ProblemPage,
                         label: `${i * limit + 1}-${i === pageNum - 1 ? total : (i + 1) * limit}`,

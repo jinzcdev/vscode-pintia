@@ -8,27 +8,45 @@ import * as path from "path";
 export abstract class PtaWebviewWithCodeStyle<T> extends PtaWebview<T> {
     protected activeColorTheme: string = "atom-one-dark.css";
 
+    /**
+     * 主题相关监听器的句柄。
+     *
+     * 此前这两个监听器注册后从未被保存，也就永远无法注销；
+     * 重渲染本身是必要的（换主题要换高亮样式表），但不该以泄漏为代价。
+     */
+    private themeListeners: vscode.Disposable[] = [];
+
     constructor(view: T) {
         super(view);
-        vscode.window.onDidChangeActiveColorTheme((e) => {
-            const mapping = colorThemeMapping.get(ptaConfig.getCodeColorTheme());
-            if (!mapping) {
-                return;
-            }
-            this.activeColorTheme = mapping[e.kind === vscode.ColorThemeKind.Light ? 0 : 1];
-            this.show(false);
-        });
-        vscode.workspace.onDidChangeConfiguration((e) => {
-            if (e.affectsConfiguration("pintia.codeColorTheme")) {
-                const colorThemeKind: vscode.ColorThemeKind = vscode.window.activeColorTheme.kind;
+        this.themeListeners.push(
+            vscode.window.onDidChangeActiveColorTheme((e) => {
                 const mapping = colorThemeMapping.get(ptaConfig.getCodeColorTheme());
                 if (!mapping) {
                     return;
                 }
-                this.activeColorTheme = mapping[colorThemeKind === vscode.ColorThemeKind.Light ? 0 : 1];
+                this.activeColorTheme = mapping[e.kind === vscode.ColorThemeKind.Light ? 0 : 1];
                 this.show(false);
-            }
-        });
+            }),
+            vscode.workspace.onDidChangeConfiguration((e) => {
+                if (e.affectsConfiguration("pintia.codeColorTheme")) {
+                    const colorThemeKind: vscode.ColorThemeKind = vscode.window.activeColorTheme.kind;
+                    const mapping = colorThemeMapping.get(ptaConfig.getCodeColorTheme());
+                    if (!mapping) {
+                        return;
+                    }
+                    this.activeColorTheme = mapping[colorThemeKind === vscode.ColorThemeKind.Light ? 0 : 1];
+                    this.show(false);
+                }
+            })
+        );
+    }
+
+    public dispose(): void {
+        for (const listener of this.themeListeners) {
+            listener.dispose();
+        }
+        this.themeListeners = [];
+        super.dispose();
     }
 
     protected getStyle(): string {

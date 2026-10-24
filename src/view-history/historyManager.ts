@@ -1,6 +1,5 @@
 import * as fs from "fs-extra";
 import * as path from "path";
-import * as vscode from "vscode";
 import { Disposable, l10n } from "vscode";
 import { ptaChannel } from "../ptaChannel";
 
@@ -9,22 +8,16 @@ import { ptaConfig } from "../ptaConfig";
 import { ptaManager } from "../ptaManager";
 import { viewedProblemPath } from "../shared";
 import { DialogType, promptForOpenOutputChannel } from "../utils/uiUtils";
-import { historyTreeDataProvider } from "./historyTreeDataProvider";
 
-class HistoryManager implements Disposable {
+export class HistoryManager implements Disposable {
     private static instance: HistoryManager;
     private viewedProblems: Record<string, ProblemBasicInfo[]> = {};
     private readonly filePath: string;
 
-    private constructor() {
-        this.filePath = viewedProblemPath;
+    /** `filePath` 可注入，便于用临时目录测试；生产走下方共享单例 */
+    public constructor(filePath: string = viewedProblemPath) {
+        this.filePath = filePath;
         this.load();
-        vscode.workspace.onDidChangeConfiguration((e) => {
-            if (e.affectsConfiguration("pintia.problemHistoryListSize")) {
-                this.trimViewedProblems();
-                historyTreeDataProvider.refresh();
-            }
-        });
     }
 
     public static getInstance(): HistoryManager {
@@ -34,7 +27,7 @@ class HistoryManager implements Disposable {
         return HistoryManager.instance;
     }
 
-    public addProblem(userId: string, problem: ProblemBasicInfo) {
+    public async addProblem(userId: string, problem: ProblemBasicInfo): Promise<void> {
         if (!this.viewedProblems[userId]) {
             this.viewedProblems[userId] = [];
         }
@@ -45,35 +38,42 @@ class HistoryManager implements Disposable {
         }
         problems.unshift(problem);
         this.trimViewedProblemsForUser(userId);
+        await this.save();
     }
 
     public getProblemHistory(userId: string): ProblemBasicInfo[] {
         return this.viewedProblems[userId] ?? [];
     }
 
-    private async load() {
+    private load(): void {
         try {
             if (!fs.existsSync(this.filePath)) {
-                fs.mkdirSync(path.dirname(this.filePath), { recursive: true });
-                fs.writeFileSync(this.filePath, JSON.stringify({}));
-            } else {
-                const data = fs.readFileSync(this.filePath, "utf-8");
-                this.viewedProblems = JSON.parse(data);
-                this.trimViewedProblems();
+                // 刻意不在读取路径上创建文件：空文件由首次 save() 落盘
+                return;
             }
+            this.viewedProblems = JSON.parse(fs.readFileSync(this.filePath, "utf-8"));
+            this.trimViewedProblems();
         } catch (error: any) {
             ptaChannel.error(error.toString());
-            await promptForOpenOutputChannel(
+            promptForOpenOutputChannel(
                 l10n.t("Failed to load viewed problems. Please check the output channel for details."),
                 DialogType.error
             );
         }
     }
 
-    private async save() {
+    /**
+     * 原子落盘：先写临时文件再改名，避免写到一半被中断时留下半截 JSON。
+     *
+     * 每次变更都立即保存——此前只在 dispose() 里保存，而 VS Code 退出时
+     * 不保证 await 扩展的 dispose，会话内浏览过的题目会直接丢失。
+     */
+    private async save(): Promise<void> {
+        const tempPath = `${this.filePath}.tmp`;
         try {
-            fs.mkdirSync(path.dirname(this.filePath), { recursive: true });
-            fs.writeFileSync(this.filePath, JSON.stringify(this.viewedProblems));
+            await fs.ensureDir(path.dirname(this.filePath));
+            await fs.writeJson(tempPath, this.viewedProblems);
+            await fs.rename(tempPath, this.filePath);
         } catch (error: any) {
             ptaChannel.error(error.toString());
             await promptForOpenOutputChannel(
@@ -100,13 +100,25 @@ class HistoryManager implements Disposable {
         return ptaManager.getUserSession()?.id ?? "";
     }
 
-    public async dispose() {
+    public async dispose(): Promise<void> {
         await this.save();
     }
 
-    public async clearViewedProblems() {
+    /**
+     * 清空当前用户的浏览历史。刷新视图由命令层负责——本类不 import tree provider，
+     * 否则两者互相 import 成环。
+     */
+    public async clearViewedProblems(): Promise<void> {
         this.viewedProblems[this.getCurrentUserId()] = [];
-        await this.save().then(() => historyTreeDataProvider.refresh());
+        await this.save();
+    }
+
+    /**
+     * 按当前配置的上限裁剪全部用户的历史。
+     * 配置变更由 `extension.ts` 监听后调用（本类不自行注册监听，避免与视图刷新耦合）。
+     */
+    public trimAll(): void {
+        this.trimViewedProblems();
     }
 }
 

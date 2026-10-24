@@ -9,18 +9,25 @@ import { IPtaUser } from "./entity/IPtaUser";
 import { ptaChannel } from "./ptaChannel";
 import { DialogType, promptForOpenOutputChannel } from "./utils/uiUtils";
 import { UserAuthProviderFactory } from "./auth/UserAuthProviderFactory";
-import * as cache from "./commands/cache";
+import { getSession, setSession } from "./sessionStore";
 import { l10n } from "vscode";
-import { t } from "@vscode/l10n";
-import { autoCheckInPTA } from "./commands/user";
 
+/**
+ * 登录态与会话持有者。
+ *
+ * 会话本身存在 [[sessionStore]] 里（那里是唯一可被 `httpUtils`/`ptaApi` 读取的地方），
+ * 本类只负责写它并广播状态变化。
+ *
+ * 刻意不 import `commands/*`：那会让本类与 `commands/cache`、`commands/user`
+ * 互相依赖。需要联动的事情改为发事件，由组合根 `extension.ts` 接线：
+ * - `signedOut` —— 登出时清缓存
+ * - `sessionRestored` —— 启动时从磁盘恢复会话后自动签到（交互式登录不发这个事件）
+ */
 class PtaManager extends EventEmitter {
-    private userSession: IUserSession | undefined;
     private userStatus: UserStatus;
 
     constructor() {
         super();
-        this.userSession = undefined;
         this.userStatus = UserStatus.SignedOut;
     }
 
@@ -61,42 +68,36 @@ class PtaManager extends EventEmitter {
                 title: l10n.t("Waiting for signin..."),
                 cancellable: false,
             },
-            async (p: vscode.Progress<{ message?: string; increment?: number }>) => {
-                return new Promise<void>(async (resolve: () => void, reject: (e: Error) => void): Promise<void> => {
-                    try {
-                        const userSession = await userAuthProvider.signIn();
+            async () => {
+                try {
+                    const userSession = await userAuthProvider.signIn();
 
-                        if (userSession) {
-                            const userSessionPath: string = path.join(configPath, "user.json");
-                            await fs.createFile(userSessionPath);
-                            await fs.writeJson(userSessionPath, userSession).catch((reason) => {
-                                ptaChannel.info(reason);
-                                reject(reason);
-                            });
-                            vscode.window.showInformationMessage(
-                                l10n.t("Successfully logged in as {0}", userSession.user)
-                            );
-                            this.userSession = userSession;
-                            this.userStatus = UserStatus.SignedIn;
-                            // 题集列表按账号区分，而缓存路径是全局的：不失效会在切换账号后
-                            // 于 TTL 内看到上一个账号的题集
-                            await ptaApi.invalidateProblemSetsCache();
+                    if (userSession) {
+                        const userSessionPath: string = path.join(configPath, "user.json");
+                        await fs.createFile(userSessionPath);
+                        await fs.writeJson(userSessionPath, userSession).catch((reason) => {
+                            ptaChannel.info(reason);
+                            throw reason;
+                        });
+                        vscode.window.showInformationMessage(l10n.t("Successfully logged in as {0}", userSession.user));
+                        setSession(userSession);
+                        this.userStatus = UserStatus.SignedIn;
+                        // 题集列表按账号区分，而缓存路径是全局的：不失效会在切换账号后
+                        // 于 TTL 内看到上一个账号的题集
+                        await ptaApi.invalidateProblemSetsCache();
 
-                            ptaChannel.info(`Login successfully and save \`user.json\` to ${path}`);
+                        ptaChannel.info(`Login successfully and save \`user.json\` to ${userSessionPath}`);
 
-                            this.emit("statusChanged");
-                        }
-
-                        resolve();
-                    } catch (error: any) {
-                        ptaChannel.error(error.toString());
-                        await promptForOpenOutputChannel(
-                            `Failed to login PTA. Please check the output channel for details.`,
-                            DialogType.error
-                        );
-                        reject(error);
+                        this.emit("statusChanged");
                     }
-                });
+                } catch (error: any) {
+                    ptaChannel.error(error.toString());
+                    await promptForOpenOutputChannel(
+                        `Failed to login PTA. Please check the output channel for details.`,
+                        DialogType.error
+                    );
+                    throw error;
+                }
             }
         );
     }
@@ -110,11 +111,7 @@ class PtaManager extends EventEmitter {
                     loginSession.loginMethod as PtaLoginMethod
                 );
 
-                await Promise.all([
-                    userAuthProvider.signOut(loginSession.cookie),
-                    fs.remove(userFilePath),
-                    cache.clearCache(),
-                ]);
+                await Promise.all([userAuthProvider.signOut(loginSession.cookie), fs.remove(userFilePath)]);
                 vscode.window.showInformationMessage(l10n.t("Successfully signed out."));
                 ptaChannel.info(
                     `Logout the current user successfully and remove user information from ${userFilePath}.`
@@ -124,7 +121,9 @@ class PtaManager extends EventEmitter {
                 return;
             }
 
-            this.userSession = undefined;
+            // 先广播再清会话：监听方（extension.ts）要在登出瞬间开始清缓存
+            this.emit("signedOut");
+            setSession(undefined);
             this.userStatus = UserStatus.SignedOut;
             this.emit("statusChanged");
         } catch (error: any) {
@@ -147,7 +146,7 @@ class PtaManager extends EventEmitter {
                     loginSession.user = user.nickname;
                     loginSession.email = user.email;
 
-                    this.userSession = loginSession;
+                    setSession(loginSession);
                     this.userStatus = UserStatus.SignedIn;
 
                     fs.writeJson(filePath, loginSession).catch(async (reason) => {
@@ -157,15 +156,16 @@ class PtaManager extends EventEmitter {
                             DialogType.error
                         );
                     });
-                    autoCheckInPTA();
+                    // 只有「从磁盘恢复会话」才自动签到；交互式登录不发这个事件
+                    this.emit("sessionRestored");
                 } else {
-                    this.userSession = undefined;
+                    setSession(undefined);
                     this.userStatus = UserStatus.SignedOut;
                     vscode.window.showErrorMessage(l10n.t("Login session has expired! Please login again."));
                 }
             }
         } catch (error) {
-            this.userSession = undefined;
+            setSession(undefined);
             this.userStatus = UserStatus.SignedOut;
         } finally {
             this.emit("statusChanged");
@@ -173,7 +173,7 @@ class PtaManager extends EventEmitter {
     }
 
     public getUserSession(): IUserSession | undefined {
-        return this.userSession;
+        return getSession();
     }
 
     public getStatus(): UserStatus {

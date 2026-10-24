@@ -39,4 +39,13 @@ describe("markdownEngine - render", () => {
         assert.ok(html.includes("hljs-"), "应包含 highlight.js 的标记 span");
         assert.ok(html.includes("language-cpp"));
     });
+
+    it("原始 HTML 块内图片的 alt 与 src 都应被转义", () => {
+        // 这类图片不会被 markdown-it 处理，会直接走到 render() 的 replace 分支；
+        // 不转义时内容里的引号会突破属性边界
+        const html = render('<div>![a"b](https://x/y".png)</div>');
+
+        assert.ok(!html.includes('alt="a"b"'), `alt 未转义: ${html}`);
+        assert.ok(html.includes("&quot;"), `应转义引号: ${html}`);
+    });
 });

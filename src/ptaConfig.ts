@@ -1,16 +1,23 @@
 import * as vscode from "vscode";
-import { OpenOptionEnum } from "./utils/workspaceUtils";
 import { DEFAULT_INVALID_CHAR_REPLACEMENT } from "./utils/stringUtils";
 import { ptaChannel } from "./ptaChannel";
 import { DialogType, promptForOpenOutputChannel } from "./utils/uiUtils";
+import { OpenOptionEnum } from "./shared";
 
+/**
+ * 配置读写。
+ *
+ * 刻意只提供 getter 与 `update(key, value)`：此前每个设置项都配了一个 setter，
+ * 但没有任何调用点，于是 `setPageSize`（写成了 `page.pageSize`）与
+ * `setPreviewProblemAndCodeIt`（写成了 `previewProblemAndCodeIt`）的 key 一直是错的
+ * 却无人发现。写入口收敛到 `update` 后，key 与 getter 是否一致由调用点直接可见。
+ *
+ * 注意 `package.json` 中这些设置声明为 `scope: "window"`，与本类「读写都不带
+ * 资源 URI」的实现一致——若将来改成按文件夹生效，两边必须同时改。
+ */
 class PtaConfig {
     private getConfiguration(): vscode.WorkspaceConfiguration {
         return vscode.workspace.getConfiguration("pintia");
-    }
-
-    private get<T>(section: string, defaultValue: T): T {
-        return this.getConfiguration().get<T>(section, defaultValue);
     }
 
     public async update(section: string, value: any): Promise<void> {
@@ -21,72 +28,36 @@ class PtaConfig {
         return this.getConfiguration().get<string>("workspaceFolder", "");
     }
 
-    public setWorkspaceFolder(workspaceFolder: string) {
-        this.update("workspaceFolder", workspaceFolder);
-    }
-
     public getShowLocked(): boolean {
         return this.getConfiguration().get<boolean>("showLocked", true);
-    }
-
-    public setShowLocked(showLocked: boolean) {
-        this.update("showLocked", showLocked);
     }
 
     public getDefaultLanguage(): string {
         return this.getConfiguration().get<string>("defaultLanguage", "C++ (g++)");
     }
 
-    public setDefaultLanguage(defaultLanguage: string) {
-        this.update("defaultLanguage", defaultLanguage);
-    }
-
     public getEnableStatusBar(): boolean {
         return this.getConfiguration().get<boolean>("enableStatusBar", true);
-    }
-
-    public setEnableStatusBar(enableStatusBar: boolean) {
-        this.update("enableStatusBar", enableStatusBar);
     }
 
     public getAutoCheckIn(): boolean {
         return this.getConfiguration().get<boolean>("autoCheckIn", true);
     }
 
-    public setAutoCheckIn(autoCheckIn: boolean) {
-        this.update("autoCheckIn", autoCheckIn);
-    }
-
     public getProblemFileName(): string {
         return this.getConfiguration().get<string>("file.problemFileNameFormat", "{label} {title}");
-    }
-
-    public setProblemFileName(fileName: string) {
-        this.update("file.problemFileNameFormat", fileName);
     }
 
     public getReplaceSpaceWithUnderscore(): boolean {
         return this.getConfiguration().get<boolean>("file.replaceSpaceWithUnderscore", false);
     }
 
-    public setReplaceSpaceWithUnderscore(replace: boolean) {
-        this.update("file.replaceSpaceWithUnderscore", replace);
-    }
-
     public getConvertChineseCharacters(): boolean {
         return this.getConfiguration().get<boolean>("file.convertChineseCharacters", false);
     }
 
-    public setConvertChineseCharacters(convert: boolean) {
-        this.update("file.convertChineseCharacters", convert);
-    }
-
     public getInvalidCharReplacement(): string {
         return this.getConfiguration().get<string>("file.invalidCharReplacement", DEFAULT_INVALID_CHAR_REPLACEMENT);
-    }
-
-    public setInvalidCharReplacement(replacement: string) {
-        this.update("file.invalidCharReplacement", replacement);
     }
 
     public getCustomProblemSetName(): Record<string, string> {
@@ -108,90 +79,48 @@ class PtaConfig {
         }
     }
 
-    public setCustomProblemSetName(customNameJson: string) {
-        if (customNameJson.trim()) {
-            this.update("file.customProblemSetName", customNameJson);
-        }
-    }
-
     public getEditorShortcuts(): string[] {
         return this.getConfiguration().get<string[]>("editor.shortcuts", ["Submit", "Test", "Preview"]);
-    }
-
-    public setEditorShortcuts(editorShortcuts: string[]) {
-        this.update("editor.shortcuts", editorShortcuts);
     }
 
     public getPageSize(): number {
         return this.getConfiguration().get<number>("paging.pageSize", 100);
     }
 
-    public setPageSize(pageSize: number) {
-        this.update("page.pageSize", pageSize);
-    }
-
     public getSearchIndexIgnoreZOJ(): boolean {
         return this.getConfiguration().get<boolean>("searchIndex.ignoreZOJ", true);
-    }
-
-    public setSearchIndexIgnoreZOJ(ignoredZOJ: boolean) {
-        this.update("searchIndex.ignoreZOJ", ignoredZOJ);
     }
 
     public getSearchIndexIgnoreLockedProblemSets(): boolean {
         return this.getConfiguration().get<boolean>("searchIndex.ignoreLockedProblemSets", true);
     }
 
-    public setSearchIndexIgnoreLockedProblemSets(ignoredLocked: boolean) {
-        this.update("searchIndex.ignoreLockedProblemSets", ignoredLocked);
-    }
-
     public getSearchIndexAutoRefresh(): boolean {
         return this.getConfiguration().get<boolean>("searchIndex.autoRefresh", false);
-    }
-
-    public setSearchIndexAutoRefresh(autoRefresh: boolean) {
-        this.update("searchIndex.autoRefresh", autoRefresh);
     }
 
     public getAutoCreateProblemSetFolder(): boolean {
         return this.getConfiguration().get<boolean>("autoCreateProblemSetFolder", true);
     }
 
-    public setAutoCreateProblemSetFolder(autoCreatePbsFolder: boolean) {
-        this.update("autoCreateProblemSetFolder", autoCreatePbsFolder);
-    }
-
     public getCodeColorTheme(): string {
         return this.getConfiguration().get<string>("codeColorTheme", "atom-one");
-    }
-
-    public setCodeColorTheme(codeColorTheme: string) {
-        this.update("codeColorTheme", codeColorTheme);
     }
 
     public getProblemHistoryListSize(): number {
         return this.getConfiguration().get<number>("problemHistoryListSize", 200);
     }
 
-    public setProblemHistoryListSize(problemHistoryListSize: number) {
-        this.update("problemHistoryListSize", problemHistoryListSize);
-    }
-
     public getPreviewProblemAndCodeIt(): boolean {
         return this.getConfiguration().get<boolean>("previewProblem.openAndCodeIt", false);
-    }
-
-    public setPreviewProblemAndCodeIt(previewProblemAndCodeIt: boolean) {
-        this.update("previewProblemAndCodeIt", previewProblemAndCodeIt);
     }
 
     public getPreviewProblemDefaultOpenedMethod(): string {
         return this.getConfiguration().get<string>("previewProblem.defaultOpenedMethod", OpenOptionEnum.alwaysAsk);
     }
 
-    public setPreviewProblemDefaultOpenedMethod(previewProblemDefaultOpenedMethod: string) {
-        this.update("previewProblem.defaultOpenedMethod", previewProblemDefaultOpenedMethod);
+    public getTimerEnableStatusBar(): boolean {
+        return this.getConfiguration().get<boolean>("timer.enableStatusBar", true);
     }
 }
 

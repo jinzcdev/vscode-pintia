@@ -1,7 +1,7 @@
 import * as fs from "fs-extra";
 import * as vscode from "vscode";
 
-import { IProblem } from "../entity/IProblem";
+import { IProblem, IProblemConfig } from "../entity/IProblem";
 import { IProblemSubmissionResult } from "../entity/IProblemSubmissionResult";
 import { explorerController } from "../explorer/explorerController";
 import { ptaChannel } from "../ptaChannel";
@@ -14,6 +14,8 @@ import { PtaSubmissionProvider } from "../webview/PtaSubmissionProvider";
 import { PtaTestProvider } from "../webview/PtaTestProvider";
 import { TestView } from "../webview/views/TestView";
 import { l10n } from "vscode";
+import { timerController } from "../timer/timerController";
+import { timerManager } from "../timer/timerManager";
 
 export async function submitSolution(ptaCode: IPtaCode): Promise<void> {
     try {
@@ -24,6 +26,9 @@ export async function submitSolution(ptaCode: IPtaCode): Promise<void> {
             return;
         }
 
+        // 在提交前捕获本次计时：评测期间继续答题或暂停都不应改变这次提交的耗时
+        const acceptedSession = timerManager.getActiveSession(ptaCode.psID, ptaCode.pID);
+
         const solution: { compiler: string; code: string } = {
             compiler: ptaCode.compiler,
             code: ptaCode.code,
@@ -32,9 +37,24 @@ export async function submitSolution(ptaCode: IPtaCode): Promise<void> {
             ptaCode.psID,
             ptaCode.pID,
             solution,
-            (msg: string, data?: IProblemSubmissionResult) => {
+            async (msg: string, data?: IProblemSubmissionResult) => {
                 switch (msg) {
                     case "SUCCESS":
+                        if (acceptedSession && data!.submission.status === "ACCEPTED") {
+                            // 只有「提交时本题正在计时 + 完全通过」才记录并通知。
+                            // 计时记录失败不应让用户以为代码提交失败。
+                            try {
+                                await timerController.handleAccepted(
+                                    ptaCode.psID,
+                                    ptaCode.pID,
+                                    data!.submission.id,
+                                    acceptedSession,
+                                    data!.submission.submitAt
+                                );
+                            } catch (error: any) {
+                                ptaChannel.error(error?.toString?.() ?? String(error));
+                            }
+                        }
                         PtaSubmissionProvider.createOrUpdate(data!)
                             .show()
                             .then(() => {
@@ -70,12 +90,16 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
         )?.exampleTestDatas;
 
         const picks: Array<IQuickPickItem<string>> = [];
-        picks.push({
-            label: l10n.t("{0} Default test cases", "$(three-bars)"),
-            description: (exampleTestDatas?.length ?? 0) / 2 === 0 ? l10n.t("No default test cases provided") : "",
-            detail: l10n.t("Test with the default cases (usually includes official test answers)"),
-            value: ":default",
-        });
+        // 题目没有官方测试样例时，不给出这个选项——列一个点进去才发现是空的条目
+        // 只会让人多一次无效点击
+        if (hasDefaultTestCases(exampleTestDatas)) {
+            picks.push({
+                label: l10n.t("{0} Default test cases", "$(three-bars)"),
+                description: "",
+                detail: l10n.t("Test with the default cases (usually includes official test answers)"),
+                value: ":default",
+            });
+        }
         if (ptaCode.customTests && ptaCode.customTests.length !== 0) {
             picks.push({
                 label: l10n.t("{0} Custom test cases", "$(note)"),
@@ -117,27 +141,23 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
             testOutput: string = "";
 
         if (choice.value === ":default") {
-            let testPicks: IQuickPickItem<number>[] = [];
-
-            if (exampleTestDatas) {
-                for (let i = 0; i < exampleTestDatas.length / 2; i++) {
-                    testPicks.push({
-                        label: l10n.t("Sample {0}", i + 1),
-                        detail: exampleTestDatas[i].input,
-                        value: i,
-                    });
-                }
-                const testChoice: IQuickPickItem<number> | undefined = await vscode.window.showQuickPick(testPicks);
-                if (!testChoice) {
-                    return;
-                }
-                caseID = testChoice.value;
-                testInput = exampleTestDatas![caseID].input;
-                testOutput = exampleTestDatas![caseID].output;
-            } else {
-                vscode.window.showErrorMessage(l10n.t("There is no default test sample for this problem."));
+            // 能走到这里说明选项被展示过，即一定有默认样例
+            const testDatas = exampleTestDatas ?? [];
+            const testPicks: IQuickPickItem<number>[] = [];
+            for (let i = 0; i < testDatas.length / 2; i++) {
+                testPicks.push({
+                    label: l10n.t("Sample {0}", i + 1),
+                    detail: testDatas[i].input,
+                    value: i,
+                });
+            }
+            const testChoice: IQuickPickItem<number> | undefined = await vscode.window.showQuickPick(testPicks);
+            if (!testChoice) {
                 return;
             }
+            caseID = testChoice.value;
+            testInput = testDatas[caseID].input;
+            testOutput = testDatas[caseID].output;
         } else if (choice.value === ":direct") {
             // TODO: Support multiple test cases simultaneously
             const testString: string | undefined = await vscode.window.showInputBox({
@@ -270,6 +290,16 @@ export async function testCustomSample(ptaCode: IPtaCode, index: number): Promis
             DialogType.error
         );
     }
+}
+
+/**
+ * 题目是否提供了默认测试样例。
+ *
+ * 判据与下方枚举样例的循环保持一致（`length / 2 > 0` 等价于 `length > 0`），
+ * 避免出现「给了这个选项、点进去却是空列表」。
+ */
+function hasDefaultTestCases(exampleTestDatas: IProblemConfig["exampleTestDatas"] | undefined): boolean {
+    return (exampleTestDatas?.length ?? 0) > 0;
 }
 
 /**

@@ -46,6 +46,8 @@ function createWebviewPanel() {
             html: "",
             onDidReceiveMessage: sinon.stub(),
             asWebviewUri: (uri: unknown) => uri,
+            /** 与真实 webview 一样给出资源 origin，供 CSP 拼装使用 */
+            cspSource: "https://test.vscode-cdn.net",
         },
         onDidDispose: sinon.stub(),
         reveal: sinon.stub(),
@@ -99,6 +101,7 @@ function createWorkspaceMock() {
     return {
         onDidChangeConfiguration: sinon.stub().returns({ dispose: sinon.stub() }),
         onDidChangeTextDocument: sinon.stub().returns({ dispose: sinon.stub() }),
+        onDidCloseTextDocument: sinon.stub().returns({ dispose: sinon.stub() }),
         getConfiguration: sinon.stub().callsFake(() => ({
             get: (section: string, defaultValue?: unknown): unknown =>
                 configurationValues.has(section) ? configurationValues.get(section) : defaultValue,
@@ -122,9 +125,17 @@ function createCommandsMock() {
     return { executeCommand: sinon.stub().resolves(undefined) };
 }
 
+function createEnvMock() {
+    return {
+        clipboard: { writeText: sinon.stub().resolves(undefined) },
+        openExternal: sinon.stub().resolves(true),
+    };
+}
+
 const windowMock = createWindowMock();
 const workspaceMock = createWorkspaceMock();
 const commandsMock = createCommandsMock();
+const envMock = createEnvMock();
 const languagesMock = { registerCodeLensProvider: sinon.stub().returns({ dispose: sinon.stub() }) };
 
 class UriMock {
@@ -184,6 +195,12 @@ class ThemeIconMock {
     constructor(public readonly id: string) {}
 }
 
+class MarkdownStringMock {
+    public isTrusted?: boolean | { enabledCommands: readonly string[] };
+    public supportThemeIcons?: boolean;
+    constructor(public value: string = "") {}
+}
+
 class EventEmitterMock {
     public event = (): void => {};
     public fire(): void {}
@@ -204,6 +221,7 @@ const vscodeMock = {
     CodeLens: CodeLensMock,
     SnippetString: SnippetStringMock,
     ThemeIcon: ThemeIconMock,
+    MarkdownString: MarkdownStringMock,
     EventEmitter: EventEmitterMock,
     ProgressLocation: { Notification: 15 },
     ViewColumn: { One: 1, Two: 2, Three: 3 },
@@ -214,6 +232,7 @@ const vscodeMock = {
     workspace: workspaceMock,
     commands: commandsMock,
     languages: languagesMock,
+    env: envMock,
 };
 
 /** 重置 mock：清空配置覆盖，并为所有 stub 重新安装默认行为与调用记录 */
@@ -223,6 +242,7 @@ export function resetVscodeMock(): void {
     Object.assign(windowMock, createWindowMock());
     Object.assign(workspaceMock, createWorkspaceMock());
     Object.assign(commandsMock, createCommandsMock());
+    Object.assign(envMock, createEnvMock());
     languagesMock.registerCodeLensProvider.reset();
     languagesMock.registerCodeLensProvider.returns({ dispose: sinon.stub() });
 }

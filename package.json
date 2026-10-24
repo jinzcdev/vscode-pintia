@@ -96,6 +96,11 @@
                     "group": "navigation@4"
                 },
                 {
+                    "command": "pintia.showTimerStats",
+                    "when": "view == pintiaExplorer",
+                    "group": "navigation@5"
+                },
+                {
                     "command": "pintia.signOut",
                     "when": "view == pintiaExplorer",
                     "group": "overflow@0"
@@ -271,6 +276,24 @@
                     "light": "resources/imgs/light/dislike.png",
                     "dark": "resources/imgs/dark/dislike.png"
                 }
+            },
+            {
+                "command": "pintia.toggleTimer",
+                "title": "%contributes.commands.pintia.toggleTimer%",
+                "category": "PTA",
+                "icon": "$(watch)"
+            },
+            {
+                "command": "pintia.timerMenu",
+                "title": "%contributes.commands.pintia.timerMenu%",
+                "category": "PTA",
+                "icon": "$(ellipsis)"
+            },
+            {
+                "command": "pintia.showTimerStats",
+                "title": "%contributes.commands.pintia.showTimerStats%",
+                "category": "PTA",
+                "icon": "$(graph)"
             }
         ],
         "configuration": [
@@ -279,7 +302,7 @@
                 "properties": {
                     "pintia.workspaceFolder": {
                         "type": "string",
-                        "scope": "resource",
+                        "scope": "window",
                         "description": "%configuration.pintia.workspaceFolder%",
                         "default": "",
                         "order": 1
@@ -287,7 +310,7 @@
                     "pintia.autoCreateProblemSetFolder": {
                         "type": "boolean",
                         "default": true,
-                        "scope": "resource",
+                        "scope": "window",
                         "description": "%configuration.pintia.autoCreateProblemSetFolder%"
                     }
                 }
@@ -338,7 +361,7 @@
                             "仓颉 (cjc)",
                             "SQL (SQL)"
                         ],
-                        "scope": "resource",
+                        "scope": "window",
                         "description": "%configuration.pintia.defaultLanguage%"
                     },
                     "pintia.editor.shortcuts": {
@@ -348,7 +371,7 @@
                             "Test",
                             "Preview"
                         ],
-                        "scope": "resource",
+                        "scope": "window",
                         "items": {
                             "type": "string",
                             "enum": [
@@ -378,35 +401,35 @@
                     "pintia.file.problemFileNameFormat": {
                         "type": "string",
                         "default": "{label} {title}",
-                        "scope": "resource",
+                        "scope": "window",
                         "markdownDescription": "%configuration.pintia.file.problemFileNameFormat%",
                         "order": 0
                     },
                     "pintia.file.replaceSpaceWithUnderscore": {
                         "type": "boolean",
                         "default": false,
-                        "scope": "resource",
+                        "scope": "window",
                         "markdownDescription": "%configuration.pintia.file.replaceSpaceWithUnderscore%",
                         "order": 1
                     },
                     "pintia.file.convertChineseCharacters": {
                         "type": "boolean",
                         "default": false,
-                        "scope": "resource",
+                        "scope": "window",
                         "markdownDescription": "%configuration.pintia.file.convertChineseCharacters%",
                         "order": 2
                     },
                     "pintia.file.customProblemSetName": {
                         "type": "string",
                         "default": "{}",
-                        "scope": "resource",
+                        "scope": "window",
                         "markdownDescription": "%configuration.pintia.file.customProblemSetName%",
                         "order": 3
                     },
                     "pintia.file.invalidCharReplacement": {
                         "type": "string",
                         "default": "_",
-                        "scope": "resource",
+                        "scope": "window",
                         "markdownDescription": "%configuration.pintia.file.invalidCharReplacement%",
                         "order": 4
                     }
@@ -425,13 +448,13 @@
                             "stackoverflow",
                             "kimbie"
                         ],
-                        "scope": "resource",
+                        "scope": "window",
                         "description": "%configuration.pintia.codeColorTheme%"
                     },
                     "pintia.enableStatusBar": {
                         "type": "boolean",
                         "default": true,
-                        "scope": "resource",
+                        "scope": "window",
                         "description": "%configuration.pintia.enableStatusBar%"
                     }
                 }
@@ -442,7 +465,7 @@
                     "pintia.previewProblem.openAndCodeIt": {
                         "type": "boolean",
                         "default": false,
-                        "scope": "resource",
+                        "scope": "window",
                         "markdownDescription": "%configuration.pintia.previewProblem.openAndCodeIt%",
                         "order": 0
                     },
@@ -463,14 +486,14 @@
                             "%configuration.pintia.previewProblem.defaultOpenedMethod.openInNewWindow%",
                             "%configuration.pintia.previewProblem.defaultOpenedMethod.addToWorkspace%"
                         ],
-                        "scope": "resource",
+                        "scope": "window",
                         "markdownDescription": "%configuration.pintia.previewProblem.defaultOpenedMethod%",
                         "order": 1
                     },
                     "pintia.showLocked": {
                         "type": "boolean",
                         "default": true,
-                        "scope": "resource",
+                        "scope": "window",
                         "description": "%configuration.pintia.showLocked%",
                         "order": 2
                     },
@@ -487,7 +510,7 @@
                             150,
                             200
                         ],
-                        "scope": "resource",
+                        "scope": "window",
                         "description": "%configuration.pintia.paging.pageSize%",
                         "order": 3
                     },
@@ -495,7 +518,7 @@
                         "type": "number",
                         "default": 200,
                         "minimum": 0,
-                        "scope": "resource",
+                        "scope": "window",
                         "description": "%configuration.pintia.problemHistoryListSize%",
                         "order": 4
                     }
@@ -507,19 +530,19 @@
                     "pintia.searchIndex.ignoreZOJ": {
                         "type": "boolean",
                         "default": true,
-                        "scope": "resource",
+                        "scope": "window",
                         "markdownDescription": "%configuration.pintia.searchIndex.ignoreZOJ%"
                     },
                     "pintia.searchIndex.ignoreLockedProblemSets": {
                         "type": "boolean",
                         "default": true,
-                        "scope": "resource",
+                        "scope": "window",
                         "markdownDescription": "%configuration.pintia.searchIndex.ignoreLockedProblemSets%"
                     },
                     "pintia.searchIndex.autoRefresh": {
                         "type": "boolean",
                         "default": false,
-                        "scope": "resource",
+                        "scope": "window",
                         "description": "%configuration.pintia.searchIndex.autoRefresh%"
                     }
                 }
@@ -530,8 +553,20 @@
                     "pintia.autoCheckIn": {
                         "type": "boolean",
                         "default": true,
-                        "scope": "resource",
+                        "scope": "window",
                         "description": "%configuration.pintia.autoCheckIn%"
+                    }
+                }
+            },
+            {
+                "title": "%configuration.title.timer%",
+                "properties": {
+                    "pintia.timer.enableStatusBar": {
+                        "type": "boolean",
+                        "default": true,
+                        "scope": "window",
+                        "description": "%configuration.pintia.timer.enableStatusBar%",
+                        "order": 0
                     }
                 }
             }

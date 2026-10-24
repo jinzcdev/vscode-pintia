@@ -4,14 +4,16 @@ import { ptaConfig } from "../ptaConfig";
 import * as fs from "fs-extra";
 import { determinePintiaFolder } from "../utils/workspaceUtils";
 import { l10n } from "vscode";
-import { IQuickPickItem } from "../shared";
+import { IQuickPickItem, OpenOptionEnum } from "../shared";
 
 export async function changeWorkspaceFolder() {
     const directory: vscode.Uri[] | undefined = await showDirectorySelectDialog();
     if (!directory || directory.length < 1) {
         return;
     }
-    ptaConfig.update("workspaceFolder", directory[0].path);
+    // 用 fsPath 而非 path：Windows 上 Uri.path 是 "/c:/..." 形式，写进配置后
+    // fs.ensureDir 与 path.join 都会拿到非法路径
+    ptaConfig.update("workspaceFolder", directory[0].fsPath);
 }
 
 export async function openWorkspace() {
@@ -39,9 +41,4 @@ export async function openWorkspace() {
             await vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(workspaceFolder), true);
             break;
     }
-}
-
-enum OpenOptionEnum {
-    openInCurrentWindow = "Open in current window",
-    openInNewWindow = "Open in new window",
 }

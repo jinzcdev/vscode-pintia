@@ -3,11 +3,12 @@ import * as os from "os";
 import { ptaChannel } from "../ptaChannel";
 
 export namespace DialogOptions {
-    export const open: vscode.MessageItem = { title: "Open" };
-    export const yes: vscode.MessageItem = { title: "Yes" };
-    export const no: vscode.MessageItem = { title: "No", isCloseAffordance: true };
-    export const never: vscode.MessageItem = { title: "Never" };
-    export const singUp: vscode.MessageItem = { title: "Sign up" };
+    // 成员之间是按引用比较的（如 `result === DialogOptions.open`），改 title 文案安全
+    export const open: vscode.MessageItem = { title: vscode.l10n.t("Open") };
+    export const yes: vscode.MessageItem = { title: vscode.l10n.t("Yes") };
+    export const no: vscode.MessageItem = { title: vscode.l10n.t("No"), isCloseAffordance: true };
+    export const never: vscode.MessageItem = { title: vscode.l10n.t("Never") };
+    export const singUp: vscode.MessageItem = { title: vscode.l10n.t("Sign up") };
 }
 
 export async function promptForOpenOutputChannel(message: string, type: DialogType): Promise<void> {
@@ -46,7 +47,7 @@ export async function showFileSelectDialog(fsPath?: string): Promise<vscode.Uri[
         canSelectFiles: true,
         canSelectFolders: false,
         canSelectMany: false,
-        openLabel: "Select",
+        openLabel: vscode.l10n.t("Select"),
     };
     return await vscode.window.showOpenDialog(options);
 }
@@ -71,7 +72,7 @@ export async function showDirectorySelectDialog(fsPath?: string): Promise<vscode
         canSelectFiles: false,
         canSelectFolders: true,
         canSelectMany: false,
-        openLabel: "Select",
+        openLabel: vscode.l10n.t("Select"),
     };
     return await vscode.window.showOpenDialog(options);
 }

@@ -217,7 +217,7 @@ async function parseProblemsToPicks(
                 {
                     label: `[${++cnt}] ${problem.label} ${problem.title}`,
                     description: "",
-                    detail: `Score: ${problem.score}, Type: ${problemTypeInfoMapping.get(problem.type)?.name ?? UNKNOWN}, PS: ${problem.psName}`,
+                    detail: `${l10n.t("Score")}: ${problem.score}, ${l10n.t("Type")}: ${problemTypeInfoMapping.get(problem.type)?.name ?? UNKNOWN}, ${l10n.t("Problem Set")}: ${problem.psName}`,
                     value: problem,
                 }
             )
