@@ -4,7 +4,7 @@
 
 ---
 
-## [0.12.0] - 2026/11/06
+## [0.12.1] - 2026/11/06
 
 ### Features
 
@@ -16,6 +16,10 @@
 ### Changes
 
 - Raised the minimum supported VS Code version to 1.75.0 (required by `@vscode/extension-telemetry`)
+
+### Fixes
+
+- Fixed internal npm registry URLs in `package-lock.json` so GitHub Actions can install dependencies
 
 ## [0.11.0] - 2026/10/24
 
