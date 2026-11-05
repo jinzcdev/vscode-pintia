@@ -123,7 +123,7 @@ describe("CustomCodeLensProvider", () => {
         assert.strictEqual(submitCode.code, "int main() {}");
         assert.deepStrictEqual(submitCode.customTests, ["1 2"]);
 
-        assert.deepStrictEqual(byCommand.get("pintia.previewProblem")?.arguments, ["ps1", "p1", false]);
+        assert.deepStrictEqual(byCommand.get("pintia.previewProblem")?.arguments, ["ps1", "p1", false, "codelens"]);
         assert.strictEqual(byCommand.get("pintia.testSolution")?.title, "Test");
     });
 

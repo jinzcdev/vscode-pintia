@@ -17,7 +17,7 @@
 
 ## 0. Requirements
 
-- [VS Code 1.66.0+](https://code.visualstudio.com/)
+- [VS Code 1.75.0+](https://code.visualstudio.com/)
 
 ## 1. Features
 
@@ -151,13 +151,25 @@ Use `Ctrl+Shift+P` (in Windows) or `Command+Shift+P` (in MacOS) to open the comm
 | `pintia.searchIndex.ignoreLockedProblemSets` | Specify whether to ignore locked problem sets in the problem search index.                                                                                                                                        | `true`                          |
 | `pintia.searchIndex.autoRefresh`             | Specify whether to automatically refresh the problem search index when the Pintia Extension is activated. It is not recommended, as problem sets change infrequently while fetching the index is time-consuming.  | `false`                         |
 | `pintia.problemHistoryListSize`              | Specify the size of the problem preview history list.                                                                                                                                                             | `200`                           |
+| `pintia.telemetry.enabled`                   | Send anonymous usage data to help improve the extension; respects VS Code's global telemetry setting.                                                                                                             | `true`                          |
 
-## 4. Want Help?
+## 4. Data & Privacy
+
+This extension uses Azure Application Insights to collect anonymous usage data in order to improve problem search, preview and the overall experience. Collection is enabled by default and respects VS Code's global telemetry setting. You can also disable it for this extension with `pintia.telemetry.enabled`; if either switch is off, no data is sent.
+
+- **Collected**: anonymous installation ID, feature/command names and counts, operation durations, search index size, preview source, external link kind (reference code/search engine), sign-in state and method, extension and VS Code versions, OS and UI language.
+- **Not collected**: PTA cookie, username/email/user ID, search keywords, problem titles/statements, source code, test input/output, file paths, URLs, submission IDs, error messages or stack traces.
+- **About machine identifiers**: the telemetry library also sends VS Code's anonymous machine identifier (`user_Id`); this field cannot be disabled separately.
+- Data is sent to Azure Application Insights for aggregate statistics only, not for advertising or sale, and may involve cross-border transfer. See [PRIVACY_en-US.md](./PRIVACY_en-US.md) for details.
+
+To disable: set VS Code's `telemetry.telemetryLevel` to `off`, or set `pintia.telemetry.enabled` to `false`.
+
+## 5. Want Help?
 
 When you meet any problem, you can check out the [Troubleshooting](https://github.com/jinzcdev/vscode-pintia/wiki/Troubleshooting) and [FAQ](https://github.com/jinzcdev/vscode-pintia/wiki/FAQ) first.
 
 If your problem still cannot be addressed, feel free to [file an issue](https://github.com/jinzcdev/vscode-pintia/issues/new/choose).
 
-## 5. Release Notes
+## 6. Release Notes
 
 Refer to [CHANGELOG](./CHANGELOG_en-US.md) | [中文文档](../CHANGELOG.md)

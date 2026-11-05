@@ -9,10 +9,88 @@
  */
 import * as Module from "module";
 import * as sinon from "sinon";
+import type * as vscode from "vscode";
 
 type ModuleWithLoad = typeof Module & { _load: (request: string, parent: NodeModule, isMain: boolean) => unknown };
 const moduleWithLoad = Module as unknown as ModuleWithLoad;
 const originalLoad = moduleWithLoad._load;
+
+export interface CapturedTelemetryEvent {
+    kind: "event" | "error";
+    name: string;
+    properties?: Record<string, unknown>;
+    measurements?: Record<string, unknown>;
+}
+
+const capturedTelemetryEvents: CapturedTelemetryEvent[] = [];
+let lastTelemetryReporter: FakeTelemetryReporter | undefined;
+
+/** 测试可断言被 telemetryService 发出的所有事件 */
+export function getTelemetryEvents(): readonly CapturedTelemetryEvent[] {
+    return capturedTelemetryEvents;
+}
+
+export function resetTelemetryEvents(): void {
+    capturedTelemetryEvents.length = 0;
+    lastTelemetryReporter = undefined;
+}
+
+export function getLastTelemetryReporter(): FakeTelemetryReporter | undefined {
+    return lastTelemetryReporter;
+}
+
+/** `@vscode/extension-telemetry` 的打桩实现 */
+export class FakeTelemetryReporter {
+    public telemetryLevel = "all";
+    public onDidChangeTelemetryLevel = () => ({ dispose: () => {} });
+    private readonly tags = new Map<string, string>();
+
+    public constructor(
+        public readonly connectionString?: string,
+        public readonly replacementOptions?: unknown,
+        public readonly initializationOptions?: unknown
+    ) {
+        lastTelemetryReporter = this;
+    }
+
+    public setContextTag(key: string, value: string): void {
+        this.tags.set(key, value);
+    }
+
+    public getContextTag(key: string): string | undefined {
+        return this.tags.get(key);
+    }
+
+    public sendTelemetryEvent(
+        name: string,
+        properties?: Record<string, unknown>,
+        measurements?: Record<string, unknown>
+    ): void {
+        capturedTelemetryEvents.push({ kind: "event", name, properties, measurements });
+    }
+
+    public sendTelemetryErrorEvent(
+        name: string,
+        properties?: Record<string, unknown>,
+        measurements?: Record<string, unknown>
+    ): void {
+        capturedTelemetryEvents.push({ kind: "error", name, properties, measurements });
+    }
+
+    public sendDangerousTelemetryEvent(): never {
+        throw new Error("sendDangerousTelemetryEvent must not be used");
+    }
+
+    public sendDangerousTelemetryErrorEvent(): never {
+        throw new Error("sendDangerousTelemetryErrorEvent must not be used");
+    }
+
+    public sendDangerousTelemetryException(): never {
+        throw new Error("sendDangerousTelemetryException must not be used");
+    }
+
+    public async dispose(): Promise<void> {}
+}
 
 /** vscode.workspace.getConfiguration 背后的存储：命中的 key 覆盖默认值 */
 const configurationValues = new Map<string, unknown>();
@@ -127,13 +205,38 @@ function createWorkspaceMock() {
 }
 
 function createCommandsMock() {
-    return { executeCommand: sinon.stub().resolves(undefined) };
+    return {
+        executeCommand: sinon.stub().resolves(undefined),
+        registerCommand: sinon.stub().callsFake((id: string, handler: (...args: any[]) => any) => {
+            registeredCommands.set(id, handler);
+            return { dispose: sinon.stub() };
+        }),
+    };
+}
+
+const registeredCommands = new Map<string, (...args: any[]) => any>();
+
+/** 取出通过 vscode.commands.registerCommand 注册的 handler，供命令包装器测试直接调用 */
+export function getRegisteredCommand(commandId: string): ((...args: any[]) => any) | undefined {
+    return registeredCommands.get(commandId);
+}
+
+export function resetRegisteredCommands(): void {
+    registeredCommands.clear();
 }
 
 function createEnvMock() {
     return {
         clipboard: { writeText: sinon.stub().resolves(undefined) },
         openExternal: sinon.stub().resolves(true),
+        isTelemetryEnabled: true,
+        language: "en",
+        sessionId: "test-session",
+        machineId: "test-machine",
+        appName: "Visual Studio Code",
+        appHost: "desktop",
+        uiKind: 1,
+        remoteName: undefined,
     };
 }
 
@@ -171,13 +274,37 @@ class UriMock {
     }
 }
 
+/** 测试用 ExtensionContext：默认 Production 模式，并提供 globalState 与版本号 */
+export function createFakeExtensionContext(overrides: Partial<vscode.ExtensionContext> = {}): vscode.ExtensionContext {
+    const globalStateValues = new Map<string, unknown>();
+    const globalState = {
+        get: <T>(key: string, defaultValue?: T): T | undefined =>
+            globalStateValues.has(key) ? (globalStateValues.get(key) as T) : defaultValue,
+        update: async (key: string, value: unknown): Promise<void> => {
+            globalStateValues.set(key, value);
+        },
+        keys: (): readonly string[] => [...globalStateValues.keys()],
+        setKeysForSync: (): void => {},
+    };
+    return {
+        subscriptions: [],
+        extensionUri: UriMock.file("/ext"),
+        extensionPath: "/ext",
+        extensionMode: 1, // vscode.ExtensionMode.Production
+        globalState,
+        workspaceState: { ...globalState, update: async () => {} },
+        extension: { packageJSON: { version: "test-version" } },
+        asAbsolutePath: (relativePath: string) => `/ext/${relativePath}`,
+        ...overrides,
+    } as unknown as vscode.ExtensionContext;
+}
+
 class PositionMock {
     constructor(
         public readonly line: number,
         public readonly character: number
     ) {}
 }
-
 class RangeMock {
     constructor(
         public readonly start: PositionMock,
@@ -233,6 +360,9 @@ const vscodeMock = {
     TreeItemCollapsibleState: { None: 0, Collapsed: 1, Expanded: 2 },
     StatusBarAlignment: { Left: 1, Right: 2 },
     ColorThemeKind: { Light: 1, Dark: 2, HighContrast: 3, HighContrastLight: 4 },
+    ExtensionMode: { Production: 1, Development: 2, Test: 3 },
+    UIKind: { Desktop: 1, Web: 2 },
+    version: "1.75.0",
     window: windowMock,
     workspace: workspaceMock,
     commands: commandsMock,
@@ -243,6 +373,8 @@ const vscodeMock = {
 /** 重置 mock：清空配置覆盖，并为所有 stub 重新安装默认行为与调用记录 */
 export function resetVscodeMock(): void {
     resetConfigValues();
+    resetRegisteredCommands();
+    resetTelemetryEvents();
     // 就地替换属性，保持 `vscode.window` 等对象引用不变（业务模块持有的是同一个对象）
     Object.assign(windowMock, createWindowMock());
     Object.assign(workspaceMock, createWorkspaceMock());
@@ -255,6 +387,9 @@ export function resetVscodeMock(): void {
 moduleWithLoad._load = function (request: string, parent: NodeModule, isMain: boolean): unknown {
     if (request === "vscode") {
         return vscodeMock;
+    }
+    if (request === "@vscode/extension-telemetry") {
+        return { TelemetryReporter: FakeTelemetryReporter, default: FakeTelemetryReporter };
     }
     return originalLoad.call(this, request, parent, isMain);
 };

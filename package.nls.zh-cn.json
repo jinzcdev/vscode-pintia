@@ -95,5 +95,7 @@
     "contributes.commands.pintia.timerMenu": "计时器操作…",
     "contributes.commands.pintia.showTimerStats": "答题耗时统计",
     "configuration.title.timer": "计时器",
-    "configuration.pintia.timer.enableStatusBar": "为拼题A 题目计时时，在状态栏显示计时器。"
+    "configuration.pintia.timer.enableStatusBar": "为拼题A 题目计时时，在状态栏显示计时器。",
+    "configuration.title.telemetry": "遥测",
+    "configuration.pintia.telemetry.enabled": "发送匿名使用数据以帮助改进插件。该设置遵循 VS Code 的全局遥测设置；任一开关关闭时都不会收集数据。"
 }

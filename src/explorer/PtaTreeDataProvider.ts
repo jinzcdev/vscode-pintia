@@ -68,7 +68,7 @@ export class PtaTreeDataProvider implements vscode.TreeDataProvider<PtaNode>, vs
                     ? {
                           title: l10n.t("Preview Problem"),
                           command: "pintia.previewProblem",
-                          arguments: [element.psID, element.pID],
+                          arguments: [element.psID, element.pID, true, "explorer"],
                       }
                     : undefined,
             contextValue: contextValue,

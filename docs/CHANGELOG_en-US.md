@@ -4,6 +4,19 @@
 
 ---
 
+## [Unreleased]
+
+### Features
+
+- **Anonymous usage telemetry**
+    - Record feature/command usage, the search-to-preview funnel, reference-code and preview search-engine clicks, and search index size/duration
+    - Added the `pintia.telemetry.enabled` setting (enabled by default; respects VS Code's global telemetry setting)
+    - Added the "Data & Privacy" section and [PRIVACY_en-US.md](./PRIVACY_en-US.md)
+
+### Changes
+
+- Raised the minimum supported VS Code version to 1.75.0 (required by `@vscode/extension-telemetry`)
+
 ## [0.11.0] - 2026/10/24
 
 ### Features

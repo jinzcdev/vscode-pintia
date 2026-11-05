@@ -22,6 +22,9 @@ import { setGlobalContext } from "./globalContext";
 import { ptaStatusBarController } from "./statusbar/ptaStatusBarController";
 import { timerController } from "./timer/timerController";
 import { timerManager } from "./timer/timerManager";
+import { registerCommandWithTelemetry } from "./telemetry/commandTelemetry";
+import { PreviewSource, TELEMETRY_EVENTS } from "./telemetry/events";
+import { telemetryService } from "./telemetry/telemetryService";
 import { ptaApi } from "./utils/api";
 import {
     executeSubmitSolution,
@@ -37,6 +40,10 @@ import { ProblemView } from "./webview/views/ProblemView";
 
 export async function activate(context: vscode.ExtensionContext) {
     setGlobalContext(context);
+    telemetryService.initialize(context, () => ptaManager.getUserSession());
+    context.subscriptions.push(telemetryService);
+    // 尽早发送，避免用户开窗后很快关闭导致当天的 DAU 丢失；登录态由后续事件携带。
+    telemetryService.trackEvent(TELEMETRY_EVENTS.SESSION_START);
 
     /** 让题目集视图定位到当前活动编辑器对应的题目（不在题目文件时不做任何事） */
     const scheduleActiveProblemReveal = (editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor) => {
@@ -109,62 +116,84 @@ export async function activate(context: vscode.ExtensionContext) {
             treeDataProvider: favoritesTreeDataProvider,
             showCollapseAll: true,
         }),
-        vscode.commands.registerCommand("pintia.openPintiaHome", () => user.openPintiaHome()),
-        vscode.commands.registerCommand("pintia.openExtensionRepo", () => user.openExtensionRepo()),
-        vscode.commands.registerCommand("pintia.refreshExplorer", async () => {
+        registerCommandWithTelemetry("pintia.openPintiaHome", () => user.openPintiaHome()),
+        registerCommandWithTelemetry("pintia.openExtensionRepo", () => user.openExtensionRepo()),
+        registerCommandWithTelemetry("pintia.refreshExplorer", async () => {
             // 手动刷新的语义是「拉取最新的」，因此先让题集列表缓存失效
             await ptaApi.invalidateProblemSetsCache();
             explorerController.refreshTreeData();
         }),
-        vscode.commands.registerCommand("pintia.clearCache", () => cache.clearCache()),
-        vscode.commands.registerCommand("pintia.signIn", () => ptaManager.signIn()),
-        vscode.commands.registerCommand("pintia.signOut", () => ptaManager.signOut()),
-        vscode.commands.registerCommand(
+        registerCommandWithTelemetry("pintia.clearCache", () => cache.clearCache()),
+        registerCommandWithTelemetry("pintia.signIn", () => ptaManager.signIn()),
+        registerCommandWithTelemetry("pintia.signOut", () => ptaManager.signOut()),
+        registerCommandWithTelemetry(
             "pintia.previewProblem",
-            async (psID: string, pID: string, codeIt: boolean = true) => {
-                const problem = await new ProblemView(psID, pID).fetch();
-                await PtaPreviewProvider.createOrUpdate(problem)
-                    .show()
-                    .then(async () => {
-                        await historyManager.addProblem(historyManager.getCurrentUserId(), {
-                            pID: problem.id,
-                            psID: problem.problemSetId,
-                            psName: problem.problemSetName,
-                            title: `${problem.label} ${problem.title}`,
+            async (psID: string, pID: string, codeIt: boolean = true, source: PreviewSource = "unknown") => {
+                const startedAt = Date.now();
+                let fetchMs = 0;
+                try {
+                    const fetchStartedAt = Date.now();
+                    const problem = await new ProblemView(psID, pID).fetch();
+                    fetchMs = Date.now() - fetchStartedAt;
+
+                    await PtaPreviewProvider.createOrUpdate(problem)
+                        .show()
+                        .then(async () => {
+                            await historyManager.addProblem(historyManager.getCurrentUserId(), {
+                                pID: problem.id,
+                                psID: problem.problemSetId,
+                                psName: problem.problemSetName,
+                                title: `${problem.label} ${problem.title}`,
+                            });
+                            historyTreeDataProvider.refresh();
+                            if (codeIt && ptaConfig.getPreviewProblemAndCodeIt()) {
+                                show.showCodingEditor(ProblemView.toPtaNode(problem));
+                            }
                         });
-                        historyTreeDataProvider.refresh();
-                        if (codeIt && ptaConfig.getPreviewProblemAndCodeIt()) {
-                            show.showCodingEditor(ProblemView.toPtaNode(problem));
-                        }
+
+                    telemetryService.trackEvent(
+                        TELEMETRY_EVENTS.PREVIEW_OPEN,
+                        {
+                            source,
+                            hasLastProgram: (problem.lastProgram ?? "").trim().length > 0,
+                        },
+                        { fetchMs, totalMs: Date.now() - startedAt }
+                    );
+                } catch (error) {
+                    telemetryService.trackError(TELEMETRY_EVENTS.ERROR, error, {
+                        command: "previewProblem",
+                        source,
                     });
+                    throw error;
+                }
             }
         ),
-        vscode.commands.registerCommand("pintia.manageUser", () => user.showUserManager()),
-        vscode.commands.registerCommand("pintia.checkIn", () => user.checkInPTA()),
-        vscode.commands.registerCommand("pintia.reportIssue", () => user.reportIssue()),
-        vscode.commands.registerCommand("pintia.searchProblem", () => show.searchProblem()),
-        vscode.commands.registerCommand("pintia.refreshProblemSearchIndex", () => cache.refreshProblemSearchIndex()),
-        vscode.commands.registerCommand("pintia.codeProblem", (ptaCode: IPtaCode) => show.showCodingEditor(ptaCode)),
-        vscode.commands.registerCommand("pintia.testCustomSample", (ptaCode: IPtaCode, index: number) =>
+        registerCommandWithTelemetry("pintia.manageUser", () => user.showUserManager()),
+        registerCommandWithTelemetry("pintia.checkIn", () => user.checkInPTA()),
+        registerCommandWithTelemetry("pintia.reportIssue", () => user.reportIssue()),
+        registerCommandWithTelemetry("pintia.searchProblem", () => show.searchProblem()),
+        registerCommandWithTelemetry("pintia.refreshProblemSearchIndex", () => cache.refreshProblemSearchIndex()),
+        registerCommandWithTelemetry("pintia.codeProblem", (ptaCode: IPtaCode) => show.showCodingEditor(ptaCode)),
+        registerCommandWithTelemetry("pintia.testCustomSample", (ptaCode: IPtaCode, index: number) =>
             submit.testCustomSample(ptaCode, index)
         ),
-        vscode.commands.registerCommand("pintia.submitSolution", (ptaCode: IPtaCode) => submit.submitSolution(ptaCode)),
-        vscode.commands.registerCommand("pintia.testSolution", (ptaCode: IPtaCode) => submit.testSolution(ptaCode)),
-        vscode.commands.registerCommand("pintia.changeDefaultLanguage", () => language.changeDefaultLanguage()),
-        vscode.commands.registerCommand("pintia.changeWorkspaceFolder", () => workspace.changeWorkspaceFolder()),
-        vscode.commands.registerCommand("pintia.openWorkspace", () => workspace.openWorkspace()),
-        vscode.commands.registerCommand("pintia.welcome", () => {
+        registerCommandWithTelemetry("pintia.submitSolution", (ptaCode: IPtaCode) => submit.submitSolution(ptaCode)),
+        registerCommandWithTelemetry("pintia.testSolution", (ptaCode: IPtaCode) => submit.testSolution(ptaCode)),
+        registerCommandWithTelemetry("pintia.changeDefaultLanguage", () => language.changeDefaultLanguage()),
+        registerCommandWithTelemetry("pintia.changeWorkspaceFolder", () => workspace.changeWorkspaceFolder()),
+        registerCommandWithTelemetry("pintia.openWorkspace", () => workspace.openWorkspace()),
+        registerCommandWithTelemetry("pintia.welcome", () => {
             vscode.commands.executeCommand(`workbench.action.openWalkthrough`, `jinzcdev.vscode-pintia#pintia`, false);
         }),
-        vscode.commands.registerCommand("pintia.addFavorite", (ptaNode: PtaNode) => star.addFavoriteProblem(ptaNode)),
-        vscode.commands.registerCommand("pintia.removeFavorite", (ptaNode: PtaNode) =>
+        registerCommandWithTelemetry("pintia.addFavorite", (ptaNode: PtaNode) => star.addFavoriteProblem(ptaNode)),
+        registerCommandWithTelemetry("pintia.removeFavorite", (ptaNode: PtaNode) =>
             star.removeFavoriteProblem(ptaNode.pID)
         ),
-        vscode.commands.registerCommand("pintia.clearViewedProblems", async () => {
+        registerCommandWithTelemetry("pintia.clearViewedProblems", async () => {
             await historyManager.clearViewedProblems();
             historyTreeDataProvider.refresh();
         }),
-        vscode.commands.registerCommand("pintia.clearFavoriteProblems", async () => {
+        registerCommandWithTelemetry("pintia.clearFavoriteProblems", async () => {
             await favoriteProblemsManager.clearFavoriteProblems();
             favoritesTreeDataProvider.refresh();
         }),
@@ -176,7 +205,7 @@ export async function activate(context: vscode.ExtensionContext) {
                 historyTreeDataProvider.refresh();
             }
         }),
-        vscode.commands.registerCommand("pintia.checkLastSubmission", async (ptaCode: IPtaCode) => {
+        registerCommandWithTelemetry("pintia.checkLastSubmission", async (ptaCode: IPtaCode) => {
             const cookie = ptaManager.getUserSession()?.cookie ?? "";
             const submissionId = (await ptaApi.getLastSubmissions(ptaCode.psID, ptaCode.pID, cookie))?.id;
             if (submissionId) {
@@ -193,20 +222,20 @@ export async function activate(context: vscode.ExtensionContext) {
                 vscode.window.showInformationMessage(vscode.l10n.t("No submission history found!"));
             }
         }),
-        vscode.commands.registerCommand("pintia.toggleTimer", () => timer.toggleTimer()),
-        vscode.commands.registerCommand("pintia.timerCodeLens", (problem: IPtaProblem) =>
+        registerCommandWithTelemetry("pintia.toggleTimer", () => timer.toggleTimer()),
+        registerCommandWithTelemetry("pintia.timerCodeLens", (problem: IPtaProblem) =>
             timer.toggleTimerForProblem(problem)
         ),
-        vscode.commands.registerCommand("pintia.timerMenu", () => timer.showTimerMenu()),
-        vscode.commands.registerCommand("pintia.showTimerStats", () => timer.showTimerStats()),
-        vscode.commands.registerCommand("pintia.submitSolutionByShortcut", executeSubmitSolution),
-        vscode.commands.registerCommand("pintia.testSolutionByShortcut", executeTestSolution)
+        registerCommandWithTelemetry("pintia.timerMenu", () => timer.showTimerMenu()),
+        registerCommandWithTelemetry("pintia.showTimerStats", () => timer.showTimerStats()),
+        registerCommandWithTelemetry("pintia.submitSolutionByShortcut", executeSubmitSolution),
+        registerCommandWithTelemetry("pintia.testSolutionByShortcut", executeTestSolution)
     );
 }
 
 export { getGlobalContext } from "./globalContext";
 
-export function deactivate() {
-    // 运行中的计时器只在内存里推进，退出前把最后一段秒数落盘
-    return timerManager.dispose();
+export async function deactivate() {
+    // 运行中的计时器只在内存里推进，退出前把最后一段秒数落盘；同时 flush 遥测队列
+    await Promise.allSettled([timerManager.dispose(), telemetryService.dispose()]);
 }

@@ -80,8 +80,8 @@
         };
     }
 
-    // 上一题 / 下一题：按钮自带目标 psID/pID，点击后在同一个预览面板切换
-    function bindProblemNav(id) {
+    // 上一题 / 下一题：按钮自带目标 psID/pID 与方向，点击后在同一个预览面板切换
+    function bindProblemNav(id, direction) {
         const el = document.getElementById(id);
         if (!el) {
             return;
@@ -93,13 +93,30 @@
                 vscode.postMessage({
                     type: "command",
                     value: "pintia.previewProblemById",
-                    args: [psID, pID],
+                    args: [psID, pID, direction],
                 });
             }
         };
     }
-    bindProblemNav("btnPrevProblem");
-    bindProblemNav("btnNextProblem");
+    bindProblemNav("btnPrevProblem", "prev");
+    bindProblemNav("btnNextProblem", "next");
+
+    // 预览页的外部链接（参考代码 / 搜索引擎等）由 VS Code 直接在浏览器打开，
+    // 不经过 extension 侧命令。这里只额外发一条 track 消息，绝不能 preventDefault。
+    function handleTrackableLink(event) {
+        const target = event.target;
+        const link = target && target.closest ? target.closest("a[data-pintia-track]") : null;
+        if (!link) {
+            return;
+        }
+        vscode.postMessage({
+            type: "track",
+            value: link.dataset.pintiaTrack,
+            args: [link.dataset.trackKind || "", link.dataset.trackEngine || ""],
+        });
+    }
+    document.addEventListener("click", handleTrackableLink, true);
+    document.addEventListener("auxclick", handleTrackableLink, true);
 
     var lst_pre = document.getElementsByTagName("pre");
     for (const pre of lst_pre) {

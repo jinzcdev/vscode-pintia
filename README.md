@@ -17,7 +17,7 @@
 
 ## 0. 运行条件
 
-- [VS Code 1.66.0+](https://code.visualstudio.com/)
+- [VS Code 1.75.0+](https://code.visualstudio.com/)
 
 ## 1. 功能
 
@@ -151,6 +151,7 @@
 | `pintia.searchIndex.ignoreLockedProblemSets` | 指定搜索题目时，是否忽略 **_未被解锁的_** 题集。                                                                                            | `true`                          |
 | `pintia.searchIndex.autoRefresh`             | 指定是否在激活插件时自动刷新题目搜索索引（不推荐，增量刷新仍可能较耗时）。                                                                  | `false`                         |
 | `pintia.problemHistoryListSize`              | 指定题目预览历史列表的大小。                                                                                                                | `200`                           |
+| `pintia.telemetry.enabled`                   | 指定是否发送匿名使用数据以改进插件；同时遵循 VS Code 的全局遥测设置。                                                                       | `true`                          |
 
 ### 题目搜索索引（开发者）
 
@@ -176,12 +177,23 @@ PINTIA_COOKIE="your_cookie" npm run build:search-index
 PINTIA_COOKIE="..." npm run build:search-index -- --output ./resources/search_index.json --mode full
 ```
 
-## 4. 需要帮助？
+## 4. 数据与隐私
+
+本扩展使用 Azure Application Insights 收集匿名使用数据，用于改进题目搜索、题目预览与整体使用体验。默认开启，并遵循 VS Code 的全局遥测设置；你也可以通过 `pintia.telemetry.enabled` 单独关闭。任一开关关闭时都不会发送数据。
+
+- **收集**：匿名安装 ID、功能/命令名称与次数、操作耗时、搜索索引规模、预览来源、外链类型（参考代码/搜索引擎）、是否登录与登录方式、扩展与 VS Code 版本、操作系统与界面语言。
+- **不收集**：PTA Cookie、用户名/邮箱/用户 ID、搜索关键词、题目标题/题面、源代码、测试输入/输出、文件路径、URL、提交 ID、错误消息或堆栈。
+- **关于机器标识**：遥测库会附带 VS Code 的匿名机器标识（`user_Id`），我们无法单独关闭该字段。
+- 数据发送到 Azure Application Insights，仅用于聚合统计，不用于广告或出售，可能涉及跨境传输。详细说明见 [PRIVACY.md](./PRIVACY.md)。
+
+关闭方式：将 VS Code 的 `telemetry.telemetryLevel` 设为 `off`，或将 `pintia.telemetry.enabled` 设为 `false`。
+
+## 5. 需要帮助？
 
 在遇到任何问题时，你可以先查看 [故障排除](https://github.com/jinzcdev/vscode-pintia/wiki/Troubleshooting) 和 [常见问题](https://github.com/jinzcdev/vscode-pintia/wiki/FAQ)。
 
 如果问题仍然无法解决，可随时 [创建一个新的 Issue](https://github.com/jinzcdev/vscode-pintia/issues/new/choose)。
 
-## 5. 更新日志
+## 6. 更新日志
 
 请参考 [CHANGELOG](./CHANGELOG.md) | [英文文档](./docs/CHANGELOG_en-US.md)

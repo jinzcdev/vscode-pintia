@@ -6,7 +6,9 @@ import { setGlobalContext } from "../../../src/globalContext";
 import { ProblemType } from "../../../src/shared";
 import { PtaPreviewProvider } from "../../../src/webview/PtaPreviewProvider";
 import { ProblemView } from "../../../src/webview/views/ProblemView";
-import { resetVscodeMock } from "../../setup";
+import { TELEMETRY_EVENTS } from "../../../src/telemetry/events";
+import { telemetryService } from "../../../src/telemetry/telemetryService";
+import { createFakeExtensionContext, getTelemetryEvents, resetVscodeMock } from "../../setup";
 
 function createProblemInfo(id: string): IProblemInfo {
     return {
@@ -95,8 +97,9 @@ describe("PtaPreviewProvider - 渲染出的 HTML", () => {
         setGlobalContext({ extensionUri: vscode.Uri.file("/ext") } as never);
     });
 
-    afterEach(() => {
+    afterEach(async () => {
         sinon.restore();
+        await telemetryService.resetForTests();
         resetVscodeMock();
     });
 
@@ -144,6 +147,43 @@ describe("PtaPreviewProvider - 渲染出的 HTML", () => {
         const html = (capturedPanel ?? panelStub.lastCall.returnValue).webview.html as string;
         assert.ok(!html.includes("<b>题集</b>"), "题集名未转义");
         assert.ok(!html.includes("<script>alert(1)</script>"), "题名未转义");
+    });
+
+    it("参考代码与搜索引擎链接应带埋点属性，点击后上报", async () => {
+        const html = await renderHtml();
+
+        assert.ok(html.includes('data-pintia-track="externalLink"'), "外链缺少埋点属性");
+        assert.ok(html.includes('data-track-kind="referenceCode"'), "参考代码缺少 kind");
+        assert.ok(html.includes('data-track-kind="search"'), "搜索链接缺少 kind");
+        assert.ok(html.includes('data-track-engine="google"'), "Google 链接缺少 engine");
+
+        const call = capturedPanel!.webview.onDidReceiveMessage.firstCall;
+        const handler = (call.args[0] as (msg: unknown) => Promise<void>).bind(call.args[1]);
+
+        await telemetryService.resetForTests();
+        telemetryService.initialize(createFakeExtensionContext(), () => undefined, "InstrumentationKey=test");
+        await handler({ type: "track", value: "externalLink", args: ["referenceCode"] });
+
+        const event = getTelemetryEvents().find((item) => item.name === TELEMETRY_EVENTS.PREVIEW_ACTION);
+        assert.ok(event, "点击参考代码后应产生 preview.action 事件");
+        assert.strictEqual(event.properties?.action, "externalLink");
+        assert.strictEqual(event.properties?.kind, "referenceCode");
+    });
+
+    it("白名单外的 webview 上报应被忽略", async () => {
+        await renderHtml();
+        const call = capturedPanel!.webview.onDidReceiveMessage.firstCall;
+        const handler = (call.args[0] as (msg: unknown) => Promise<void>).bind(call.args[1]);
+
+        await telemetryService.resetForTests();
+        telemetryService.initialize(createFakeExtensionContext(), () => undefined, "InstrumentationKey=test");
+        await handler({ type: "track", value: "externalLink", args: ["javascript:alert(1)"] });
+        await handler({ type: "track", value: "unknown-action", args: ["referenceCode"] });
+
+        assert.strictEqual(
+            getTelemetryEvents().filter((item) => item.name === TELEMETRY_EVENTS.PREVIEW_ACTION).length,
+            0
+        );
     });
 
     describe("上一题 / 下一题", () => {
@@ -199,7 +239,7 @@ describe("PtaPreviewProvider - 渲染出的 HTML", () => {
             await handler({
                 type: "command",
                 value: "pintia.previewProblemById",
-                args: ["ps1", "p3"],
+                args: ["ps1", "p3", "next"],
             });
 
             assert.deepStrictEqual((vscode.commands.executeCommand as sinon.SinonStub).firstCall.args, [
@@ -207,6 +247,7 @@ describe("PtaPreviewProvider - 渲染出的 HTML", () => {
                 "ps1",
                 "p3",
                 false,
+                "webview",
             ]);
         });
     });

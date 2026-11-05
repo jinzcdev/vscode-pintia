@@ -197,6 +197,7 @@ describe("PtaTimerStatsProvider - 交互式统计页", () => {
             "ps1",
             "p1",
             false,
+            "timerStats",
         ]);
     });
 });
