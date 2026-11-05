@@ -122,6 +122,10 @@ class PtaConfig {
     public getTimerEnableStatusBar(): boolean {
         return this.getConfiguration().get<boolean>("timer.enableStatusBar", true);
     }
+
+    public getTelemetryEnabled(): boolean {
+        return this.getConfiguration().get<boolean>("telemetry.enabled", true);
+    }
 }
 
 export const ptaConfig: PtaConfig = new PtaConfig();

@@ -27,6 +27,8 @@ import { getSearchIndexStore } from "../searchIndex";
 import { SEARCH_INDEX_CACHE_KEY } from "./cache";
 import { l10n } from "vscode";
 import { resolveProblemFilePath } from "../utils/problemFilePath";
+import { TELEMETRY_EVENTS } from "../telemetry/events";
+import { telemetryService } from "../telemetry/telemetryService";
 
 export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
     try {
@@ -136,7 +138,7 @@ export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
                 viewColumn: vscode.ViewColumn.Two,
             });
             await editor.insertSnippet(new vscode.SnippetString(content.join("\n")));
-            await vscode.workspace.save(fileUri);
+            await editor.document.save();
         } else {
             await vscode.window.showTextDocument(fileUri, { preview: false, viewColumn: vscode.ViewColumn.Two });
         }
@@ -150,20 +152,40 @@ export async function showCodingEditor(ptaCode: IPtaCode): Promise<void> {
 }
 
 export async function searchProblem(): Promise<void> {
+    const startedAt = Date.now();
     const userSession: IUserSession | undefined = ptaManager.getUserSession();
     if (!userSession) {
+        telemetryService.trackEvent(TELEMETRY_EVENTS.SEARCH_OPEN, { outcome: "notLoggedIn" });
         vscode.window.showInformationMessage(l10n.t("User is not logged in or the login session has expired!"));
         return;
     }
     const items = await parseProblemsToPicks(fetchProblemIndex());
+    telemetryService.trackEvent(
+        TELEMETRY_EVENTS.SEARCH_OPEN,
+        {
+            outcome: "ready",
+            indexSize: items.length,
+            ignoreZOJ: ptaConfig.getSearchIndexIgnoreZOJ(),
+            ignoreLocked: ptaConfig.getSearchIndexIgnoreLockedProblemSets(),
+        },
+        { loadMs: Date.now() - startedAt }
+    );
     const choice: IQuickPickItem<IProblemSearchItem> | undefined = await vscode.window.showQuickPick(items, {
         matchOnDetail: true,
         placeHolder: l10n.t("Select one problem (total: {0})", items.length),
     });
     if (!choice) {
+        telemetryService.trackEvent(TELEMETRY_EVENTS.SEARCH_CANCEL, { indexSize: items.length });
         return;
     }
-    vscode.commands.executeCommand("pintia.previewProblem", choice.value.psID, choice.value.pID);
+
+    const rank = items.indexOf(choice) + 1;
+    telemetryService.trackEvent(
+        TELEMETRY_EVENTS.SEARCH_SELECT,
+        { indexSize: items.length },
+        { rank: rank > 0 ? rank : 0 }
+    );
+    vscode.commands.executeCommand("pintia.previewProblem", choice.value.psID, choice.value.pID, true, "search");
 }
 
 async function fetchProblemIndex(): Promise<Array<IProblemSearchItem>> {

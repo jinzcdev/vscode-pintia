@@ -8,7 +8,7 @@
     "license": "MIT",
     "icon": "resources/imgs/pta_logo.png",
     "engines": {
-        "vscode": "^1.66.0"
+        "vscode": "^1.75.0"
     },
     "repository": {
         "type": "git",
@@ -569,6 +569,18 @@
                         "order": 0
                     }
                 }
+            },
+            {
+                "title": "%configuration.title.telemetry%",
+                "properties": {
+                    "pintia.telemetry.enabled": {
+                        "type": "boolean",
+                        "default": true,
+                        "scope": "window",
+                        "description": "%configuration.pintia.telemetry.enabled%",
+                        "order": 0
+                    }
+                }
             }
         ],
         "snippets": [
@@ -752,7 +764,7 @@
         "@types/node-fetch": "^2.6.11",
         "@types/qrcode": "^1.5.5",
         "@types/sinon": "^21.0.1",
-        "@types/vscode": "^1.66.0",
+        "@types/vscode": "~1.75.0",
         "@typescript-eslint/eslint-plugin": "^8.13.0",
         "@typescript-eslint/parser": "^8.13.0",
         "@vscode/l10n-dev": "^0.0.35",
@@ -766,6 +778,7 @@
         "vscode-test": "^1.5.0"
     },
     "dependencies": {
+        "@vscode/extension-telemetry": "1.5.2",
         "@vscode/l10n": "^0.0.18",
         "@vscode/markdown-it-katex": "^1.1.0",
         "fs-extra": "11.2.0",

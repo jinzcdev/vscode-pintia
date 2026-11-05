@@ -23,7 +23,7 @@ export class FavoritesTreeDataProvider implements vscode.TreeDataProvider<Proble
             command: {
                 title: l10n.t("Preview Problem"),
                 command: "pintia.previewProblem",
-                arguments: [element.psID, element.pID],
+                arguments: [element.psID, element.pID, true, "favorites"],
             },
             tooltip: element.psName,
             contextValue: "problem-favorite",

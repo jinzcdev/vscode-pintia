@@ -6,6 +6,8 @@ import { getGlobalContext } from "../globalContext";
 import { compilerLangMapping } from "../shared";
 import { ptaApi } from "../utils/api";
 import { escapeHtml } from "../utils/stringUtils";
+import { isPreviewLinkKind, isPreviewSearchEngine, TELEMETRY_EVENTS } from "../telemetry/events";
+import { telemetryService } from "../telemetry/telemetryService";
 import { IWebViewMessage } from "./PtaWebview";
 import { PtaWebviewWithCodeStyle } from "./PtaWebviewWithCodeStyle";
 import * as markdownEngine from "./markdownEngine";
@@ -40,7 +42,6 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
 
     protected getContent(): string {
         const problem = this.data.problem as ProblemView;
-        const keyword: string = `${problem.label} ${problem.title}`.replace(/ /g, "+");
         const copyButtonScriptUri = this.getWebview()?.asWebviewUri(
             vscode.Uri.joinPath(getGlobalContext().extensionUri, "media", "main.js")
         );
@@ -52,10 +53,10 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
         return `
         <div class="header">
             <div class="problem-title">
-            <h1><a href="${ptaApi.getProblemURL(problem.problemSetId, problem.id, problem.type)}" target="_blank">${escapeHtml(problem.title)}</a></h1>
+            <h1><a href="${ptaApi.getProblemURL(problem.problemSetId, problem.id, problem.type)}" target="_blank" data-pintia-track="externalLink" data-track-kind="problemTitle">${escapeHtml(problem.title)}</a></h1>
             </div>
             <div class="problem-set-name">
-            <a href="${ptaApi.getProblemSetURL(problem.problemSetId)}" target="_blank">${escapeHtml(problem.problemSetName)}</a>
+            <a href="${ptaApi.getProblemSetURL(problem.problemSetId)}" target="_blank" data-pintia-track="externalLink" data-track-kind="problemSet">${escapeHtml(problem.problemSetName)}</a>
             </div>
         </div>
 
@@ -95,19 +96,7 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
                     : ""
             }
 
-            ${markdownEngine.render(
-                [
-                    l10n.t("Search:") +
-                        " " +
-                        [
-                            `[${l10n.t("Google")}](https://www.google.com/search?q=${keyword})`,
-                            `[${l10n.t("Bing")}](https://cn.bing.com/search?q=${keyword})`,
-                            `[${l10n.t("Baidu")}](https://www.baidu.com/s?wd=${keyword})`,
-                            `[${l10n.t("Reference Code (partial problems only)")}](https://github.com/jinzcdev/PTA/tree/main/${this.formatProblemSetName(problem.problemSetName)})`,
-                        ].join(" | "),
-                    "<hr>",
-                ].join("\n")
-            )}
+            ${this.generateExternalLinks(problem)}
 
             ${
                 problem.lastProgram.trim().length
@@ -139,6 +128,28 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
             </div>
         </div>
         <script nonce="${this.nonce}" src="${copyButtonScriptUri}"></script>`;
+    }
+
+    /**
+     * 预览页的外部搜索与“参考代码”链接。
+     *
+     * 这些链接由 webview 直接打开，不经过 extension 侧命令；因此用 data-* 标记
+     * 给 media/main.js 的委托监听器，再由 `track` 消息上报点击。
+     */
+    private generateExternalLinks(problem: ProblemView): string {
+        const keyword = encodeURIComponent(`${problem.label} ${problem.title}`);
+        const referenceUrl = `https://github.com/jinzcdev/PTA/tree/main/${this.formatProblemSetName(problem.problemSetName)}`;
+        const link = (href: string, kind: string, text: string, engine?: string): string => {
+            const engineAttribute = engine ? ` data-track-engine="${engine}"` : "";
+            return `<a href="${escapeHtml(href)}" data-pintia-track="externalLink" data-track-kind="${kind}"${engineAttribute}>${escapeHtml(text)}</a>`;
+        };
+        const links = [
+            link(`https://www.google.com/search?q=${keyword}`, "search", l10n.t("Google"), "google"),
+            link(`https://cn.bing.com/search?q=${keyword}`, "search", l10n.t("Bing"), "bing"),
+            link(`https://www.baidu.com/s?wd=${keyword}`, "search", l10n.t("Baidu"), "baidu"),
+            link(referenceUrl, "referenceCode", l10n.t("Reference Code (partial problems only)")),
+        ];
+        return `<p>${escapeHtml(l10n.t("Search:"))} ${links.join(" | ")}</p><hr>`;
     }
 
     /**
@@ -268,16 +279,21 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
                         "pintia.previewProblem",
                         this.data.ptaCode.psID,
                         this.data.ptaCode.pID,
-                        false
+                        false,
+                        "webview"
                     );
                 } else if (msg.value === "pintia.previewProblemById") {
-                    const [psID, pID] = (msg.args ?? []) as string[];
+                    const [psID, pID, direction] = (msg.args ?? []) as string[];
                     if (psID && pID) {
-                        await vscode.commands.executeCommand("pintia.previewProblem", psID, pID, false);
+                        if (direction === "prev" || direction === "next") {
+                            telemetryService.trackEvent(TELEMETRY_EVENTS.PREVIEW_ACTION, { action: direction });
+                        }
+                        await vscode.commands.executeCommand("pintia.previewProblem", psID, pID, false, "webview");
                     }
                 } else if (msg.value === "pintia.checkLastSubmission") {
                     await vscode.commands.executeCommand("pintia.checkLastSubmission", this.data.ptaCode);
                 } else if (msg.value === "pintia.copyContent") {
+                    telemetryService.trackEvent(TELEMETRY_EVENTS.PREVIEW_ACTION, { action: "copyContent" });
                     const content = this.data.problem.content;
                     vscode.env.clipboard.writeText(content).then(() => {
                         vscode.window.showInformationMessage(vscode.l10n.t("Successfully copied to the clipboard!"));
@@ -286,12 +302,31 @@ export class PtaPreviewProvider extends PtaWebviewWithCodeStyle<ProblemView> {
                     await vscode.commands.executeCommand("pintia.welcome");
                 }
                 break;
+            case "track":
+                this.trackExternalLink(msg.value, msg.args);
+                break;
             case "text":
                 vscode.window.showInformationMessage(msg.value);
                 break;
             default:
                 await super.onDidReceiveMessage(msg);
         }
+    }
+
+    /** 只接受白名单内的静态链接 ID；webview 传来的其他值一律忽略。 */
+    private trackExternalLink(value: string, args: unknown[] | undefined): void {
+        if (value !== "externalLink") {
+            return;
+        }
+        const [kind, engine] = (args ?? []) as unknown[];
+        if (!isPreviewLinkKind(kind)) {
+            return;
+        }
+        const properties: Record<string, string> = { action: "externalLink", kind };
+        if (kind === "search" && isPreviewSearchEngine(engine)) {
+            properties.engine = engine;
+        }
+        telemetryService.trackEvent(TELEMETRY_EVENTS.PREVIEW_ACTION, properties);
     }
 
     private formatProblemSetName(name: string): string {

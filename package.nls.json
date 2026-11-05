@@ -95,5 +95,7 @@
     "contributes.commands.pintia.timerMenu": "Timer Menu…",
     "contributes.commands.pintia.showTimerStats": "Answer Time Statistics",
     "configuration.title.timer": "Timer",
-    "configuration.pintia.timer.enableStatusBar": "Show the timer in the status bar while timing a Pintia problem."
+    "configuration.pintia.timer.enableStatusBar": "Show the timer in the status bar while timing a Pintia problem.",
+    "configuration.title.telemetry": "Telemetry",
+    "configuration.pintia.telemetry.enabled": "Send anonymous usage data to help improve the extension. This respects VS Code's global telemetry setting; disabling either setting stops all collection."
 }

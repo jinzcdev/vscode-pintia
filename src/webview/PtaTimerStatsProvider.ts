@@ -173,7 +173,7 @@ export class PtaTimerStatsProvider extends PtaWebview<ITimerAttempt[]> {
         if (msg.type === "command" && msg.value === "pintia.previewProblem") {
             const [psID, pID] = (msg.args ?? []) as string[];
             if (psID && pID) {
-                await vscode.commands.executeCommand("pintia.previewProblem", psID, pID, false);
+                await vscode.commands.executeCommand("pintia.previewProblem", psID, pID, false, "timerStats");
             }
         }
     }

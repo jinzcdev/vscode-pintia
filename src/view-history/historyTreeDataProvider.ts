@@ -27,7 +27,7 @@ export class HistoryTreeDataProvider implements vscode.TreeDataProvider<ProblemB
             command: {
                 title: l10n.t("Preview Problem"),
                 command: "pintia.previewProblem",
-                arguments: [element.psID, element.pID],
+                arguments: [element.psID, element.pID, true, "history"],
             },
             tooltip: element.psName,
             contextValue: contextValue,
