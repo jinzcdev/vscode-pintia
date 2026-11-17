@@ -4,6 +4,23 @@
 
 ---
 
+## [0.13.0] - 2026/11/17
+
+### Features
+
+- **Problem Notes**
+    - Added an _Add Note_ CodeLens that inserts a note block at the end of the code block; each problem file allows only one note block, and adding another one shows a prompt
+    - Added a _Format Note_ CodeLens and the `PTA: Format Note Block` command, which formats the note using your configured Markdown formatter
+    - Markdown inside the note block is highlighted as Markdown, matching `.md` files
+
+### Changes
+
+- **Editor Shortcuts**
+    - Added `AddNote` and `Timer` to the default value of `pintia.editor.shortcuts`; items and their order remain configurable
+    - Deduplicated configured items and filtered unknown ones to avoid rendering the same button twice
+- **Explorer**
+    - Added icons to the problem set, history and favorites views, and removed the redundant collapse button from their title bars
+
 ## [0.12.1] - 2026/11/06
 
 ### Features

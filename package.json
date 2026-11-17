@@ -2,7 +2,7 @@
     "name": "vscode-pintia",
     "displayName": "Pintia (拼题A)",
     "description": "%description%",
-    "version": "0.12.1",
+    "version": "0.13.0",
     "author": "Zhichao Jin",
     "publisher": "jinzcdev",
     "license": "MIT",
