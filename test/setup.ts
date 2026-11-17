@@ -306,10 +306,24 @@ class PositionMock {
     ) {}
 }
 class RangeMock {
+    public readonly start: PositionMock;
+    public readonly end: PositionMock;
+
     constructor(
-        public readonly start: PositionMock,
-        public readonly end: PositionMock
-    ) {}
+        startOrLine: PositionMock | number,
+        endOrCharacter: PositionMock | number,
+        endLine?: number,
+        endCharacter?: number
+    ) {
+        if (typeof startOrLine === "number") {
+            // new Range(startLine, startCharacter, endLine, endCharacter)
+            this.start = new PositionMock(startOrLine, endOrCharacter as number);
+            this.end = new PositionMock(endLine!, endCharacter!);
+        } else {
+            this.start = startOrLine;
+            this.end = endOrCharacter as PositionMock;
+        }
+    }
 }
 
 class CodeLensMock {
@@ -360,6 +374,7 @@ const vscodeMock = {
     TreeItemCollapsibleState: { None: 0, Collapsed: 1, Expanded: 2 },
     StatusBarAlignment: { Left: 1, Right: 2 },
     ColorThemeKind: { Light: 1, Dark: 2, HighContrast: 3, HighContrastLight: 4 },
+    EndOfLine: { LF: 1, CRLF: 2 },
     ExtensionMode: { Production: 1, Development: 2, Test: 3 },
     UIKind: { Desktop: 1, Web: 2 },
     version: "1.75.0",

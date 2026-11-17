@@ -7,3 +7,5 @@ node_modules
 **/.DS_Store
 **/tmp/
 .vscode/c_cpp_properties.json
+# 本地私有文档（如埋点查询指南），不纳入仓库
+.local/

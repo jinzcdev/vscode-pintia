@@ -3,7 +3,11 @@ import { ptaConfig } from "../ptaConfig";
 import { IPtaCode, IPtaProblem, TimerState } from "../shared";
 import { l10n } from "vscode";
 import { parseCodeBlock, parseCodeInfo, getCodeLensRange, ICodeBlock, parseProblemMeta } from "../utils/editorUtils";
+import { findNoteBlock } from "../utils/noteBlock";
 import { timerManager } from "../timer/timerManager";
+
+/** 与 package.json 中 `pintia.editor.shortcuts` 的 enum 保持一致 */
+const EDITOR_SHORTCUTS: ReadonlySet<string> = new Set(["Submit", "Test", "Preview", "AddNote", "Timer"]);
 
 export class CustomCodeLensProvider implements vscode.CodeLensProvider<PtaCodeLens> {
     private onDidChangeCodeLensesEmitter: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
@@ -32,23 +36,38 @@ export class CustomCodeLensProvider implements vscode.CodeLensProvider<PtaCodeLe
         }
         const range: vscode.Range = codeEndRanges[0];
         const codeLens: PtaCodeLens[] = [];
+        const problem: IPtaProblem = { psID: ptaCode.psID, pID: ptaCode.pID, ...parseProblemMeta(content) };
 
-        const shortcuts: string[] = ptaConfig.getEditorShortcuts();
-        for (const shortcut of shortcuts ?? []) {
-            codeLens.push(new PtaCodeLens(range, document.uri.fsPath, content, shortcut));
+        // 配置里可能残留重复项或旧值：去重并按 enum 过滤，避免同一按钮渲染多次
+        const shortcuts: string[] = [...new Set(ptaConfig.getEditorShortcuts() ?? [])].filter((shortcut) =>
+            EDITOR_SHORTCUTS.has(shortcut)
+        );
+        for (const shortcut of shortcuts) {
+            const commandTitle = shortcut === "AddNote" ? "addNote" : shortcut === "Timer" ? "timer" : shortcut;
+            codeLens.push(
+                shortcut === "Timer"
+                    ? new PtaCodeLens(range, document.uri.fsPath, content, commandTitle, undefined, problem)
+                    : new PtaCodeLens(range, document.uri.fsPath, content, commandTitle)
+            );
         }
 
         // 保持原有语义：未配置快捷键时，自定义样例的透镜也一并不显示
-        if (shortcuts && shortcuts.length > 0) {
+        if (shortcuts.length > 0) {
             const customTestRanges: vscode.Range[] = getCodeLensRange(document, /@pintia\s+test=start/g);
             for (let i = 0; i < customTestRanges.length; i++) {
                 codeLens.push(new PtaCodeLens(customTestRanges[i], document.uri.fsPath, content, "customTest", i));
             }
         }
 
-        // 计时按钮独立于 editor.shortcuts，且放在数组末尾，显示在同行最右侧
-        const problem: IPtaProblem = { psID: ptaCode.psID, pID: ptaCode.pID, ...parseProblemMeta(content) };
-        codeLens.push(new PtaCodeLens(range, document.uri.fsPath, content, "timer", undefined, problem));
+        // 笔记块独立于 editor.shortcuts：它用的是 Markdown 格式化器，与提交/测试无关。
+        // 与预览解析一致，只认第一个完整的笔记块
+        const noteBlock = findNoteBlock(content);
+        if (noteBlock) {
+            codeLens.push(
+                new PtaCodeLens(document.lineAt(noteBlock.startLine).range, document.uri.fsPath, content, "formatNote")
+            );
+        }
+
         return codeLens;
     }
 
@@ -100,6 +119,16 @@ export class CustomCodeLensProvider implements vscode.CodeLensProvider<PtaCodeLe
                     title: l10n.t("Preview"),
                     command: "pintia.previewProblem",
                     arguments: [ptaCode.psID, ptaCode.pID, false, "codelens"],
+                };
+            } else if (command === "formatNote") {
+                codeLens.command = {
+                    title: l10n.t("Format Note"),
+                    command: "pintia.formatNote",
+                };
+            } else if (command === "addNote") {
+                codeLens.command = {
+                    title: l10n.t("Add Note"),
+                    command: "pintia.addNote",
                 };
             } else if (command === "timer" && codeLens.problem) {
                 codeLens.command = {

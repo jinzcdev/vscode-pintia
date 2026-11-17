@@ -1,0 +1,27 @@
+{
+    "name": "Pintia Note (Markdown)",
+    "scopeName": "inline.pintia.note.markdown",
+    "injectionSelector": "L:comment.block, L:string.quoted.multi.python, L:string.quoted.docstring.multi.python, L:string.quoted.raw.multi.python, L:string.quoted.docstring.raw.multi.python",
+    "patterns": [
+        {
+            "begin": "[ \\t]*(@pintia\\s+note=start)",
+            "beginCaptures": {
+                "1": {
+                    "name": "keyword.control.pintia.note.begin"
+                }
+            },
+            "end": "(@pintia\\s+note=end)",
+            "endCaptures": {
+                "1": {
+                    "name": "keyword.control.pintia.note.end"
+                }
+            },
+            "contentName": "meta.embedded.block.pintia.note.markdown",
+            "patterns": [
+                {
+                    "include": "text.html.markdown"
+                }
+            ]
+        }
+    ]
+}

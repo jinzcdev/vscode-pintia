@@ -1,7 +1,9 @@
 import * as fs from "fs-extra";
 import * as vscode from "vscode";
 import { codeLensController } from "./codelens/CodeLensController";
+import { addProblemNote } from "./commands/addNote";
 import * as cache from "./commands/cache";
+import { formatProblemNote } from "./commands/formatNote";
 import * as language from "./commands/language";
 import * as show from "./commands/show";
 import * as star from "./commands/star";
@@ -110,11 +112,9 @@ export async function activate(context: vscode.ExtensionContext) {
         historyManager,
         vscode.window.createTreeView("pintiaProblemHistory", {
             treeDataProvider: historyTreeDataProvider,
-            showCollapseAll: true,
         }),
         vscode.window.createTreeView("pintiaMyFavorites", {
             treeDataProvider: favoritesTreeDataProvider,
-            showCollapseAll: true,
         }),
         registerCommandWithTelemetry("pintia.openPintiaHome", () => user.openPintiaHome()),
         registerCommandWithTelemetry("pintia.openExtensionRepo", () => user.openExtensionRepo()),
@@ -181,6 +181,8 @@ export async function activate(context: vscode.ExtensionContext) {
         registerCommandWithTelemetry("pintia.testSolution", (ptaCode: IPtaCode) => submit.testSolution(ptaCode)),
         registerCommandWithTelemetry("pintia.changeDefaultLanguage", () => language.changeDefaultLanguage()),
         registerCommandWithTelemetry("pintia.changeWorkspaceFolder", () => workspace.changeWorkspaceFolder()),
+        registerCommandWithTelemetry("pintia.addNote", () => addProblemNote()),
+        registerCommandWithTelemetry("pintia.formatNote", () => formatProblemNote()),
         registerCommandWithTelemetry("pintia.openWorkspace", () => workspace.openWorkspace()),
         registerCommandWithTelemetry("pintia.welcome", () => {
             vscode.commands.executeCommand(`workbench.action.openWalkthrough`, `jinzcdev.vscode-pintia#pintia`, false);

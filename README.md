@@ -49,10 +49,12 @@
 
 <img style="width: 65%;" src="./docs/imgs/shortcuts.png" alt="编辑器快捷键">
 
-- 该插件支持 3 个编辑器快捷键
+- 该插件支持 5 个编辑器快捷键（可通过配置项 `pintia.editor.shortcuts` 选择显示哪些按钮以及它们的顺序）
     - `提交/Submit`：向拼题 A 提交你的答案
     - `测试/Test`：用 **自定义的测试样例** 或 **默认样例** 测试你的答案
     - `预览题目/Preview`: 在源文件中打开习题预览
+    - `添加笔记/AddNote`：在代码块底部插入笔记块
+    - `计时/Timer`: 开始、暂停或继续本题的计时
 
 ---
 
@@ -77,7 +79,7 @@
 
 ### 1.6 笔记功能
 
-你可以在代码编辑区键入 `ptanote` 生成笔记块，在其中输入你的笔记，下次预览题目时，笔记会以 Markdown 的形式解析并预览。
+点击 `Preview` 右侧的 `添加笔记` CodeLens（或在代码编辑区键入 `ptanote`）即可在代码块最下方生成笔记块，在其中输入你的笔记，下次预览题目时，笔记会以 Markdown 的形式解析并预览。每个题目文件只允许有一个笔记块；重复点击 `添加笔记` 会给出提示。笔记块内的 Markdown 语法会像 `.md` 文件一样高亮；点击笔记块上方的 `格式化笔记` CodeLens（或执行 `PTA: 格式化笔记块` 命令），会用你为 Markdown 配置的格式化器整理笔记内容。
 
 <img style="width: 85%;" src="./docs/imgs/note.png" alt="笔记">
 
@@ -129,29 +131,29 @@
 
 ## 3. 插件主要配置
 
-| 设置名称                                     | 描述                                                                                                                                        | 默认值                          |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| `pintia.workspaceFolder`                     | 工作区文件夹的路径（存储题目源文件）。                                                                                                      | `""`                            |
-| `pintia.defaultLanguage`                     | 设置答题时默认使用的编程语言。                                                                                                              | `C++ (g++)`                     |
-| `pintia.previewProblem.openAndCodeIt`        | 指定是否在预览题目时自动打开代码编辑器，开启时建议不要将 `#pintia.previewProblem.defaultOpenedMethod#` 设置为 `总是询问`。                  | `false`                         |
-| `pintia.previewProblem.defaultOpenedMethod`  | 指定预览题目时打开代码编辑器的方式，默认为 `总是询问`。                                                                                     | `Always ask`                    |
-| `pintia.paging.pageSize`                     | 指定当题目集较大时候，是否对题目列表分页。pageSize 为 0 表示不分页。                                                                        | `100`                           |
-| `pintia.showLocked`                          | 指定是否显示未解锁的题集（一些教材题目集）。                                                                                                | `true`                          |
-| `pintia.autoCreateProblemSetFolder`          | 指定创建题目源文件时是否自动创建其习题集文件夹并将源代码文件放入相应的文件夹中。                                                            | `true`                          |
-| `pintia.editor.shortcuts`                    | 自定义编码时的编辑器快捷键。                                                                                                                | `["Submit", "Test", "Preview"]` |
-| `pintia.enableStatusBar`                     | 指定是否显示 PTA 状态栏。                                                                                                                   | `true`                          |
-| `pintia.codeColorTheme`                      | 指定代码着色主题。                                                                                                                          | `atom-one`                      |
-| `pintia.autoCheckIn`                         | 指定是否在激活插件时自动签到 PTA 教育商店。                                                                                                 | `true`                          |
-| `pintia.file.problemFileNameFormat`          | 设置题目文件的命名格式。支持变量：`{label}`（题目标签）、`{title}`（题目标题）、`{pid}`（题目ID）、`{psid}`（题目集ID）。                   | `{label} {title}`               |
-| `pintia.file.replaceSpaceWithUnderscore`     | 指定是否将题目文件名中的空格替换为下划线。启用后，"A1001 Hello World" 将变为 "A1001_Hello_World"。                                          | `false`                         |
-| `pintia.file.convertChineseCharacters`       | 将题目文件名中的中文字符转换为拼音，中文标点符号转换为英文标点，可避免某些编译器无法编译或调试源文件。                                      | `false`                         |
-| `pintia.file.customProblemSetName`           | 自定义题目集文件夹名称。接受一个 JSON 字符串，将题目集 ID 映射到自定义名称并具有最高优先级。                                                | `{}`                            |
-| `pintia.file.invalidCharReplacement`         | 用于替换文件名与题集文件夹名中非法字符（`<>:"/\|?*`）的字符。设为空字符串表示直接删除这些字符；若该值本身包含非法字符或空白，将回退为 `_`。 | `_`                             |
-| `pintia.searchIndex.ignoreZOJ`               | 指定搜索题目时，是否忽略 **_ZOJ Problem Set_** 题集。                                                                                       | `true`                          |
-| `pintia.searchIndex.ignoreLockedProblemSets` | 指定搜索题目时，是否忽略 **_未被解锁的_** 题集。                                                                                            | `true`                          |
-| `pintia.searchIndex.autoRefresh`             | 指定是否在激活插件时自动刷新题目搜索索引（不推荐，增量刷新仍可能较耗时）。                                                                  | `false`                         |
-| `pintia.problemHistoryListSize`              | 指定题目预览历史列表的大小。                                                                                                                | `200`                           |
-| `pintia.telemetry.enabled`                   | 指定是否发送匿名使用数据以改进插件；同时遵循 VS Code 的全局遥测设置。                                                                       | `true`                          |
+| 设置名称                                     | 描述                                                                                                                                        | 默认值                                              |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `pintia.workspaceFolder`                     | 工作区文件夹的路径（存储题目源文件）。                                                                                                      | `""`                                                |
+| `pintia.defaultLanguage`                     | 设置答题时默认使用的编程语言。                                                                                                              | `C++ (g++)`                                         |
+| `pintia.previewProblem.openAndCodeIt`        | 指定是否在预览题目时自动打开代码编辑器，开启时建议不要将 `#pintia.previewProblem.defaultOpenedMethod#` 设置为 `总是询问`。                  | `false`                                             |
+| `pintia.previewProblem.defaultOpenedMethod`  | 指定预览题目时打开代码编辑器的方式，默认为 `总是询问`。                                                                                     | `Always ask`                                        |
+| `pintia.paging.pageSize`                     | 指定当题目集较大时候，是否对题目列表分页。pageSize 为 0 表示不分页。                                                                        | `100`                                               |
+| `pintia.showLocked`                          | 指定是否显示未解锁的题集（一些教材题目集）。                                                                                                | `true`                                              |
+| `pintia.autoCreateProblemSetFolder`          | 指定创建题目源文件时是否自动创建其习题集文件夹并将源代码文件放入相应的文件夹中。                                                            | `true`                                              |
+| `pintia.editor.shortcuts`                    | 自定义编码时的编辑器快捷键。                                                                                                                | `["Submit", "Test", "Preview", "AddNote", "Timer"]` |
+| `pintia.enableStatusBar`                     | 指定是否显示 PTA 状态栏。                                                                                                                   | `true`                                              |
+| `pintia.codeColorTheme`                      | 指定代码着色主题。                                                                                                                          | `atom-one`                                          |
+| `pintia.autoCheckIn`                         | 指定是否在激活插件时自动签到 PTA 教育商店。                                                                                                 | `true`                                              |
+| `pintia.file.problemFileNameFormat`          | 设置题目文件的命名格式。支持变量：`{label}`（题目标签）、`{title}`（题目标题）、`{pid}`（题目ID）、`{psid}`（题目集ID）。                   | `{label} {title}`                                   |
+| `pintia.file.replaceSpaceWithUnderscore`     | 指定是否将题目文件名中的空格替换为下划线。启用后，"A1001 Hello World" 将变为 "A1001_Hello_World"。                                          | `false`                                             |
+| `pintia.file.convertChineseCharacters`       | 将题目文件名中的中文字符转换为拼音，中文标点符号转换为英文标点，可避免某些编译器无法编译或调试源文件。                                      | `false`                                             |
+| `pintia.file.customProblemSetName`           | 自定义题目集文件夹名称。接受一个 JSON 字符串，将题目集 ID 映射到自定义名称并具有最高优先级。                                                | `{}`                                                |
+| `pintia.file.invalidCharReplacement`         | 用于替换文件名与题集文件夹名中非法字符（`<>:"/\|?*`）的字符。设为空字符串表示直接删除这些字符；若该值本身包含非法字符或空白，将回退为 `_`。 | `_`                                                 |
+| `pintia.searchIndex.ignoreZOJ`               | 指定搜索题目时，是否忽略 **_ZOJ Problem Set_** 题集。                                                                                       | `true`                                              |
+| `pintia.searchIndex.ignoreLockedProblemSets` | 指定搜索题目时，是否忽略 **_未被解锁的_** 题集。                                                                                            | `true`                                              |
+| `pintia.searchIndex.autoRefresh`             | 指定是否在激活插件时自动刷新题目搜索索引（不推荐，增量刷新仍可能较耗时）。                                                                  | `false`                                             |
+| `pintia.problemHistoryListSize`              | 指定题目预览历史列表的大小。                                                                                                                | `200`                                               |
+| `pintia.telemetry.enabled`                   | 指定是否发送匿名使用数据以改进插件；同时遵循 VS Code 的全局遥测设置。                                                                       | `true`                                              |
 
 ### 题目搜索索引（开发者）
 

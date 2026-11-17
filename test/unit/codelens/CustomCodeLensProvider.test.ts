@@ -48,19 +48,12 @@ describe("CustomCodeLensProvider", () => {
         return command;
     }
 
-    it("未配置编辑器快捷键时仍应提供计时 CodeLens", async () => {
+    it("未配置编辑器快捷键时不应提供任何 CodeLens", () => {
         setConfigValue("editor.shortcuts", []);
 
-        const codeLenses = customCodeLensProvider.provideCodeLenses(
-            createFakeDocument(createProblemSource())
-        ) as vscode.CodeLens[];
+        const codeLenses = customCodeLensProvider.provideCodeLenses(createFakeDocument(createProblemSource()));
 
-        assert.strictEqual(codeLenses.length, 1);
-        const command = await resolveCommands(codeLenses);
-        assert.deepStrictEqual(
-            command.map((item) => item.command),
-            ["pintia.timerCodeLens"]
-        );
+        assert.deepStrictEqual(codeLenses, []);
     });
 
     it("文件不含 PTA 文件头时应不提供 CodeLens", () => {
@@ -82,20 +75,58 @@ describe("CustomCodeLensProvider", () => {
         assert.strictEqual(customCodeLensProvider.provideCodeLenses(createFakeDocument(source)), undefined);
     });
 
-    it("应为每个快捷键与自定义样例生成 CodeLens，计时按钮排在最后", async () => {
-        setConfigValue("editor.shortcuts", ["Submit", "Test", "Preview"]);
+    it("应为每个快捷键与自定义样例各生成一个 CodeLens", () => {
+        setConfigValue("editor.shortcuts", ["Submit", "Test", "Preview", "AddNote", "Timer"]);
 
         const codeLenses = customCodeLensProvider.provideCodeLenses(
             createFakeDocument(createProblemSource({ customTests: ["1 2", "3 4"] }))
         ) as vscode.CodeLens[];
 
-        // 3 个快捷键 + 2 个自定义样例 + 1 个计时按钮
-        assert.strictEqual(codeLenses.length, 6);
+        // 5 个快捷键 + 2 个自定义样例
+        assert.strictEqual(codeLenses.length, 7);
+    });
+
+    it("应按配置中的顺序生成 CodeLens", async () => {
+        setConfigValue("editor.shortcuts", ["Preview", "Submit", "Timer", "AddNote"]);
+
+        const codeLenses = customCodeLensProvider.provideCodeLenses(
+            createFakeDocument(createProblemSource({ customTests: [] }))
+        ) as vscode.CodeLens[];
         const commands = await resolveCommands(codeLenses);
-        assert.strictEqual(
-            commands[commands.length - 1].command,
-            "pintia.timerCodeLens",
-            "计时按钮应排在最后，显示在同行最右侧"
+
+        assert.deepStrictEqual(
+            commands.map((command) => command.command),
+            ["pintia.previewProblem", "pintia.submitSolution", "pintia.timerCodeLens", "pintia.addNote"]
+        );
+        assert.strictEqual(commands[3].title, "Add Note");
+    });
+
+    it("配置中的重复快捷键应只生成一个 CodeLens", async () => {
+        setConfigValue("editor.shortcuts", ["Submit", "Submit", "AddNote", "AddNote", "Timer", "Timer"]);
+
+        const codeLenses = customCodeLensProvider.provideCodeLenses(
+            createFakeDocument(createProblemSource({ customTests: [] }))
+        ) as vscode.CodeLens[];
+        const commands = await resolveCommands(codeLenses);
+
+        assert.strictEqual(codeLenses.length, 3);
+        assert.deepStrictEqual(
+            commands.map((command) => command.command),
+            ["pintia.submitSolution", "pintia.addNote", "pintia.timerCodeLens"]
+        );
+    });
+
+    it("从配置中移除 AddNote 与 Timer 后不应再提供对应按钮", async () => {
+        setConfigValue("editor.shortcuts", ["Submit"]);
+
+        const codeLenses = customCodeLensProvider.provideCodeLenses(
+            createFakeDocument(createProblemSource({ customTests: [] }))
+        ) as vscode.CodeLens[];
+        const commands = await resolveCommands(codeLenses);
+
+        assert.deepStrictEqual(
+            commands.map((command) => command.command),
+            ["pintia.submitSolution"]
         );
     });
 
@@ -113,7 +144,6 @@ describe("CustomCodeLensProvider", () => {
             "pintia.submitSolution",
             "pintia.testCustomSample",
             "pintia.testSolution",
-            "pintia.timerCodeLens",
         ]);
 
         const submitCode = byCommand.get("pintia.submitSolution")?.arguments?.[0] as IPtaCode;
@@ -201,6 +231,45 @@ describe("CustomCodeLensProvider", () => {
         assert.deepStrictEqual(
             customTestCommands.map((command) => command.arguments?.[1]),
             [0, 1]
+        );
+    });
+
+    it("默认配置下添加笔记应位于 Preview 右侧、计时按钮左侧", async () => {
+        setConfigValue("editor.shortcuts", ["Submit", "Test", "Preview", "AddNote", "Timer"]);
+
+        const codeLenses = customCodeLensProvider.provideCodeLenses(
+            createFakeDocument(createProblemSource({ customTests: [] }))
+        ) as vscode.CodeLens[];
+        const commands = await resolveCommands(codeLenses);
+
+        assert.deepStrictEqual(
+            commands.map((command) => command.command),
+            [
+                "pintia.submitSolution",
+                "pintia.testSolution",
+                "pintia.previewProblem",
+                "pintia.addNote",
+                "pintia.timerCodeLens",
+            ]
+        );
+        assert.strictEqual(commands[3].title, "Add Note");
+    });
+
+    it("笔记块应提供格式化 CodeLens（不受 editor.shortcuts 影响）", async () => {
+        setConfigValue("editor.shortcuts", []);
+        const source =
+            createProblemSource({ customTests: [] }) + "\n/* @pintia note=start\n## 标题\n@pintia note=end */";
+
+        const codeLenses = customCodeLensProvider.provideCodeLenses(createFakeDocument(source)) as vscode.CodeLens[];
+        const commands = await resolveCommands(codeLenses);
+        const noteCommand = commands.find((command) => command.command === "pintia.formatNote");
+
+        assert.ok(noteCommand, "未找到格式化笔记 CodeLens");
+        assert.strictEqual(noteCommand.title, "Format Note");
+        // AddNote 已从配置中移除，不应再渲染添加按钮
+        assert.ok(
+            !commands.some((command) => command.command === "pintia.addNote"),
+            "未配置 AddNote 时不应提供添加笔记 CodeLens"
         );
     });
 });
