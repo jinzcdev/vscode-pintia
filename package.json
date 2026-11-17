@@ -47,16 +47,19 @@
             "pintia": [
                 {
                     "id": "pintiaExplorer",
-                    "name": "%contributes.views.pintia.pintiaExplorer%"
+                    "name": "%contributes.views.pintia.pintiaExplorer%",
+                    "icon": "$(book)"
                 },
                 {
                     "id": "pintiaProblemHistory",
                     "name": "%contributes.views.pintia.pintiaProblemHistory%",
+                    "icon": "$(history)",
                     "visibility": "collapsed"
                 },
                 {
                     "id": "pintiaMyFavorites",
                     "name": "%contributes.views.pintia.pintiaMyFavorites%",
+                    "icon": "$(star)",
                     "visibility": "collapsed"
                 }
             ]
@@ -237,6 +240,18 @@
                 "icon": "$(folder)"
             },
             {
+                "command": "pintia.addNote",
+                "title": "%contributes.commands.pintia.addNote%",
+                "category": "PTA",
+                "icon": "$(note)"
+            },
+            {
+                "command": "pintia.formatNote",
+                "title": "%contributes.commands.pintia.formatNote%",
+                "category": "PTA",
+                "icon": "$(edit)"
+            },
+            {
                 "command": "pintia.welcome",
                 "title": "%contributes.commands.pintia.welcome%",
                 "category": "PTA",
@@ -369,26 +384,34 @@
                         "default": [
                             "Submit",
                             "Test",
-                            "Preview"
+                            "Preview",
+                            "AddNote",
+                            "Timer"
                         ],
                         "scope": "window",
+                        "uniqueItems": true,
                         "items": {
                             "type": "string",
                             "enum": [
                                 "Submit",
                                 "Test",
-                                "Preview"
+                                "Preview",
+                                "AddNote",
+                                "Timer"
                             ],
-                            "uniqueItems": true,
                             "enumItemLabels": [
                                 "%configuration.pintia.editor.shortcuts.label.submit%",
                                 "%configuration.pintia.editor.shortcuts.label.test%",
-                                "%configuration.pintia.editor.shortcuts.label.preview%"
+                                "%configuration.pintia.editor.shortcuts.label.preview%",
+                                "%configuration.pintia.editor.shortcuts.label.addNote%",
+                                "%configuration.pintia.editor.shortcuts.label.timer%"
                             ],
                             "enumDescriptions": [
                                 "%configuration.pintia.editor.shortcuts.submit%",
                                 "%configuration.pintia.editor.shortcuts.test%",
-                                "%configuration.pintia.editor.shortcuts.preview%"
+                                "%configuration.pintia.editor.shortcuts.preview%",
+                                "%configuration.pintia.editor.shortcuts.addNote%",
+                                "%configuration.pintia.editor.shortcuts.timer%"
                             ]
                         },
                         "description": "%configuration.pintia.editor.shortcuts%"
@@ -580,6 +603,59 @@
                         "description": "%configuration.pintia.telemetry.enabled%",
                         "order": 0
                     }
+                }
+            }
+        ],
+        "grammars": [
+            {
+                "scopeName": "inline.pintia.note.markdown",
+                "path": "./syntaxes/pintia-note.tmLanguage.json",
+                "injectTo": [
+                    "source.c",
+                    "source.cpp",
+                    "source.cuda-cpp",
+                    "source.objc",
+                    "source.objcpp",
+                    "source.cs",
+                    "source.dart",
+                    "source.go",
+                    "source.groovy",
+                    "source.java",
+                    "source.js",
+                    "source.js.jsx",
+                    "source.ts",
+                    "source.tsx",
+                    "source.lua",
+                    "source.perl",
+                    "source.php",
+                    "text.html.php",
+                    "source.python",
+                    "source.r",
+                    "source.ruby",
+                    "source.rust",
+                    "source.shell",
+                    "source.sql",
+                    "source.swift",
+                    "source.asp.vb.net",
+                    "source.kotlin",
+                    "source.scala",
+                    "source.haskell",
+                    "source.ocaml",
+                    "source.d",
+                    "source.fortran",
+                    "source.fortran.modern",
+                    "source.pascal",
+                    "source.racket",
+                    "source.lisp",
+                    "source.common-lisp",
+                    "source.vala",
+                    "source.awk",
+                    "source.octave",
+                    "source.asm",
+                    "source.cangjie"
+                ],
+                "embeddedLanguages": {
+                    "meta.embedded.block.pintia.note.markdown": "markdown"
                 }
             }
         ],

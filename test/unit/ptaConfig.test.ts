@@ -116,7 +116,7 @@ describe("ptaConfig", () => {
             assert.strictEqual(ptaConfig.getShowLocked(), true);
             assert.strictEqual(ptaConfig.getEnableStatusBar(), true);
             assert.strictEqual(ptaConfig.getDefaultLanguage(), "C++ (g++)");
-            assert.deepStrictEqual(ptaConfig.getEditorShortcuts(), ["Submit", "Test", "Preview"]);
+            assert.deepStrictEqual(ptaConfig.getEditorShortcuts(), ["Submit", "Test", "Preview", "AddNote", "Timer"]);
             assert.strictEqual(ptaConfig.getCodeColorTheme(), "atom-one");
             assert.strictEqual(ptaConfig.getPageSize(), 100);
             assert.strictEqual(ptaConfig.getProblemHistoryListSize(), 200);

@@ -80,7 +80,13 @@ class PtaConfig {
     }
 
     public getEditorShortcuts(): string[] {
-        return this.getConfiguration().get<string[]>("editor.shortcuts", ["Submit", "Test", "Preview"]);
+        return this.getConfiguration().get<string[]>("editor.shortcuts", [
+            "Submit",
+            "Test",
+            "Preview",
+            "AddNote",
+            "Timer",
+        ]);
     }
 
     public getPageSize(): number {
