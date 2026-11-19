@@ -1,4 +1,5 @@
 import * as assert from "assert";
+import * as fs from "fs-extra";
 import * as sinon from "sinon";
 import * as vscode from "vscode";
 import { formatProblemNote } from "../../../src/commands/formatNote";
@@ -52,9 +53,12 @@ describe("commands/formatNote", () => {
             options: { tabSize: 4, insertSpaces: true },
             edit: editStub,
         };
-        // 命令会把笔记内容放进临时 Markdown 文档，这里返回与内容对应的最小文档
-        (vscode.workspace.openTextDocument as sinon.SinonStub).callsFake(async (options: { content: string }) =>
-            createDocument(options.content)
+        // 命令会把笔记内容写入临时 .md 文件再打开，这里按路径读回内容构造最小文档
+        (vscode.workspace.openTextDocument as sinon.SinonStub).callsFake(
+            async (target: { content?: string; fsPath?: string }) =>
+                createDocument(
+                    typeof target.fsPath === "string" ? fs.readFileSync(target.fsPath, "utf8") : (target.content ?? "")
+                )
         );
     });
 
@@ -72,6 +76,19 @@ describe("commands/formatNote", () => {
 
         assert.strictEqual((vscode.window.showInformationMessage as sinon.SinonStub).callCount, 0);
         assert.strictEqual(editStub.callCount, 0);
+    });
+
+    it("应通过已保存的临时文件格式化，并在结束后删除它", async () => {
+        (vscode.commands.executeCommand as sinon.SinonStub).resolves([]);
+
+        await formatProblemNote();
+
+        const tempUri = (vscode.workspace.openTextDocument as sinon.SinonStub).firstCall.args[0] as {
+            fsPath: string;
+        };
+        // 使用磁盘上的 .md 文件而不是会残留为「未保存文件」的 untitled 文档
+        assert.ok(tempUri.fsPath.endsWith(".md"), "应打开临时 Markdown 文件");
+        assert.strictEqual(fs.existsSync(tempUri.fsPath), false, "临时文件应在格式化后被删除");
     });
 
     it("格式化器返回空编辑（内容已符合格式）时应静默返回", async () => {
