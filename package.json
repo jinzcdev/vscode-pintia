@@ -48,18 +48,18 @@
                 {
                     "id": "pintiaExplorer",
                     "name": "%contributes.views.pintia.pintiaExplorer%",
-                    "icon": "$(book)"
+                    "icon": "resources/imgs/pta_logo.svg"
                 },
                 {
                     "id": "pintiaProblemHistory",
                     "name": "%contributes.views.pintia.pintiaProblemHistory%",
-                    "icon": "$(history)",
+                    "icon": "resources/imgs/pta_logo.svg",
                     "visibility": "collapsed"
                 },
                 {
                     "id": "pintiaMyFavorites",
                     "name": "%contributes.views.pintia.pintiaMyFavorites%",
-                    "icon": "$(star)",
+                    "icon": "resources/imgs/pta_logo.svg",
                     "visibility": "collapsed"
                 }
             ]
