@@ -4,6 +4,13 @@
 
 ---
 
+## [0.13.1] - 2026/11/19
+
+### Bug Fixes
+
+- **Problem Notes**
+    - Fixed an issue where formatting a note left an unsaved `Untitled-*` temporary document in the editor
+
 ## [0.13.0] - 2026/11/17
 
 ### Features
