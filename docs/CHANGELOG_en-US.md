@@ -4,6 +4,13 @@
 
 ---
 
+## [0.13.2] - 2026/11/19
+
+### Bug Fixes
+
+- **Explorer**
+    - Fixed the activity bar icon occasionally rendering as a book icon by unifying the three view icons, so VS Code's icon fallback always uses the PTA logo
+
 ## [0.13.1] - 2026/11/19
 
 ### Bug Fixes
