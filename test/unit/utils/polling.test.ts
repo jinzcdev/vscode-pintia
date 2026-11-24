@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import * as sinon from "sinon";
-import { pollUntil } from "../../../src/utils/polling";
+import { PollingCancelledError, pollUntil } from "../../../src/utils/polling";
 
 /** 不真正等待的 sleep，让用例无需推进时钟 */
 const noSleep = async (): Promise<void> => {};
@@ -105,5 +105,29 @@ describe("polling - pollUntil", () => {
         await pollUntil(fetchOnce, (d) => d.done, { maxAttempts: 5, sleep });
 
         assert.strictEqual(sleep.callCount, 3);
+    });
+
+    it("开始前已取消时不应发起请求", async () => {
+        const fetchOnce = sinon.stub();
+
+        await assert.rejects(
+            pollUntil(fetchOnce, () => true, { maxAttempts: 5, sleep: noSleep, shouldCancel: () => true }),
+            PollingCancelledError
+        );
+        assert.strictEqual(fetchOnce.called, false);
+    });
+
+    it("等待期间取消时应停止轮询", async () => {
+        let cancelled = false;
+        const sleep = async (): Promise<void> => {
+            cancelled = true;
+        };
+        const fetchOnce = sinon.stub();
+
+        await assert.rejects(
+            pollUntil(fetchOnce, () => true, { maxAttempts: 5, sleep, shouldCancel: () => cancelled }),
+            PollingCancelledError
+        );
+        assert.strictEqual(fetchOnce.called, false);
     });
 });

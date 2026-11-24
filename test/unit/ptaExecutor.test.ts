@@ -164,4 +164,116 @@ describe("ptaExecutor - 提交与自定义测试", () => {
             assert.strictEqual(callback.called, false);
         });
     });
+
+    describe("testSolutions", () => {
+        const noSleep = async (): Promise<void> => {};
+
+        it("批量测试应只准备一次 exam 上下文，并按输入顺序返回结果", async () => {
+            sinon.stub(ptaManager, "getUserSession").returns({ cookie: "PTASession=c" } as never);
+            const onCaseUpdate = sinon.stub();
+
+            const updates = await ptaExecutor.testSolutions("ps1", "p1", { compiler: "GXX", code: "x" }, ["1", "2"], {
+                concurrency: 2,
+                startIntervalMs: 0,
+                sleep: noSleep,
+                onCaseUpdate,
+            });
+
+            assert.strictEqual((ptaApi.getProblem as sinon.SinonStub).calledOnce, true);
+            assert.strictEqual((ptaApi.getProblemSetPermission as sinon.SinonStub).calledOnce, true);
+            assert.strictEqual((ptaApi.getProblemSetExams as sinon.SinonStub).calledOnce, true);
+            assert.strictEqual(submitSolutionStub.callCount, 2);
+            assert.deepStrictEqual(
+                updates.map((update) => update.phase),
+                ["done", "done"]
+            );
+            assert.deepStrictEqual(
+                onCaseUpdate
+                    .getCalls()
+                    .map((call) => call.args[0].phase)
+                    .sort(),
+                ["done", "done", "running", "running"]
+            );
+        });
+
+        it("批量提交应带上各自的测试输入", async () => {
+            sinon.stub(ptaManager, "getUserSession").returns({ cookie: "PTASession=c" } as never);
+
+            await ptaExecutor.testSolutions("ps1", "p1", { compiler: "GXX", code: "x" }, ["1", "2"], {
+                concurrency: 1,
+                startIntervalMs: 0,
+                sleep: noSleep,
+            });
+
+            assert.deepStrictEqual(
+                submitSolutionStub.getCalls().map((call) => call.args[2].details[0].customTestData.content),
+                ["1\n", "2\n"]
+            );
+        });
+
+        it("单条失败不应中断其他样例", async () => {
+            sinon.stub(ptaManager, "getUserSession").returns({ cookie: "PTASession=c" } as never);
+            submitSolutionStub.onFirstCall().resolves({ error: { message: "rejected" } } as never);
+            submitSolutionStub.onSecondCall().resolves({ submissionId: "s2" } as never);
+
+            const updates = await ptaExecutor.testSolutions("ps1", "p1", { compiler: "GXX", code: "x" }, ["1", "2"], {
+                concurrency: 1,
+                startIntervalMs: 0,
+                sleep: noSleep,
+            });
+
+            assert.strictEqual(updates[0].phase, "error");
+            assert.match(updates[0].error ?? "", /rejected/);
+            assert.strictEqual(updates[1].phase, "done");
+        });
+
+        it("并发提交应保持启动间隔", async () => {
+            sinon.stub(ptaManager, "getUserSession").returns({ cookie: "PTASession=c" } as never);
+            const sleep = sinon.stub().resolves();
+
+            await ptaExecutor.testSolutions("ps1", "p1", { compiler: "GXX", code: "x" }, ["1", "2"], {
+                concurrency: 2,
+                startIntervalMs: 300,
+                sleep,
+            });
+
+            assert.strictEqual(sleep.called, true);
+            assert.ok(
+                sleep.args.some((args) => Number(args[0]) >= 250 && Number(args[0]) <= 300),
+                `实际等待: ${JSON.stringify(sleep.args)}`
+            );
+        });
+
+        it("取消后不应再提交，未开始的样例标记为 cancelled", async () => {
+            sinon.stub(ptaManager, "getUserSession").returns({ cookie: "PTASession=c" } as never);
+            const token = {
+                isCancellationRequested: true,
+                onCancellationRequested: sinon.stub(),
+            } as never;
+
+            const updates = await ptaExecutor.testSolutions("ps1", "p1", { compiler: "GXX", code: "x" }, ["1", "2"], {
+                concurrency: 2,
+                startIntervalMs: 0,
+                sleep: noSleep,
+                cancellationToken: token,
+            });
+
+            assert.strictEqual(submitSolutionStub.called, false);
+            assert.deepStrictEqual(
+                updates.map((update) => update.phase),
+                ["cancelled", "cancelled"]
+            );
+        });
+
+        it("未登录时应返回空结果且不发起请求", async () => {
+            sinon.stub(ptaManager, "getUserSession").returns(undefined);
+
+            const updates = await ptaExecutor.testSolutions("ps1", "p1", { compiler: "GXX", code: "x" }, ["1"], {
+                sleep: noSleep,
+            });
+
+            assert.deepStrictEqual(updates, []);
+            assert.strictEqual(submitSolutionStub.called, false);
+        });
+    });
 });

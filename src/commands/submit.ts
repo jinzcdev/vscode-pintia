@@ -1,7 +1,7 @@
 import * as fs from "fs-extra";
 import * as vscode from "vscode";
 
-import { IProblem, IProblemConfig } from "../entity/IProblem";
+import { IProblem } from "../entity/IProblem";
 import { IProblemSubmissionResult } from "../entity/IProblemSubmissionResult";
 import { explorerController } from "../explorer/explorerController";
 import { ptaChannel } from "../ptaChannel";
@@ -9,6 +9,14 @@ import { ptaConfig } from "../ptaConfig";
 import { ptaExecutor } from "../ptaExecutor";
 import { IPtaCode, IQuickPickItem } from "../shared";
 import { ptaApi } from "../utils/api";
+import {
+    collectTestSamples,
+    createAdHocSample,
+    findExpectedOutput,
+    previewTestSampleInput,
+    TestSample,
+    testSampleSourceLabel,
+} from "../utils/testSamples";
 import { DialogType, promptForOpenOutputChannel, showFileSelectDialog } from "../utils/uiUtils";
 import { PtaSubmissionProvider } from "../webview/PtaSubmissionProvider";
 import { PtaTestProvider } from "../webview/PtaTestProvider";
@@ -16,6 +24,13 @@ import { TestView } from "../webview/views/TestView";
 import { l10n } from "vscode";
 import { timerController } from "../timer/timerController";
 import { timerManager } from "../timer/timerManager";
+
+type TestPickKind = "all" | "choose" | "direct" | "file";
+
+/** 用于丢弃过期批次的回调，避免连续点击“运行全部”时两次结果互相覆盖 */
+let activeTestRun = 0;
+/** 上一次批量测试的取消信号，新批次开始时会停止旧批次继续提交 */
+let activeCancellation: { isCancellationRequested: boolean } | undefined;
 
 export async function submitSolution(ptaCode: IPtaCode): Promise<void> {
     try {
@@ -85,36 +100,23 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
         }
 
         const problem: IProblem = await ptaApi.getProblem(ptaCode.psID, ptaCode.pID);
-        const exampleTestDatas = (
-            problem.problemConfig.programmingProblemConfig ?? problem.problemConfig.codeCompletionProblemConfig
-        )?.exampleTestDatas;
+        const samples = collectTestSamples(problem, ptaCode.customTests);
 
-        const picks: Array<IQuickPickItem<string>> = [];
-        // 题目没有官方测试样例时，不给出这个选项——列一个点进去才发现是空的条目
-        // 只会让人多一次无效点击
-        if (hasDefaultTestCases(exampleTestDatas)) {
+        const picks: Array<IQuickPickItem<TestPickKind>> = [];
+        if (samples.length >= 1) {
             picks.push({
-                label: l10n.t("{0} Default test cases", "$(three-bars)"),
-                description: "",
-                detail: l10n.t("Test with the default cases (usually includes official test answers)"),
-                value: ":default",
+                label: l10n.t("{0} Run all test cases", "$(run-all)"),
+                description: l10n.t("{0} cases", samples.length),
+                detail: l10n.t("Run every default, custom, and problem test case at once"),
+                value: "all",
             });
         }
-        if (ptaCode.customTests && ptaCode.customTests.length !== 0) {
+        if (samples.length >= 1) {
             picks.push({
-                label: l10n.t("{0} Custom test cases", "$(note)"),
-                description: "",
-                detail: l10n.t("Test with the custom cases"),
-                value: ":custom",
-            });
-        }
-        const problemContent = problem.content;
-        if (problemContent.indexOf("```in") !== -1) {
-            picks.push({
-                label: l10n.t("{0} Test cases in the problem", "$(book)"),
-                description: "",
-                detail: l10n.t("Test with the input cases in the problem"),
-                value: ":problem",
+                label: l10n.t("{0} Test a sample...", "$(list-selection)"),
+                description: l10n.t("{0} cases", samples.length),
+                detail: l10n.t("Choose from the default, custom, and problem test cases"),
+                value: "choose",
             });
         }
         picks.push(
@@ -122,44 +124,52 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
                 label: l10n.t("{0} Write directly...", "$(pencil)"),
                 description: "",
                 detail: l10n.t("Write test cases in input box"),
-                value: ":direct",
+                value: "direct",
             },
             {
                 label: l10n.t("{0} Browse...", "$(file-text)"),
                 description: "",
                 detail: l10n.t("Test with the written cases in file"),
-                value: ":file",
+                value: "file",
             }
         );
-        const choice: IQuickPickItem<string> | undefined = await vscode.window.showQuickPick(picks);
+
+        const choice: IQuickPickItem<TestPickKind> | undefined = await vscode.window.showQuickPick(picks);
         if (!choice) {
             return;
         }
 
-        let caseID: number = -1;
-        let testInput: string = "",
-            testOutput: string = "";
+        if (choice.value === "all") {
+            await runTestCases(ptaCode, problem, samples);
+            return;
+        }
 
-        if (choice.value === ":default") {
-            // 能走到这里说明选项被展示过，即一定有默认样例
-            const testDatas = exampleTestDatas ?? [];
-            const testPicks: IQuickPickItem<number>[] = [];
-            for (let i = 0; i < testDatas.length / 2; i++) {
-                testPicks.push({
-                    label: l10n.t("Sample {0}", i + 1),
-                    detail: testDatas[i].input,
-                    value: i,
-                });
-            }
-            const testChoice: IQuickPickItem<number> | undefined = await vscode.window.showQuickPick(testPicks);
-            if (!testChoice) {
+        if (choice.value === "choose") {
+            const testPicks: Array<IQuickPickItem<TestSample>> = samples.map((sample) => ({
+                label: sample.name || l10n.t("Sample {0}", sample.index + 1),
+                description: testSampleSourceLabel(sample.source),
+                detail: l10n.t("Input: {0}", previewTestSampleInput(sample.input)),
+                value: sample,
+            }));
+            const picked = await vscode.window.showQuickPick(testPicks, {
+                canPickMany: true,
+                placeHolder: l10n.t("Select test cases"),
+                matchOnDescription: true,
+                matchOnDetail: true,
+            });
+            if (!picked || picked.length === 0) {
                 return;
             }
-            caseID = testChoice.value;
-            testInput = testDatas[caseID].input;
-            testOutput = testDatas[caseID].output;
-        } else if (choice.value === ":direct") {
-            // TODO: Support multiple test cases simultaneously
+            await runTestCases(
+                ptaCode,
+                problem,
+                picked.map((item) => item.value)
+            );
+            return;
+        }
+
+        let sample: TestSample | undefined;
+        if (choice.value === "direct") {
             const testString: string | undefined = await vscode.window.showInputBox({
                 prompt: l10n.t("Enter the test cases."),
                 validateInput: (s: string): string | undefined =>
@@ -168,89 +178,27 @@ export async function testSolution(ptaCode: IPtaCode): Promise<void> {
                 ignoreFocusOut: true,
             });
             if (testString) {
-                testInput = testString.replace(/\\n/g, "\n");
+                const input = testString.replace(/\\n/g, "\n");
+                sample = createAdHocSample("direct", input);
+                sample.expected = findExpectedOutput(problem, input);
             }
-        } else if (choice.value === ":file") {
+        } else if (choice.value === "file") {
             const testFile: vscode.Uri[] | undefined = await showFileSelectDialog(ptaConfig.getWorkspaceFolder());
             if (testFile && testFile.length) {
                 const input: string = await fs.readFile(testFile[0].fsPath, "utf-8");
                 if (input) {
-                    testInput = input;
+                    sample = createAdHocSample("file", input);
+                    sample.expected = findExpectedOutput(problem, input);
                 } else {
                     vscode.window.showErrorMessage(l10n.t("The selected test file must not be empty."));
                 }
             }
-        } else if (choice.value === ":custom") {
-            let testPicks: IQuickPickItem<number>[] = [];
-            const customTests = ptaCode.customTests;
-            if (customTests && customTests.length !== 0) {
-                for (let i = 0; i < customTests.length; i++) {
-                    testPicks.push({
-                        label: l10n.t("Sample {0}", i + 1),
-                        detail: customTests[i],
-                        value: i,
-                    });
-                }
-                const testChoice: IQuickPickItem<number> | undefined = await vscode.window.showQuickPick(testPicks);
-                if (!testChoice) {
-                    return;
-                }
-                testInput = customTests[testChoice.value];
-                testOutput = getTestInputAnswerFromExampleTestDatas(problem, testInput) ?? "";
-            } else {
-                vscode.window.showErrorMessage(
-                    l10n.t("No custom test samples found. Please check the format of the test code blocks.")
-                );
-                return;
-            }
-        } else if (choice.value === ":problem") {
-            let testPicks: IQuickPickItem<number>[] = [];
-            const codeBlockRegex = /```in([\s\S]*?)```/g;
-            const matches = problemContent.matchAll(codeBlockRegex);
-            const testCases: string[] = [];
-            for (const match of matches) {
-                const codeBlockContent = match[1].trim();
-                testCases.push(codeBlockContent);
-            }
-            if (testCases.length === 0) {
-                return;
-            }
-            for (let i = 0; i < testCases.length; i++) {
-                testPicks.push({
-                    label: l10n.t("Sample {0}", i + 1),
-                    detail: testCases[i],
-                    value: i,
-                });
-            }
-            const testChoice: IQuickPickItem<number> | undefined = await vscode.window.showQuickPick(testPicks);
-            if (!testChoice) {
-                return;
-            }
-            testInput = testCases[testChoice.value];
-            testOutput = getTestInputAnswerFromExampleTestDatas(problem, testInput) ?? "";
         }
-        if (!testInput) {
+
+        if (!sample || !sample.input) {
             return;
         }
-        const solution: { compiler: string; code: string; testInput: string } = {
-            compiler: ptaCode.compiler,
-            code: ptaCode.code,
-            testInput: testInput,
-        };
-        await ptaExecutor.testSolution(
-            ptaCode.psID,
-            ptaCode.pID,
-            solution,
-            (msg: string, data?: IProblemSubmissionResult) => {
-                switch (msg) {
-                    case "SUCCESS":
-                        data!.problem = problem;
-                        PtaTestProvider.createOrUpdate(new TestView(data!, testOutput)).show();
-                        break;
-                    default:
-                }
-            }
-        );
+        await runTestCases(ptaCode, problem, [sample]);
     } catch (error: any) {
         ptaChannel.error(error);
         await promptForOpenOutputChannel(
@@ -265,24 +213,16 @@ export async function testCustomSample(ptaCode: IPtaCode, index: number): Promis
         if (!ptaCode.customTests || ptaCode.customTests.length <= index) {
             throw new Error("No custom samples found. Please check the format of the test code blocks.");
         }
-        const solution: { compiler: string; code: string; testInput: string } = {
-            compiler: ptaCode.compiler,
-            code: ptaCode.code ?? "",
-            testInput: ptaCode.customTests[index],
-        };
         const problem: IProblem = await ptaApi.getProblem(ptaCode.psID, ptaCode.pID);
-        let testOutput = getTestInputAnswerFromExampleTestDatas(problem, solution.testInput) ?? "";
-        await ptaExecutor.testSolution(
-            ptaCode.psID,
-            ptaCode.pID,
-            solution,
-            (msg: string, data?: IProblemSubmissionResult) => {
-                if (msg === "SUCCESS") {
-                    data!.problem = problem;
-                    PtaTestProvider.createOrUpdate(new TestView(data!, testOutput)).show();
-                }
-            }
-        );
+        const input = ptaCode.customTests[index];
+        const sample: TestSample = {
+            id: `custom:${index}`,
+            source: "custom",
+            index,
+            input,
+            expected: findExpectedOutput(problem, input),
+        };
+        await runTestCases(ptaCode, problem, [sample]);
     } catch (error: any) {
         ptaChannel.error(error);
         await promptForOpenOutputChannel(
@@ -293,30 +233,121 @@ export async function testCustomSample(ptaCode: IPtaCode, index: number): Promis
 }
 
 /**
- * 题目是否提供了默认测试样例。
+ * 运行一批测试样例：先展示全部 pending 卡片，再逐条刷新结果。
  *
- * 判据与下方枚举样例的循环保持一致（`length / 2 > 0` 等价于 `length > 0`），
- * 避免出现「给了这个选项、点进去却是空列表」。
+ * `show(false)` 只更新 HTML，不会抢焦点；面板被用户关闭后也不会被强行重开。
  */
-function hasDefaultTestCases(exampleTestDatas: IProblemConfig["exampleTestDatas"] | undefined): boolean {
-    return (exampleTestDatas?.length ?? 0) > 0;
-}
+async function runTestCases(ptaCode: IPtaCode, problem: IProblem, samples: TestSample[]): Promise<void> {
+    if (samples.length === 0) {
+        return;
+    }
 
-/**
- * Get the answer of the test input from the example test data if the test input matches the example test input.
- */
-function getTestInputAnswerFromExampleTestDatas(problem: IProblem, customTestInput: string = "") {
-    // TODO 支持多种题型
-    const exampleTestDatas = (
-        problem.problemConfig.programmingProblemConfig ?? problem.problemConfig.codeCompletionProblemConfig
-    )?.exampleTestDatas;
-    if (exampleTestDatas) {
-        for (let i = 0; i < exampleTestDatas.length / 2; i++) {
-            const input = exampleTestDatas[i]?.input ?? "";
-            if (input.trim() === customTestInput.trim()) {
-                return exampleTestDatas[i].output;
+    // 新批次开始前停止旧批次，避免两次“运行全部”同时往拼题A 提交
+    activeCancellation && (activeCancellation.isCancellationRequested = true);
+    const cancellation = { isCancellationRequested: false };
+    activeCancellation = cancellation;
+    const runId = ++activeTestRun;
+    const view = new TestView(
+        problem,
+        ptaCode.compiler,
+        samples.map((sample) => ({ sample, phase: "pending" as const }))
+    );
+
+    await PtaTestProvider.createOrUpdate(view).show();
+
+    let refreshTimer: ReturnType<typeof setTimeout> | undefined;
+    let refreshChain: Promise<void> = Promise.resolve();
+
+    const refresh = (focused: boolean = false): Promise<void> => {
+        refreshChain = refreshChain
+            .then(() => {
+                if (runId === activeTestRun) {
+                    return PtaTestProvider.createOrUpdate(view).show(focused);
+                }
+                return undefined;
+            })
+            .catch((error: any) => {
+                ptaChannel.error(error?.toString?.() ?? String(error));
+            });
+        return refreshChain;
+    };
+
+    const scheduleRefresh = (): void => {
+        if (refreshTimer || runId !== activeTestRun) {
+            return;
+        }
+        refreshTimer = setTimeout(() => {
+            refreshTimer = undefined;
+            void refresh(false);
+        }, 500);
+    };
+
+    try {
+        const updates = await ptaExecutor.testSolutions(
+            ptaCode.psID,
+            ptaCode.pID,
+            { compiler: ptaCode.compiler, code: ptaCode.code ?? "" },
+            samples.map((sample) => sample.input),
+            {
+                cancellationToken: cancellation as unknown as vscode.CancellationToken,
+                onCaseUpdate: (update) => {
+                    if (runId !== activeTestRun) {
+                        return;
+                    }
+                    const entry = view.cases[update.index];
+                    if (!entry) {
+                        return;
+                    }
+                    entry.phase = update.phase;
+                    entry.result = update.result;
+                    entry.error = update.error;
+                    scheduleRefresh();
+                },
+            }
+        );
+
+        if (runId !== activeTestRun) {
+            return;
+        }
+
+        // 防御性处理：理论上 testSolutions 会为每条返回更新
+        updates.forEach((update) => {
+            const entry = view.cases[update.index];
+            if (!entry) {
+                return;
+            }
+            entry.phase = update.phase;
+            entry.result = update.result;
+            entry.error = update.error;
+        });
+        for (const entry of view.cases) {
+            if (entry.phase === "pending" || entry.phase === "running") {
+                entry.phase = "error";
+                entry.error = l10n.t("Testing sample failed. Please check the output channel for details.");
             }
         }
+    } catch (error: any) {
+        ptaChannel.error(error?.toString?.() ?? String(error));
+        if (runId === activeTestRun) {
+            for (const entry of view.cases) {
+                if (entry.phase === "pending" || entry.phase === "running") {
+                    entry.phase = "error";
+                    entry.error = error?.message ?? String(error);
+                }
+            }
+            await promptForOpenOutputChannel(
+                l10n.t("Testing sample failed. Please check the output channel for details."),
+                DialogType.error
+            );
+        }
+    } finally {
+        if (activeCancellation === cancellation) {
+            activeCancellation = undefined;
+        }
+        if (refreshTimer) {
+            clearTimeout(refreshTimer);
+            refreshTimer = undefined;
+        }
+        await refresh(false);
     }
-    return "";
 }

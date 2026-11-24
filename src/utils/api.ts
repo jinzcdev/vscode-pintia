@@ -14,7 +14,7 @@ import {
     ptaCache,
     supportedProblemTypes,
 } from "../shared";
-import { addUrlParams, HttpRequestError, httpGet, httpPost } from "./httpUtils";
+import { addUrlParams, HttpRequestError, HttpRequestOptions, httpGet, httpPost } from "./httpUtils";
 import { isExamNotAccessible } from "./problemSetAccess";
 
 import * as fs from "fs-extra";
@@ -209,8 +209,12 @@ class PtaAPI {
         }
     }
 
-    public async getProblemSetPermission(psID: string, cookie?: string): Promise<number | undefined> {
-        const permission = await httpGet(`https://pintia.cn/api/problem-sets/${psID}/exams`, cookie).then(
+    public async getProblemSetPermission(
+        psID: string,
+        cookie?: string,
+        httpOptions?: HttpRequestOptions
+    ): Promise<number | undefined> {
+        const permission = await httpGet(`https://pintia.cn/api/problem-sets/${psID}/exams`, cookie, httpOptions).then(
             (json) => json["permission"]
         );
         return permission?.permission ?? -1;
@@ -365,7 +369,12 @@ class PtaAPI {
      * @param pID
      * @returns
      */
-    public async getProblem(psID: string, pID: string, cookie?: string): Promise<IProblem> {
+    public async getProblem(
+        psID: string,
+        pID: string,
+        cookie?: string,
+        httpOptions?: HttpRequestOptions
+    ): Promise<IProblem> {
         const filePath = path.join(cacheDirPath, psID, pID + ".json");
         // That cookie is not undefined denotes requirement for submission result, therefore,
         // the problem need to be updated.
@@ -374,7 +383,11 @@ class PtaAPI {
             return await fs.readJSON(filePath);
         }
 
-        const data: IProblem = await httpGet(`${this.problemUrl}/${psID}/exam-problems/${pID}`, cookie).then((json) => {
+        const data: IProblem = await httpGet(
+            `${this.problemUrl}/${psID}/exam-problems/${pID}`,
+            cookie,
+            httpOptions
+        ).then((json) => {
             const problem = json["problemSetProblem"];
             problem["organization"] = json["organization"];
             return problem;
@@ -425,18 +438,26 @@ class PtaAPI {
      * @param psID
      * @returns
      */
-    public async getProblemSetExams(psID: string, cookie?: string): Promise<IProblemSetExam> {
-        return await httpGet(`${this.problemUrl}/${psID}/exams`, cookie);
+    public async getProblemSetExams(
+        psID: string,
+        cookie?: string,
+        httpOptions?: HttpRequestOptions
+    ): Promise<IProblemSetExam> {
+        return await httpGet(`${this.problemUrl}/${psID}/exams`, cookie, httpOptions);
     }
 
-    public async createProblemSetExamAndReturn(psID: string, cookie?: string): Promise<IExam> {
-        await this.createProblemSetExam(psID, cookie);
-        return await httpGet(`${this.problemUrl}/${psID}/exams`, cookie).then((json) => json["exam"]);
+    public async createProblemSetExamAndReturn(
+        psID: string,
+        cookie?: string,
+        httpOptions?: HttpRequestOptions
+    ): Promise<IExam> {
+        await this.createProblemSetExam(psID, cookie, httpOptions);
+        return await httpGet(`${this.problemUrl}/${psID}/exams`, cookie, httpOptions).then((json) => json["exam"]);
     }
 
-    public async createProblemSetExam(psID: string, cookie?: string): Promise<void> {
+    public async createProblemSetExam(psID: string, cookie?: string, httpOptions?: HttpRequestOptions): Promise<void> {
         ptaChannel.info(`Try to create the exam of problem set ${psID}`);
-        await httpPost(`${this.problemUrl}/${psID}/exams`, cookie);
+        await httpPost(`${this.problemUrl}/${psID}/exams`, cookie, undefined, httpOptions);
     }
 
     public async checkAndCreateProblemSetExam(psID: string, cookie?: string): Promise<IExam> {
@@ -494,8 +515,13 @@ class PtaAPI {
      * @param body
      * @returns
      */
-    public async submitSolution(examID: string, cookie: string, body: IProblemCode): Promise<IProblemSubmission> {
-        return await httpPost(this.examUrl + `/${examID}/submissions`, cookie, body);
+    public async submitSolution(
+        examID: string,
+        cookie: string,
+        body: IProblemCode,
+        httpOptions?: HttpRequestOptions
+    ): Promise<IProblemSubmission> {
+        return await httpPost(this.examUrl + `/${examID}/submissions`, cookie, body, httpOptions);
     }
 
     /**
@@ -512,8 +538,16 @@ class PtaAPI {
         return await httpGet(`${this.submissionUrl}/${submissionID}`, cookie);
     }
 
-    public async getProblemTestResult(submissionID: string, cookie: string): Promise<IProblemSubmissionResult> {
-        return await httpGet(`${this.submissionUrl}/${submissionID}?custom_test_data_submission=true`, cookie);
+    public async getProblemTestResult(
+        submissionID: string,
+        cookie: string,
+        httpOptions?: HttpRequestOptions
+    ): Promise<IProblemSubmissionResult> {
+        return await httpGet(
+            `${this.submissionUrl}/${submissionID}?custom_test_data_submission=true`,
+            cookie,
+            httpOptions
+        );
     }
 
     // https://passport.pintia.cn/api/oauth/wechat/official-account/auth-url
