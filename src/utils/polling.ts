@@ -32,6 +32,16 @@ export interface IPollOptions {
      */
     sleep?: (ms: number) => Promise<void>;
     timeoutMessage?: string;
+    /** 返回 true 时停止轮询并抛出 PollingCancelledError */
+    shouldCancel?: () => boolean;
+}
+
+/** 用户取消批量测试时用于和真正的失败区分开 */
+export class PollingCancelledError extends Error {
+    constructor(message: string = "Polling cancelled") {
+        super(message);
+        this.name = "PollingCancelledError";
+    }
 }
 
 export function delay(ms: number): Promise<void> {
@@ -49,11 +59,23 @@ export async function pollUntil<T>(
     isDone: (data: T) => boolean,
     options: IPollOptions
 ): Promise<T> {
-    const { maxAttempts, intervalMs = POLL_INTERVAL_MS, sleep = delay, timeoutMessage = "Polling timed out" } = options;
+    const {
+        maxAttempts,
+        intervalMs = POLL_INTERVAL_MS,
+        sleep = delay,
+        timeoutMessage = "Polling timed out",
+        shouldCancel,
+    } = options;
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        if (shouldCancel?.()) {
+            throw new PollingCancelledError();
+        }
         // 保留改造前的语义：先等一个间隔再发首次请求
         await sleep(intervalMs);
+        if (shouldCancel?.()) {
+            throw new PollingCancelledError();
+        }
 
         const data = await fetchOnce();
         if (data === undefined || data === null) {
