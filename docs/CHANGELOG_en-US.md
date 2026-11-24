@@ -4,6 +4,28 @@
 
 ---
 
+## [0.14.0] - 2026/11/24
+
+### Features
+
+- **Testing**
+    - Added pass/fail detection on the test result page: when the problem provides expected output, actual output is compared ignoring trailing whitespace and trailing blank lines, with Passed / Failed / Not checked states
+    - Added a side-by-side line diff for failed samples, including line numbers, red/green highlighting and a "whitespace-only difference" hint
+    - Merged default, in-problem and custom samples into a single entry; the secondary list labels each sample's source and supports multi-select. Multi-line inputs show a multi-line preview, so samples sharing the same first line are distinguishable
+    - Added _Run all test cases_, shown even when there is only one sample; batch results are displayed together on one page with per-case updates and cancellation
+    - Test samples are deduplicated by input, with priority Default > In problem > Custom
+    - Batch testing uses bounded concurrency (at most 2) and a submit interval, plus exponential backoff retries for HTTP 429
+
+### Changes
+
+- **Dependencies**
+    - Upgraded markdown-it 15, katex 0.19, @vscode/markdown-it-katex 1.1.2 and markdown-it-replace-link 1.2.2
+    - Pinned TypeScript to 5.6.3 to prevent dependency refreshes from unexpectedly upgrading to TypeScript 6
+
+### Fixes
+
+- The test result page now keeps the actual output when the judging status is not NEUTRAL instead of replacing it with the status text; samples without expected output are marked Not checked rather than failed
+
 ## [0.13.2] - 2026/11/19
 
 ### Bug Fixes
