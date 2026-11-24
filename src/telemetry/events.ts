@@ -19,14 +19,7 @@ export type TelemetryEventName = (typeof TELEMETRY_EVENTS)[keyof typeof TELEMETR
 
 /** Where a preview was opened from. Used to build the search → preview funnel. */
 export type PreviewSource =
-    | "unknown"
-    | "search"
-    | "explorer"
-    | "history"
-    | "favorites"
-    | "codelens"
-    | "webview"
-    | "timerStats";
+    "unknown" | "search" | "explorer" | "history" | "favorites" | "codelens" | "webview" | "timerStats";
 
 export const PREVIEW_LINK_KINDS = ["referenceCode", "search", "problemTitle", "problemSet"] as const;
 export type PreviewLinkKind = (typeof PREVIEW_LINK_KINDS)[number];
